@@ -32,7 +32,6 @@ show_notice() {
 }
 
 
-
 # 安装依赖
 install_base(){
   # 安装qrencode
