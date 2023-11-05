@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Function: Print text with a delay between each character
+# 函数：按字符间隔延迟打印文本
 print_with_delay() {
     local text="$1"
     local delay="$2"
@@ -11,41 +11,41 @@ print_with_delay() {
     echo
 }
 
-# Function: Print text in red color
-red() {
+# 函数：以红色打印文本
+红色() {
     echo -e "\033[31m\033[01m$*\033[0m"
 }
 
-# Function: Print text in green color
-green() {
+# 函数：以绿色打印文本
+绿色() {
     echo -e "\033[32m\033[01m$*\033[0m"
 }
 
-# Function: Print text in yellow color
-yellow() {
+# 函数：以黄色打印文本
+黄色() {
     echo -e "\033[33m\033[01m$*\033[0m"
 }
 
-# Function: Display a formatted notice message
-show_notice() {
+# 函数：显示格式化的提示消息
+显示提示() {
     local message="$1"
-    local green_bg="\e[48;5;34m"
-    local white_fg="\e[97m"
-    local reset="\e[0m"
+    local 绿色背景="\e[48;5;34m"
+    local 白色前景="\e[97m"
+    local 重置="\e[0m"
 
-    echo -e "${green_bg}${white_fg}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${reset}"
-    echo -e "${white_fg}┃${reset}                                                                                             "
-    echo -e "${white_fg}┃${reset}                                   ${message}                                                "
-    echo -e "${white_fg}┃${reset}                                                                                             "
-    echo -e "${green_bg}${white_fg}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${reset}"
+    echo -e "${绿色背景}${白色前景}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${重置}"
+    echo -e "${白色前景}┃${重置}                                                                                             "
+    echo -e "${白色前景}┃${重置}                                   ${message}                                                "
+    echo -e "${白色前景}┃${重置}                                                                                             "
+    echo -e "${绿色背景}${白色前景}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${重置}"
 }
 
-# Function: Install required dependencies
-install_base() {
+# 安装所需依赖
+安装基础依赖() {
     local packages=("qrencode")
     for package in "${packages[@]}"; do
         if ! command -v "$package" &> /dev/null; then
-            echo "Installing $package..."
+            echo "正在安装 $package..."
             if [ -n "$(command -v apt)" ]; then
                 sudo apt update > /dev/null 2>&1
                 sudo apt install -y "$package" > /dev/null 2>&1
@@ -54,22 +54,22 @@ install_base() {
             elif [ -n "$(command -v dnf)" ]; then
                 sudo dnf install -y "$package"
             else
-                echo "Unable to install $package. Please install it manually and run the script again."
+                echo "无法安装 $package，请手动安装后再运行脚本。"
                 exit 1
             fi
-            echo "$package has been installed."
+            echo "$package 安装完成。"
         else
-            echo "$package is already installed."
+            echo "$package 已经安装。"
         fi
     done
 }
 
-# Function: Download Sing-Box and set it up
-download_singbox() {
+# 下载 Sing-Box 并进行设置
+下载Sing-Box() {
     local arch=$(uname -m)
-    echo "Architecture: $arch"
+    echo "架构: $arch"
 
-    # Map architecture names
+    # 映射架构名称
     case $arch in
         x86_64)
             arch="amd64"
@@ -82,35 +82,35 @@ download_singbox() {
             ;;
     esac
 
-    # Fetch the latest release version number from GitHub API
+    # 从 GitHub API 获取最新发布版本号
     local latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" | grep -Po '"tag_name": "\K.*?(?=")' | sort -V | tail -n 1)
-    local latest_version=${latest_version_tag#v}  # Remove 'v' prefix from version number
-    echo "Latest version: $latest_version"
+    local latest_version=${latest_version_tag#v}  # 移除版本号前缀 'v'
+    echo "最新版本: $latest_version"
 
-    # Prepare package names and download URL
+    # 准备软件包名称和下载 URL
     local package_name="sing-box-${latest_version}-linux-${arch}"
     local url="https://github.com/SagerNet/sing-box/releases/download/${latest_version_tag}/${package_name}.tar.gz"
 
-    # Download the latest release package (.tar.gz) from GitHub
+    # 从 GitHub 下载最新发布的软件包 (.tar.gz)
     curl -sLo "/root/${package_name}.tar.gz" "$url"
 
-    # Extract the package and move the binary to /root
+    # 解压软件包并将可执行文件移动到 /root
     tar -xzf "/root/${package_name}.tar.gz" -C /root
     mv "/root/${package_name}/sing-box" /root/sbox
 
-    # Cleanup the package
+    # 清理软件包
     rm -r "/root/${package_name}.tar.gz" "/root/${package_name}"
 
-    # Set the permissions
+    # 设置权限
     chown root:root /root/sbox/sing-box
     chmod +x /root/sbox/sing-box
 }
 
-# Function: Download Cloudflared and set it up
-download_cloudflared() {
+# 下载 Cloudflared 并进行设置
+下载Cloudflared() {
     local arch=$(uname -m)
 
-    # Map architecture names
+    # 映射架构名称
     case $arch in
         x86_64)
             cf_arch="amd64"
@@ -123,19 +123,19 @@ download_cloudflared() {
             ;;
     esac
 
-    # Download Cloudflared for Linux
+    # 下载 Linux 版本的 Cloudflared
     local cf_url="https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${cf_arch}"
     curl -sLo "/root/sbox/cloudflared-linux" "$cf_url"
     chmod +x /root/sbox/cloudflared-linux
     echo ""
 }
 
-# Function: Display client configuration details
-show_client_configuration() {
-    # Get server IP
+# 显示客户端配置详细信息
+显示客户端配置() {
+    # 获取服务器 IP
     local server_ip=$(grep -o "SERVER_IP='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
 
-    # Display Reality configuration
+    # 显示 Reality 配置
     local reality_port=$(grep -o "REALITY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
     local reality_server_name=$(grep -o "REALITY_SERVER_NAME='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
     local reality_uuid=$(grep -o "REALITY_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
@@ -145,18 +145,18 @@ show_client_configuration() {
 
     echo ""
     echo ""
-    show_notice "$(red "Reality Configuration")"
+    显示提示 "$(红色 "Reality 配置")"
     echo ""
     echo ""
-    red "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    红色 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo "$reality_link"
     echo ""
-    red "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    红色 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo ""
 
-    # Display Hysteria2 configuration
+    # 显示 Hysteria2 配置
     local hy_port=$(grep -o "HY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
     local hy_server_name=$(grep -o "HY_SERVER_NAME='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
     local hy_password=$(grep -o "HY_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
@@ -164,18 +164,18 @@ show_client_configuration() {
 
     echo ""
     echo ""
-    show_notice "$(green "Hysteria2 Configuration")"
+    显示提示 "$(绿色 "Hysteria2 配置")"
     echo ""
     echo ""
-    green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    绿色 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo "$hy2_link"
     echo ""
-    green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    绿色 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo ""
 
-    # Display Vmess configuration
+    # 显示 Vmess 配置
     local vmess_uuid=$(grep -o "VMESS_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
     local ws_path=$(grep -o "WS_PATH='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
     local vmesswss_link='vmess://'$(echo '{"add":"speed.cloudflare.com","aid":"0","host":"'$server_ip'","id":"'$vmess_uuid'","net":"ws","path":"'${ws_path}?ed=2048'","port":"443","ps":"sing-box-vmess-tls","tls":"tls","type":"none","v":"2"}' | base64 -w 0)
@@ -183,93 +183,93 @@ show_client_configuration() {
 
     echo ""
     echo ""
-    show_notice "$(yellow "Vmess Configuration")"
+    显示提示 "$(黄色 "Vmess 配置")"
     echo ""
     echo ""
-    yellow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    黄色 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo "$vmesswss_link"
     echo ""
-    yellow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    黄色 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo ""
-    yellow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    黄色 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo "$vmessws_link"
     echo ""
-    yellow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    黄色 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo ""
 }
 
-# Function: Enable BBR congestion control algorithm
-enable_bbr() {
+# 启用 BBR 拥塞控制算法
+启用BBR() {
     bash <(curl -L -s https://raw.githubusercontent.com/teddysun/across/master/bbr.sh)
     echo ""
 }
 
-# Function: Modify Sing-Box server configuration
-modify_singbox() {
-    # Modify Reality configuration
-    show_notice "Modifying Reality Configuration"
+# 修改 Sing-Box 服务器配置
+修改Sing-Box() {
+    # 修改 Reality 配置
+    显示提示 "修改 Reality 配置"
     echo ""
     local reality_current_port=$(grep -o "REALITY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
     while true; do
-        read -p "Enter the new port number (current port: $reality_current_port): " reality_port
+        read -p "输入新的端口号 (当前端口: $reality_current_port): " reality_port
         reality_port=${reality_port:-$reality_current_port}
         if [ "$reality_port" -eq "$reality_current_port" ]; then
             break
         fi
         if ss -tuln | grep -q ":$reality_port\b"; then
-            echo "Port $reality_port is already in use. Please choose a different port."
+            echo "端口 $reality_port 已被占用，请选择其他端口。"
         else
             break
         fi
     done
     echo ""
     local reality_current_server_name=$(grep -o "REALITY_SERVER_NAME='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-    read -p "Enter the domain name to steal (current domain: $reality_current_server_name): " reality_server_name
+    read -p "输入要伪装的域名 (当前域名: $reality_current_server_name): " reality_server_name
     reality_server_name=${reality_server_name:-$reality_current_server_name}
     echo ""
 
-    # Modify Hysteria2 configuration
-    show_notice "Modifying Hysteria2 Configuration"
+    # 修改 Hysteria2 配置
+    显示提示 "修改 Hysteria2 配置"
     echo ""
     local hy_current_port=$(grep -o "HY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
     while true; do
-        read -p "Enter the new port number (current port: $hy_current_port): " hy_port
+        read -p "输入新的端口号 (当前端口: $hy_current_port): " hy_port
         hy_port=${hy_port:-$hy_current_port}
         if [ "$hy_port" -eq "$hy_current_port" ]; then
             break
         fi
         if ss -tuln | grep -q ":$hy_port\b"; then
-            echo "Port $hy_port is already in use. Please choose a different port."
+            echo "端口 $hy_port 已被占用，请选择其他端口。"
         else
             break
         fi
     done
     echo ""
 
-    # Update Sing-Box configuration
+    # 更新 Sing-Box 配置
     sed -i "s/REALITY_PORT='[^']*'/REALITY_PORT='$reality_port'/" /root/sbox/config
     sed -i "s/REALITY_SERVER_NAME='[^']*'/REALITY_SERVER_NAME='$reality_server_name'/" /root/sbox/config
     sed -i "s/HY_PORT='[^']*'/HY_PORT='$hy_port'/" /root/sbox/config
 
-    # Restart Sing-Box service
+    # 重启 Sing-Box 服务
     systemctl restart sing-box
 }
 
-# Function: Uninstall Sing-Box server
-uninstall_singbox() {
-    # Stop and disable services
+# 卸载 Sing-Box 服务器
+卸载Sing-Box() {
+    # 停止并禁用服务
     systemctl stop sing-box argo
     systemctl disable sing-box argo > /dev/null 2>&1
 
-    # Remove service files
+    # 删除服务文件
     rm -f /etc/systemd/system/sing-box.service
     rm -f /etc/systemd/system/argo.service
 
-    # Remove configuration and executable files
+    # 删除配置文件和可执行文件
     rm -f /root/sbox/sbconfig_server.json
     rm -f /root/sbox/sing-box
     rm -f /root/sbox/cloudflared-linux
@@ -277,62 +277,62 @@ uninstall_singbox() {
     rm -f /root/sbox/self-cert/cert.pem
     rm -f /root/sbox/config
 
-    # Remove directories
+    # 删除目录
     rm -rf /root/sbox/self-cert/
     rm -rf /root/sbox/
 
-    echo "Uninstallation completed."
+    echo "卸载完成。"
 }
 
-# Install required dependencies
-install_base
+# 安装基础依赖
+安装基础依赖
 
-# Check if Sing-Box is already installed
+# 检查是否已安装 Sing-Box
 if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -f "/root/sbox/cloudflared-linux" ] && [ -f "/root/sbox/sing-box" ] && [ -f "/etc/systemd/system/sing-box.service" ]; then
-    echo "Sing-Box is already installed."
+    echo "Sing-Box 已经安装。"
     echo ""
-    echo "Please choose an option:"
+    echo "请选择一个选项："
     echo ""
-    echo "1. Reinstall Sing-Box"
-    echo "2. Modify Configuration"
-    echo "3. Display Client Configuration"
-    echo "4. Uninstall Sing-Box"
-    echo "5. Update Sing-Box Kernel"
-    echo "6. Manually Restart Cloudflared"
-    echo "7. Enable BBR Congestion Control"
-    echo "8. Restart Sing-Box"
+    echo "1. 重新安装 Sing-Box"
+    echo "2. 修改配置"
+    echo "3. 显示客户端配置"
+    echo "4. 卸载 Sing-Box"
+    echo "5. 更新 Sing-Box 内核"
+    echo "6. 手动重启 Cloudflared"
+    echo "7. 启用 BBR 拥塞控制"
+    echo "8. 重启 Sing-Box"
     echo ""
-    read -p "Enter your choice (1-8): " choice
+    read -p "输入您的选择 (1-8): " choice
 
     case $choice in
         1)
-            show_notice "Starting reinstallation..."
-            # Uninstall previous installation
-            uninstall_singbox
+            显示提示 "开始重新安装..."
+            # 卸载之前的安装
+            卸载Sing-Box
             ;;
         2)
-            # Modify Sing-Box configuration
-            modify_singbox
-            # Display client configuration
-            show_client_configuration
+            # 修改 Sing-Box 配置
+            修改Sing-Box
+            # 显示客户端配置
+            显示客户端配置
             exit 0
             ;;
         3)
-            # Display client configuration
-            show_client_configuration
+            # 显示客户端配置
+            显示客户端配置
             exit 0
             ;;
         4)
-            # Uninstall Sing-Box
-            uninstall_singbox
+            # 卸载 Sing-Box
+            卸载Sing-Box
             exit 0
             ;;
         5)
-            show_notice "Updating Sing-Box..."
-            download_singbox
-            # Check configuration and start the service
+            显示提示 "正在更新 Sing-Box..."
+            下载Sing-Box
+            # 检查配置并启动服务
             if /root/sbox/sing-box check -c /root/sbox/sbconfig_server.json; then
-                echo "Configuration checked successfully. Starting Sing-Box service..."
+                echo "配置检查成功。正在启动 Sing-Box 服务..."
                 systemctl restart sing-box
             fi
             echo ""
@@ -341,104 +341,104 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
         6)
             systemctl stop argo
             systemctl start argo
-            echo "Restart completed. View the new client information."
-            show_client_configuration
+            echo "重启完成。查看新的客户端信息。"
+            显示客户端配置
             exit 0
             ;;
         7)
-            enable_bbr
+            启用BBR
             exit 0
             ;;
         8)
             systemctl restart sing-box
-            echo "Restart completed."
+            echo "重启完成。"
             ;;
         *)
-            echo "Invalid choice. Exiting."
+            echo "无效的选择。退出。"
             exit 1
             ;;
     esac
 fi
 
-# Create necessary directories
+# 创建必要的目录
 mkdir -p "/root/sbox/"
 
-# Download Sing-Box and set it up
-download_singbox
+# 下载 Sing-Box 并进行设置
+下载Sing-Box
 
-# Download Cloudflared and set it up
-download_cloudflared
+# 下载 Cloudflared 并进行设置
+下载Cloudflared
 
-# Configure Reality
-red "Configuring Reality"
+# 配置 Reality
+红色 "配置 Reality"
 echo ""
 key_pair=$(/root/sbox/sing-box generate reality-keypair)
 private_key=$(echo "$key_pair" | awk '/PrivateKey/ {print $2}' | tr -d '"')
 public_key=$(echo "$key_pair" | awk '/PublicKey/ {print $2}' | tr -d '"')
 reality_uuid=$(/root/sbox/sing-box generate uuid)
 short_id=$(/root/sbox/sing-box generate rand --hex 8)
-echo "UUID and Short ID generated."
+echo "生成 UUID 和 Short ID。"
 echo ""
 while true; do
-    read -p "Enter the Reality port number (default: 443): " reality_port
+    read -p "输入 Reality 端口号 (默认: 443): " reality_port
     reality_port=${reality_port:-443}
     if ss -tuln | grep -q ":$reality_port\b"; then
-        echo "Port $reality_port is already in use. Please choose a different port."
+        echo "端口 $reality_port 已被占用，请选择其他端口。"
     else
         break
     fi
 done
 echo ""
-read -p "Enter the domain name to steal (default: itunes.apple.com): " reality_server_name
+read -p "输入要伪装的域名 (默认: itunes.apple.com): " reality_server_name
 reality_server_name=${reality_server_name:-itunes.apple.com}
 echo ""
 
-# Configure Hysteria2
-green "Configuring Hysteria2"
+# 配置 Hysteria2
+绿色 "配置 Hysteria2"
 echo ""
 hy_password=$(/root/sbox/sing-box generate rand --hex 8)
-echo "Generated an 8-character random password."
+echo "生成一个 8 位随机密码。"
 echo ""
 while true; do
-    read -p "Enter the Hysteria2 listen port (default: 8443): " hy_port
+    read -p "输入 Hysteria2 监听端口 (默认: 8443): " hy_port
     hy_port=${hy_port:-8443}
     if ss -tuln | grep -q ":$hy_port\b"; then
-        echo "Port $hy_port is already in use. Please choose a different port."
+        echo "端口 $hy_port 已被占用，请选择其他端口。"
     else
         break
     fi
 done
 echo ""
-read -p "Enter the self-signed certificate domain (default: bing.com): " hy_server_name
+read -p "输入自签名证书的域名 (默认: bing.com): " hy_server_name
 hy_server_name=${hy_server_name:-bing.com}
 mkdir -p /root/sbox/self-cert/ && openssl ecparam -genkey -name prime256v1 -out /root/sbox/self-cert/private.key && openssl req -new -x509 -days 36500 -key /root/sbox/self-cert/private.key -out /root/sbox/self-cert/cert.pem -subj "/CN=${hy_server_name}"
 echo ""
-echo "Self-signed certificate generated."
+echo "生成自签名证书。"
 echo ""
 
-# Configure Vmess
-yellow "Configuring Vmess"
+# 配置 Vmess
+黄色 "配置 Vmess"
 echo ""
 vmess_uuid=$(/root/sbox/sing-box generate uuid)
 while true; do
-    read -p "Enter the Vmess port (default: 18443): " vmess_port
+    read -p "输入 Vmess 端口号 (默认: 18443): " vmess_port
     vmess_port=${vmess_port:-18443}
     if ss -tuln | grep -q ":$vmess_port\b"; then
-        echo "Port $vmess_port is already in use. Please choose a different port."
+        echo "端口 $vmess_port 已被占用，请选择其他端口。"
     else
         break
     fi
 done
 echo ""
-read -p "Enter the WS path (without a slash, default: randomly generated): " ws_path
+read -p "输入 WS 路径 (不包含斜杠，随机生成默认值): " ws_path
 ws_path=${ws_path:-$(/root/sbox/sing-box generate rand --hex 6)}
 
-# Get server IP
+# 获取服务器 IP
 server_ip=$(curl -s4m8 ip.sb -k) || server_ip=$(curl -s6m8 ip.sb -k)
 
-# Create configuration file
+# 创建配置文件
 cat > /root/sbox/config <<EOF
-# Server IP
+# 服务器 IP
 SERVER_IP='$server_ip'
 
 # Sing-Box
@@ -465,7 +465,7 @@ ARGO_DOMAIN=''
 
 EOF
 
-# Create Sing-Box service file
+# 创建 Sing-Box 服务文件
 cat > /etc/systemd/system/sing-box.service <<EOF
 [Unit]
 After=network.target nss-lookup.target
@@ -485,15 +485,15 @@ LimitNOFILE=infinity
 WantedBy=multi-user.target
 EOF
 
-# Check configuration and start the service
+# 检查配置并启动服务
 if /root/sbox/sing-box check -c /root/sbox/sbconfig_server.json; then
-    echo "Configuration checked successfully. Starting Sing-Box service..."
+    echo "配置检查成功。正在启动 Sing-Box 服务..."
     systemctl daemon-reload
     systemctl enable sing-box > /dev/null 2>&1
     systemctl start sing-box
     systemctl restart sing-box
 
-    show_client_configuration
+    显示客户端配置
 else
-    echo "Error in configuration. Aborting."
+    echo "配置错误。中止。"
 fi
