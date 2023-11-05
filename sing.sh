@@ -31,10 +31,6 @@ show_notice() {
     echo -e "${green_bg}${white_fg}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${reset}"
 }
 
-# 作者介绍
-print_with_delay "Reality Hysteria2 wss 三合一脚本 by 绵阿羊" 0.03
-echo ""
-echo ""
 
 # 安装依赖
 install_base(){
