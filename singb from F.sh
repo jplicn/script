@@ -1609,7 +1609,7 @@ while getopts ":P:p:OoUuVvNnBbRr" OPTNAME; do
     'U'|'u' ) select_language; check_system_info; uninstall; exit 0 ;;
     'N'|'n' ) select_language; [ ! -s $WORK_DIR/list ] && error " Sing-box $(text 26) "; export_list; exit 0 ;;
     'V'|'v' ) select_language; check_arch; version; exit 0 ;;
-    'B'|'b' ) select_language; bash <(wget -qO- --no-check-certificate "https://raw.githubusercontent.com/ylx2016/Linux-NetSpeed/master/tcp.sh"); exit ;;
+    'B'|'b' ) select_language; bash <(curl -Lso- https://git.io/kernel.sh); exit ;;
     'R'|'r' ) select_language; check_system_info; change_protocals; exit 0 ;;
   esac
 done
