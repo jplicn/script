@@ -1579,6 +1579,7 @@ menu() {
   info "\t IPv4: $WAN4 $WARPSTATUS4 $COUNTRY4  $ASNORG4 "
   info "\t IPv6: $WAN6 $WARPSTATUS6 $COUNTRY6  $ASNORG6 "
   info "\t Sing-box: $STATUS\t $SING_BOX_VERSION "
+  info "\t 当前拥塞控制算法: ${net_congestion_control=`cat /proc/sys/net/ipv4/tcp_congestion_control | awk '{print $1}'`}
   [ -n "$PID" ] && info "\t $(text 56): $PID "
   [ -n "$RUNTIME" ] && info "\t $(text 57): $RUNTIME "
   [ -n "$MEMORY_USAGE" ] && info "\t $(text 58): $MEMORY_USAGE MB"
