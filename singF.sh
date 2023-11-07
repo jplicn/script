@@ -12,7 +12,7 @@ MIN_PORT=1000
 MAX_PORT=65525
 TLS_SERVER=addons.mozilla.org
 CDN_DEFAULT=www.who.int
-PROTOCAL_LIST=("reality" "hysteria2" "tuic" "shadowTLS" "shadowsocks" "trojan" "vmess + ws" "vless + ws + tls")
+PROTOCAL_LIST=("reality" "hysteria2" "tuic" "shadowTLS" "trojan" "vmess + ws" "vless + ws + tls")
 CONSECUTIVE_PORTS=${#PROTOCAL_LIST[@]}
 CDN_DOMAIN=("www.who.int" "cdn.anycast.eu.org" "443.cf.bestl.de" "cn.azhz.eu.org" "cfip.gay")
 
@@ -746,27 +746,6 @@ EOF
 EOF
   fi
 
-  # 生成 Shadowsocks 配置
-  CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
-  if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
-    [ -z "$PORT_SHADOWSOCKS" ] && PORT_SHADOWSOCKS=$[START_PORT+$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]
-    cat > $WORK_DIR/conf/15_SHADOWSOCKS_inbounds.json << EOF
-{
-    "inbounds":[
-        {
-            "type":"shadowsocks",
-            "sniff":true,
-            "sniff_override_destination":true,
-            "tag":"shadowsocks-in",
-            "listen":"::",
-            "listen_port":$PORT_SHADOWSOCKS,
-            "method":"aes-128-gcm",
-            "password":"$UUID"
-        }
-    ]
-}
-EOF
-  fi
 
   # 生成 Trojan 配置
   CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
@@ -939,7 +918,6 @@ export_list() {
     [ -s $WORK_DIR/conf/*_HYSTERIA2_inbounds.json ] && PORT_HYSTERIA2=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_HYSTERIA2_inbounds.json)
     [ -s $WORK_DIR/conf/*_TUIC_inbounds.json ] && PORT_TUIC=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_TUIC_inbounds.json)
     [ -s $WORK_DIR/conf/*_SHADOWTLS_inbounds.json ] && PORT_SHADOWTLS=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_SHADOWTLS_inbounds.json)
-    [ -s $WORK_DIR/conf/*_SHADOWSOCKS_inbounds.json ] && PORT_SHADOWSOCKS=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_SHADOWSOCKS_inbounds.json)
     [ -s $WORK_DIR/conf/*_TROJAN_inbounds.json ] && PORT_TROJAN=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_TROJAN_inbounds.json)
     [ -s $WORK_DIR/conf/*_VMESS_WS_inbounds.json ] && WS_SERVER_IP=${WS_SERVER_IP:-"$(grep -A2 "{name.*vmess[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $2}'))"} && VMESS_HOST_DOMAIN=${VMESS_HOST_DOMAIN:-"$(grep -A2 "{name.*vmess[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $4}')"} && PORT_VMESS_WS=${PORT_VMESS_WS:-"$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_VMESS_WS_inbounds.json)"} && CDN=${CDN:-"$(sed -n "s/.*{name.*vmess[ ]\+ws.*server:[ ]\+\([^,]\+\).*/\1/gp" $WORK_DIR/list)"}
     [ -s $WORK_DIR/conf/*_VLESS_WS_inbounds.json ] && WS_SERVER_IP=${WS_SERVER_IP:-"$(grep -A2 "{name.*vless[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $2}'))"} && VLESS_HOST_DOMAIN=${VLESS_HOST_DOMAIN:-"$(grep -A2 "{name.*vless[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $4}')"} && PORT_VLESS_WS=${PORT_VLESS_WS:-"$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_VLESS_WS_inbounds.json)"} && CDN=${CDN:-"$(sed -n "s/.*{name.*vless[ ]\+ws.*server:[ ]\+\([^,]\+\).*/\1/gp" $WORK_DIR/list)"}
@@ -1135,10 +1113,7 @@ EOF
 
 $(hint "ss://$(base64 -w0 <<< 2022-blake3-aes-128-gcm:${SHADOWTLS_PASSWORD}@${SERVER_IP_2}:${PORT_SHADOWTLS} | sed "s/Cg==$//")?shadow-tls=$(base64 -w0 <<< {\"version\":\"3\",\"host\":\"$TLS_SERVER\",\"password\":\"$UUID\" | sed "s/Cg==$//")#${NODE_NAME}%20ShadowTLS%20v3")
 EOF
-  [ -n "$PORT_SHADOWSOCKS" ] && cat >> $WORK_DIR/list << EOF
 
-$(hint "ss://$(base64 -w0 <<< aes-128-gcm:${UUID}@${SERVER_IP_2}:${PORT_SHADOWSOCKS} | sed "s/Cg==$//")#${NODE_NAME}%20ss")
-EOF
   [ -n "$PORT_TROJAN" ] && cat >> $WORK_DIR/list << EOF
 
 $(hint "trojan://${UUID}@${SERVER_IP_1}:${PORT_TROJAN}?allowInsecure=1#${NODE_NAME}%20trojan")
@@ -1157,53 +1132,7 @@ $(hint "vless://$(base64 -w0 <<< "auto:${UUID}@${CDN}:443" | sed "s/Cg==$//")?re
 
 $(text 52)")
 EOF
-  cat >> $WORK_DIR/list << EOF
-*******************************************
-┌────────────────┐
-│                │
-│   $(warning "Clash Meta")   │
-│                │
-└────────────────┘
-----------------------------
-EOF
-  [ -n "$PORT_REALITY" ] && cat >> $WORK_DIR/list << EOF
 
-$(info "- {name: \"${NODE_NAME} vless-reality-vision\", type: vless, server: ${SERVER_IP}, port: ${PORT_REALITY}, uuid: ${UUID}, network: tcp, udp: true, tls: true, servername: ${TLS_SERVER}, flow: xtls-rprx-vision, client-fingerprint: chrome, reality-opts: {public-key: ${REALITY_PUBLIC}, short-id: \"\"} }")
-EOF
-  [ -n "$PORT_HYSTERIA2" ] && cat >> $WORK_DIR/list << EOF
-
-$(info "- {name: \"${NODE_NAME} hysteria2\", type: hysteria2, server: ${SERVER_IP}, port: ${PORT_HYSTERIA2}, up: \"200 Mbps\", down: \"1000 Mbps\", password: ${UUID}, obfs: salamander, obfs-password: ${UUID}, skip-cert-verify: true}")
-EOF
-  [ -n "$PORT_TUIC" ] && cat >> $WORK_DIR/list << EOF
-
-$(info "- {name: \"${NODE_NAME} tuic\", type: tuic, server: ${SERVER_IP}, port: ${PORT_TUIC}, uuid: ${UUID}, password: ${UUID}, alpn: [h3], disable-sni: true, reduce-rtt: true, request-timeout: 8000, udp-relay-mode: native, congestion-controller: bbr, skip-cert-verify: true}")
-EOF
-  [ -n "$PORT_SHADOWTLS" ] && cat >> $WORK_DIR/list << EOF
-
-$(info "- {name: \"${NODE_NAME} ShadowTLS v3\", type: ss, server: ${SERVER_IP}, port: ${PORT_SHADOWTLS}, cipher: 2022-blake3-aes-128-gcm, password: \"${SHADOWTLS_PASSWORD}\", plugin: shadow-tls, client-fingerprint: chrome, plugin-opts: {host: \"${TLS_SERVER}\", password: \"${UUID}\", version: 3}}")
-EOF
-  [ -n "$PORT_SHADOWSOCKS" ] && cat >> $WORK_DIR/list << EOF
-
-$(info "- {name: \"${NODE_NAME} ss\", server: ${SERVER_IP}, port: ${PORT_SHADOWSOCKS}, type: ss, cipher: aes-128-gcm, password: \"${UUID}\"}")
-EOF
-  [ -n "$PORT_TROJAN" ] && cat >> $WORK_DIR/list << EOF
-
-$(info "- {name: \"${NODE_NAME} trojan\", type: trojan, server: ${SERVER_IP}, port: ${PORT_TROJAN}, password: ${UUID}, client-fingerprint: random, skip-cert-verify: true}")
-EOF
-  [ -n "$PORT_VMESS_WS" ] && TYPE_HOST_DOMAIN=$VMESS_HOST_DOMAIN && TYPE_PORT_WS=$PORT_VMESS_WS && cat >> $WORK_DIR/list << EOF
-
-----------------------------
-$(info "- {name: \"${NODE_NAME} vmess ws\", type: vmess, server: ${CDN}, port: 80, uuid: ${UUID}, udp: true, tls: false, alterId: 0, cipher: none, skip-cert-verify: true, network: ws, ws-opts: { path: \"/${UUID}-vmess\", headers: { Host: ${VMESS_HOST_DOMAIN}, max-early-data: 2048, early-data-header-name: Sec-WebSocket-Protocol} } }
-
-$(text 52)")
-EOF
-  [ -n "$PORT_VLESS_WS" ] && TYPE_HOST_DOMAIN=$VLESS_HOST_DOMAIN && TYPE_PORT_WS=$PORT_VLESS_WS && cat >> $WORK_DIR/list << EOF
-
-----------------------------
-$(info "- {name: \"${NODE_NAME} vless ws\", type: vless, server: ${CDN}, port: 443, uuid: ${UUID}, udp: true, tls: true, servername: ${VLESS_HOST_DOMAIN}, network: ws, skip-cert-verify: true, ws-opts: { path: \"/${UUID}-vless?ed=2048\", headers: { Host: ${VLESS_HOST_DOMAIN} } } }
-
-$(text 52)")
-EOF
   cat >> $WORK_DIR/list << EOF
 *******************************************
 ┌────────────────┐
@@ -1232,10 +1161,7 @@ nekoray://shadowsocks#$(base64 -w0 <<< "{\"_v\":0,\"method\":\"2022-blake3-aes-1
 
 $(text 48)")
 EOF
-  [ -n "$PORT_SHADOWSOCKS" ] && cat >> $WORK_DIR/list << EOF
-----------------------------
-$(hint "ss://$(base64 -w0 <<< aes-128-gcm:${UUID} | sed "s/Cg==$//")@${SERVER_IP_1}:${PORT_SHADOWSOCKS}#${NODE_NAME}%20ss")
-EOF
+
   [ -n "$PORT_TROJAN" ] && cat >> $WORK_DIR/list << EOF
 ----------------------------
 $(hint "trojan://${UUID}@${SERVER_IP_1}:${PORT_TROJAN}?security=tls&allowInsecure=1&fp=random&type=tcp#${NODE_NAME}%20trojan")
@@ -1414,12 +1340,6 @@ change_protocals() {
   if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
     [[ "${KEEP_PROTOCALS[@]}" =~ "shadowTLS" ]] && SHADOWTLS_PASSWORD=$(sed -r "s/\x1B\[[0-9;]*[mG]//g" $WORK_DIR/list | sed -n 's/.*{name.*password:[ ]*\"\([^\"]\+\)".*shadow-tls.*/\1/pg') || SHADOWTLS_PASSWORD=$($WORK_DIR/sing-box generate rand --base64 16)
     PORT_SHADOWTLS=${REINSTALL_PORTS[$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]}
-  fi
-
-  # 获取原始 Shadowsocks 配置信息
-  CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
-  if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
-    PORT_SHADOWSOCKS=${REINSTALL_PORTS[$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]}
   fi
 
   # 获取原始 Trojan 配置信息
