@@ -7,7 +7,7 @@ VERSION='v1.0'
 # GH_PROXY='https://ghproxy.com/' # 不稳定，暂不使用
 TEMP_DIR='/tmp/sing-box'
 WORK_DIR='/etc/sing-box'
-START_PORT_DEFAULT=str(random.randint(1000, 20000))
+START_PORT_DEFAULT==$((RANDOM % 19001 + 1000))
 MIN_PORT=1000
 MAX_PORT=65525
 TLS_SERVER=addons.mozilla.org
