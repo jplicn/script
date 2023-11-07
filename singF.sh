@@ -12,7 +12,7 @@ MIN_PORT=1000
 MAX_PORT=65525
 TLS_SERVER=addons.mozilla.org
 CDN_DEFAULT=www.who.int
-PROTOCAL_LIST=("reality" "hysteria2" "tuic" "vmess + ws" "vless + ws + tls")
+PROTOCAL_LIST=("reality" "hysteria2" "tuic" )
 CONSECUTIVE_PORTS=${#PROTOCAL_LIST[@]}
 CDN_DOMAIN=("www.who.int" "cdn.anycast.eu.org" "443.cf.bestl.de" "cn.azhz.eu.org" "cfip.gay")
 
@@ -693,83 +693,6 @@ EOF
 }
 EOF
   fi
-
-
-  # 生成 vmess + ws 配置
-  CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
-  if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
-    [ -z "$PORT_VMESS_WS" ] && PORT_VMESS_WS=$[START_PORT+$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]
-    cat > $WORK_DIR/conf/17_VMESS_WS_inbounds.json << EOF
-{
-    "inbounds":[
-        {
-            "type":"vmess",
-            "sniff":true,
-            "sniff_override_destination":true,
-            "tag":"vmess-ws-in",
-            "listen":"::",
-            "listen_port":${PORT_VMESS_WS},
-            "tcp_fast_open":false,
-            "proxy_protocol":false,
-            "users":[
-                {
-                    "uuid":"${UUID}",
-                    "alterId":0
-                }
-            ],
-            "transport":{
-                "type":"ws",
-                "path":"/${UUID}-vmess",
-                "max_early_data":2048,
-                "early_data_header_name":"Sec-WebSocket-Protocol"
-            }
-        }
-    ]
-}
-EOF
-  fi
-
-  # 生成 vless + ws + tls 配置
-  CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
-  if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
-    [ -z "$PORT_VLESS_WS" ] && PORT_VLESS_WS=$[START_PORT+$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]
-    cat > $WORK_DIR/conf/18_VLESS_WS_inbounds.json << EOF
-{
-    "inbounds":[
-        {
-            "type":"vless",
-            "sniff_override_destination":true,
-            "sniff":true,
-            "tag":"vless-ws-in",
-            "listen":"::",
-            "listen_port":${PORT_VLESS_WS},
-            "tcp_fast_open":false,
-            "proxy_protocol":false,
-            "users":[
-                {
-                    "name":"sing-box",
-                    "uuid":"${UUID}"
-                }
-            ],
-            "transport":{
-                "type":"ws",
-                "path":"/${UUID}-vless",
-                "max_early_data":2048,
-                "early_data_header_name":"Sec-WebSocket-Protocol"
-            },
-            "tls":{
-                "enabled":true,
-                "server_name":"${VLESS_HOST_DOMAIN}",
-                "min_version":"1.3",
-                "max_version":"1.3",
-                "certificate_path":"${WORK_DIR}/cert/cert.pem",
-                "key_path":"${WORK_DIR}/cert/private.key"
-            }
-        }
-    ]
-}
-EOF
-  fi
 }
 
 # Sing-box 生成守护进程文件
@@ -835,8 +758,6 @@ export_list() {
     [ -s $WORK_DIR/conf/*_REALITY_inbounds.json ] && PORT_REALITY=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_REALITY_inbounds.json)
     [ -s $WORK_DIR/conf/*_HYSTERIA2_inbounds.json ] && PORT_HYSTERIA2=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_HYSTERIA2_inbounds.json)
     [ -s $WORK_DIR/conf/*_TUIC_inbounds.json ] && PORT_TUIC=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_TUIC_inbounds.json)
-    [ -s $WORK_DIR/conf/*_VMESS_WS_inbounds.json ] && WS_SERVER_IP=${WS_SERVER_IP:-"$(grep -A2 "{name.*vmess[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $2}'))"} && VMESS_HOST_DOMAIN=${VMESS_HOST_DOMAIN:-"$(grep -A2 "{name.*vmess[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $4}')"} && PORT_VMESS_WS=${PORT_VMESS_WS:-"$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_VMESS_WS_inbounds.json)"} && CDN=${CDN:-"$(sed -n "s/.*{name.*vmess[ ]\+ws.*server:[ ]\+\([^,]\+\).*/\1/gp" $WORK_DIR/list)"}
-    [ -s $WORK_DIR/conf/*_VLESS_WS_inbounds.json ] && WS_SERVER_IP=${WS_SERVER_IP:-"$(grep -A2 "{name.*vless[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $2}'))"} && VLESS_HOST_DOMAIN=${VLESS_HOST_DOMAIN:-"$(grep -A2 "{name.*vless[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $4}')"} && PORT_VLESS_WS=${PORT_VLESS_WS:-"$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_VLESS_WS_inbounds.json)"} && CDN=${CDN:-"$(sed -n "s/.*{name.*vless[ ]\+ws.*server:[ ]\+\([^,]\+\).*/\1/gp" $WORK_DIR/list)"}
   fi
 
   # IPv6 时的 IP 处理
@@ -871,20 +792,6 @@ EOF
 $(hint "tuic://${UUID}:${UUID}@${SERVER_IP_2}:${PORT_TUIC}?congestion_control=bbr&udp_relay_mode=native&alpn=h3&allow_insecure=1#${NODE_NAME}%20tuic")
 EOF
 
-  [ -n "$PORT_VMESS_WS" ] && TYPE_HOST_DOMAIN=$VMESS_HOST_DOMAIN && TYPE_PORT_WS=$PORT_VMESS_WS && cat >> $WORK_DIR/list << EOF
-
-----------------------------
-$(hint "vmess://$(base64 -w0 <<< none:${UUID}@${CDN}:80 | sed "s/Cg==$//")?remarks=${NODE_NAME}%20vmess%20ws&obfsParam=${VMESS_HOST_DOMAIN}&path=/${UUID}-vmess&obfs=websocket&alterId=0
-
-$(text 52)")
-EOF
-  [ -n "$PORT_VLESS_WS" ] && TYPE_HOST_DOMAIN=$VLESS_HOST_DOMAIN && TYPE_PORT_WS=$PORT_VLESS_WS && cat >> $WORK_DIR/list << EOF
-
-----------------------------
-$(hint "vless://$(base64 -w0 <<< "auto:${UUID}@${CDN}:443" | sed "s/Cg==$//")?remarks=${NODE_NAME}%20vless%20ws&obfsParam=${VLESS_HOST_DOMAIN}&path=/${UUID}-vless?ed=2048&obfs=websocket&tls=1&peer=${VLESS_HOST_DOMAIN}&allowInsecure=1
-
-$(text 52)")
-EOF
 
   cat >> $WORK_DIR/list << EOF
 *******************************************
@@ -907,18 +814,6 @@ EOF
 $(hint "tuic://${UUID}:${UUID}@${SERVER_IP_1}:${PORT_TUIC}?congestion_control=bbr&alpn=h3&udp_relay_mode=native&allow_insecure=1&disable_sni=1#${NODE_NAME}%20tuic")
 EOF
 
-  [ -n "$PORT_VMESS_WS" ] && TYPE_HOST_DOMAIN=$VMESS_HOST_DOMAIN && TYPE_PORT_WS=$PORT_VMESS_WS && cat >> $WORK_DIR/list << EOF
-----------------------------
-$(hint "vmess://$(base64 -w0 <<< "{\"add\":\"${CDN}\",\"aid\":\"0\",\"host\":\"${VMESS_HOST_DOMAIN}\",\"id\":\"${UUID}\",\"net\":\"ws\",\"path\":\"/${UUID}-vmess\",\"port\":\"80\",\"ps\":\"${NODE_NAME} vmess ws\",\"scy\":\"none\",\"sni\":\"\",\"tls\":\"\",\"type\":\"\",\"v\":\"2\"}" | sed "s/Cg==$//")
-
-$(text 52)")
-EOF
-  [ -n "$PORT_VLESS_WS" ] && TYPE_HOST_DOMAIN=$VLESS_HOST_DOMAIN && TYPE_PORT_WS=$PORT_VLESS_WS && cat >> $WORK_DIR/list << EOF
-----------------------------
-$(hint "vless://${UUID}@${CDN}:443?security=tls&sni=${VLESS_HOST_DOMAIN}&type=ws&path=/${UUID}-vless?ed%3D2048&host=${VLESS_HOST_DOMAIN}&encryption=none#${NODE_NAME}%20vless%20ws
-
-$(text 52)")
-EOF
   cat >> $WORK_DIR/list << EOF
 *******************************************
 EOF
