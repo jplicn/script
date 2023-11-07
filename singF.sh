@@ -175,8 +175,7 @@ select_language() {
     case $(cat $WORK_DIR/language 2>&1) in
       E ) L=E ;;
       C ) L=C ;;
-      * ) [ -z "$L" ] && L=E && hint "\n $(text 0) \n" && reading " $(text 24) " LANGUAGE
-      [ "$LANGUAGE" = 2 ] && L=C ;;
+      * ) [ -z "$L" ] && L=C ;;
     esac
   fi
 }
