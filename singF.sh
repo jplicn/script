@@ -12,7 +12,7 @@ MIN_PORT=1000
 MAX_PORT=65525
 TLS_SERVER=addons.mozilla.org
 CDN_DEFAULT=www.who.int
-PROTOCAL_LIST=("reality" "hysteria2" "tuic" "shadowTLS" "trojan" "vmess + ws" "vless + ws + tls")
+PROTOCAL_LIST=("reality" "hysteria2" "tuic" "vmess + ws" "vless + ws + tls")
 CONSECUTIVE_PORTS=${#PROTOCAL_LIST[@]}
 CDN_DOMAIN=("www.who.int" "cdn.anycast.eu.org" "443.cf.bestl.de" "cn.azhz.eu.org" "cfip.gay")
 
@@ -116,8 +116,6 @@ E[46]="Warp / warp-go was detected to be running. Please enter the correct serve
 C[46]="检测到 warp / warp-go 正在运行，请输入确认的服务器 IP:"
 E[47]="No server ip, script exits. Feedback:[https://github.com/fscarmen/sing-box/issues]"
 C[47]="没有 server ip，脚本退出，问题反馈:[https://github.com/fscarmen/sing-box/issues]"
-E[48]="ShadowTLS - Copy the above two Neko links and manually set up the chained proxies in order. Tutorial: https://github.com/fscarmen/sing-box/blob/main/README.md#sekobox-%E8%AE%BE%E7%BD%AE-shadowtls-%E6%96%B9%E6%B3%95"
-C[48]="ShadowTLS - 复制上面两条 Neko links 进去，并按顺序手动设置链式代理，详细教程: https://github.com/fscarmen/sing-box/blob/main/README.md#sekobox-%E8%AE%BE%E7%BD%AE-shadowtls-%E6%96%B9%E6%B3%95"
 E[49]="Select more protocols to install (e.g. hgbd):\n a. all (default)"
 C[49]="多选需要安装协议(比如 hgbd):\n a. all (默认)"
 E[50]="Please enter the \$TYPE domain name:"
@@ -706,76 +704,6 @@ EOF
 EOF
   fi
 
-  # 生成 shadowTLS V5 配置
-  CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
-  if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
-    [ -z "$SHADOWTLS_PASSWORD" ] && SHADOWTLS_PASSWORD=$($TEMP_DIR/sing-box generate rand --base64 16)
-    [ -z "$PORT_SHADOWTLS" ] && PORT_SHADOWTLS=$[START_PORT+$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]
-    cat > $WORK_DIR/conf/14_SHADOWTLS_inbounds.json << EOF
-{
-    "inbounds":[
-        {
-            "type":"shadowtls",
-            "sniff":true,
-            "sniff_override_destination":true,
-            "listen":"::",
-            "listen_port":$PORT_SHADOWTLS,
-            "detour":"shadowtls-in",
-            "version":3,
-            "users":[
-                {
-                    "password":"$UUID"
-                }
-            ],
-            "handshake":{
-                "server":"$TLS_SERVER",
-                "server_port":443
-            },
-            "strict_mode":true
-        },
-        {
-            "type":"shadowsocks",
-            "tag":"shadowtls-in",
-            "listen":"127.0.0.1",
-            "network":"tcp",
-            "method":"2022-blake3-aes-128-gcm",
-            "password":"$SHADOWTLS_PASSWORD"
-        }
-    ]
-}
-EOF
-  fi
-
-
-  # 生成 Trojan 配置
-  CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
-  if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
-    [ -z "$PORT_TROJAN" ] && PORT_TROJAN=$[START_PORT+$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]
-    cat > $WORK_DIR/conf/16_TROJAN_inbounds.json << EOF
-{
-    "inbounds":[
-        {
-            "type":"trojan",
-            "sniff":true,
-            "sniff_override_destination":true,
-            "tag":"trojan-in",
-            "listen":"::",
-            "listen_port":$PORT_TROJAN,
-            "users":[
-                {
-                    "password":"$UUID"
-                }
-            ],
-            "tls":{
-                "enabled":true,
-                "certificate_path":"$WORK_DIR/cert/cert.pem",
-                "key_path":"$WORK_DIR/cert/private.key"
-            }
-        }
-    ]
-}
-EOF
-  fi
 
   # 生成 vmess + ws 配置
   CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
@@ -917,8 +845,6 @@ export_list() {
     [ -s $WORK_DIR/conf/*_REALITY_inbounds.json ] && PORT_REALITY=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_REALITY_inbounds.json)
     [ -s $WORK_DIR/conf/*_HYSTERIA2_inbounds.json ] && PORT_HYSTERIA2=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_HYSTERIA2_inbounds.json)
     [ -s $WORK_DIR/conf/*_TUIC_inbounds.json ] && PORT_TUIC=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_TUIC_inbounds.json)
-    [ -s $WORK_DIR/conf/*_SHADOWTLS_inbounds.json ] && PORT_SHADOWTLS=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_SHADOWTLS_inbounds.json)
-    [ -s $WORK_DIR/conf/*_TROJAN_inbounds.json ] && PORT_TROJAN=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_TROJAN_inbounds.json)
     [ -s $WORK_DIR/conf/*_VMESS_WS_inbounds.json ] && WS_SERVER_IP=${WS_SERVER_IP:-"$(grep -A2 "{name.*vmess[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $2}'))"} && VMESS_HOST_DOMAIN=${VMESS_HOST_DOMAIN:-"$(grep -A2 "{name.*vmess[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $4}')"} && PORT_VMESS_WS=${PORT_VMESS_WS:-"$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_VMESS_WS_inbounds.json)"} && CDN=${CDN:-"$(sed -n "s/.*{name.*vmess[ ]\+ws.*server:[ ]\+\([^,]\+\).*/\1/gp" $WORK_DIR/list)"}
     [ -s $WORK_DIR/conf/*_VLESS_WS_inbounds.json ] && WS_SERVER_IP=${WS_SERVER_IP:-"$(grep -A2 "{name.*vless[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $2}'))"} && VLESS_HOST_DOMAIN=${VLESS_HOST_DOMAIN:-"$(grep -A2 "{name.*vless[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $4}')"} && PORT_VLESS_WS=${PORT_VLESS_WS:-"$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_VLESS_WS_inbounds.json)"} && CDN=${CDN:-"$(sed -n "s/.*{name.*vless[ ]\+ws.*server:[ ]\+\([^,]\+\).*/\1/gp" $WORK_DIR/list)"}
   fi
@@ -1109,15 +1035,7 @@ EOF
 
 $(hint "tuic://${UUID}:${UUID}@${SERVER_IP_2}:${PORT_TUIC}?congestion_control=bbr&udp_relay_mode=native&alpn=h3&allow_insecure=1#${NODE_NAME}%20tuic")
 EOF
-  [ -n "$PORT_SHADOWTLS" ] && cat >> $WORK_DIR/list << EOF
 
-$(hint "ss://$(base64 -w0 <<< 2022-blake3-aes-128-gcm:${SHADOWTLS_PASSWORD}@${SERVER_IP_2}:${PORT_SHADOWTLS} | sed "s/Cg==$//")?shadow-tls=$(base64 -w0 <<< {\"version\":\"3\",\"host\":\"$TLS_SERVER\",\"password\":\"$UUID\" | sed "s/Cg==$//")#${NODE_NAME}%20ShadowTLS%20v3")
-EOF
-
-  [ -n "$PORT_TROJAN" ] && cat >> $WORK_DIR/list << EOF
-
-$(hint "trojan://${UUID}@${SERVER_IP_1}:${PORT_TROJAN}?allowInsecure=1#${NODE_NAME}%20trojan")
-EOF
   [ -n "$PORT_VMESS_WS" ] && TYPE_HOST_DOMAIN=$VMESS_HOST_DOMAIN && TYPE_PORT_WS=$PORT_VMESS_WS && cat >> $WORK_DIR/list << EOF
 
 ----------------------------
@@ -1153,19 +1071,7 @@ EOF
 ----------------------------
 $(hint "tuic://${UUID}:${UUID}@${SERVER_IP_1}:${PORT_TUIC}?congestion_control=bbr&alpn=h3&udp_relay_mode=native&allow_insecure=1&disable_sni=1#${NODE_NAME}%20tuic")
 EOF
-  [ -n "$PORT_SHADOWTLS" ] && cat >> $WORK_DIR/list << EOF
-----------------------------
-$(hint "nekoray://custom#$(base64 -w0 <<< "{\"_v\":0,\"addr\":\"127.0.0.1\",\"cmd\":[\"\"],\"core\":\"internal\",\"cs\":\"{\n    \\\"password\\\": \\\"${UUID}\\\",\n    \\\"server\\\": \\\"${SERVER_IP_1}\\\",\n    \\\"server_port\\\": ${PORT_SHADOWTLS},\n    \\\"tag\\\": \\\"shadowtls-out\\\",\n    \\\"tls\\\": {\n        \\\"enabled\\\": true,\n        \\\"server_name\\\": \\\"addons.mozilla.org\\\"\n    },\n    \\\"type\\\": \\\"shadowtls\\\",\n    \\\"version\\\": 3\n}\n\",\"mapping_port\":0,\"name\":\"1-tls-not-use\",\"port\":1080,\"socks_port\":0}")
 
-nekoray://shadowsocks#$(base64 -w0 <<< "{\"_v\":0,\"method\":\"2022-blake3-aes-128-gcm\",\"name\":\"2-ss-not-use\",\"pass\":\"${SHADOWTLS_PASSWORD}\",\"port\":0,\"stream\":{\"ed_len\":0,\"insecure\":false,\"mux_s\":0,\"net\":\"tcp\"},\"uot\":0}")
-
-$(text 48)")
-EOF
-
-  [ -n "$PORT_TROJAN" ] && cat >> $WORK_DIR/list << EOF
-----------------------------
-$(hint "trojan://${UUID}@${SERVER_IP_1}:${PORT_TROJAN}?security=tls&allowInsecure=1&fp=random&type=tcp#${NODE_NAME}%20trojan")
-EOF
   [ -n "$PORT_VMESS_WS" ] && TYPE_HOST_DOMAIN=$VMESS_HOST_DOMAIN && TYPE_PORT_WS=$PORT_VMESS_WS && cat >> $WORK_DIR/list << EOF
 ----------------------------
 $(hint "vmess://$(base64 -w0 <<< "{\"add\":\"${CDN}\",\"aid\":\"0\",\"host\":\"${VMESS_HOST_DOMAIN}\",\"id\":\"${UUID}\",\"net\":\"ws\",\"path\":\"/${UUID}-vmess\",\"port\":\"80\",\"ps\":\"${NODE_NAME} vmess ws\",\"scy\":\"none\",\"sni\":\"\",\"tls\":\"\",\"type\":\"\",\"v\":\"2\"}" | sed "s/Cg==$//")
@@ -1333,19 +1239,6 @@ change_protocals() {
   CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
   if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
     PORT_TUIC=${REINSTALL_PORTS[$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]}
-  fi
-
-  # 获取原始 shadowTLS 配置信息
-  CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
-  if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
-    [[ "${KEEP_PROTOCALS[@]}" =~ "shadowTLS" ]] && SHADOWTLS_PASSWORD=$(sed -r "s/\x1B\[[0-9;]*[mG]//g" $WORK_DIR/list | sed -n 's/.*{name.*password:[ ]*\"\([^\"]\+\)".*shadow-tls.*/\1/pg') || SHADOWTLS_PASSWORD=$($WORK_DIR/sing-box generate rand --base64 16)
-    PORT_SHADOWTLS=${REINSTALL_PORTS[$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]}
-  fi
-
-  # 获取原始 Trojan 配置信息
-  CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
-  if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
-    PORT_TROJAN=${REINSTALL_PORTS[$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]}
   fi
 
   # 获取原始 vmess + ws 配置信息
