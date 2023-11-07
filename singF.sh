@@ -356,15 +356,9 @@ sing-box_variable() {
     DOMAIN_STRATEG=prefer_ipv6
   fi
 
-  # 选择安装的协议，由于选项 a 为全部协议，所以选项数不是从 a 开始，而是从 b 开始，处理输入：把大写全部变为小写，把不符合的选项去掉，把重复的选项合并
-  MAX_CHOOSE_PROTOCALS=$(asc $[CONSECUTIVE_PORTS+96+1])
-  if [ -z "$CHOOSE_PROTOCALS" ]; then
-    hint "\n $(text 49) "
-    for e in "${!PROTOCAL_LIST[@]}"; do
-      [[ "$e" =~ '6'|'7' ]] && hint " $(asc $[e+98]). ${PROTOCAL_LIST[e]} $(text 61) " || hint " $(asc $[e+98]). ${PROTOCAL_LIST[e]} "
-    done
-    reading "\n $(text 24) " CHOOSE_PROTOCALS
-  fi
+# 自动选择全部协议
+MAX_CHOOSE_PROTOCALS=$(asc $[CONSECUTIVE_PORTS+96+1])
+INSTALL_PROTOCALS=($(eval echo {b..$MAX_CHOOSE_PROTOCALS}))
 
   # 对选择协议的输入处理逻辑：先把所有的大写转为小写，并把所有没有去选项剔除掉，最后按输入的次序排序。如果选项为 a(all) 和其他选项并存，将会忽略 a，如 abc 则会处理为 bc
   CHOOSE_PROTOCALS=$(tr '[:upper:]' '[:lower:]' <<< "$CHOOSE_PROTOCALS")
