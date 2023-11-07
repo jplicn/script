@@ -190,7 +190,6 @@ text() { grep -q '\$' <<< "${E[$*]}" && eval echo "\$(eval echo "\${${L}[$*]}")"
       echo "$package 已经安装。"
     fi
   done
-}
 
 
 # 选择中英语言
