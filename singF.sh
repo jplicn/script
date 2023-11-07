@@ -379,19 +379,14 @@ sing-box_variable() {
     enter_start_port ${#INSTALL_PROTOCALS[@]}
   fi
 
-  # 输入服务器 IP,默认为检测到的服务器 IP，如果全部为空，则提示并退出脚本
-  [ -z "$SERVER_IP" ] && reading "\n $(text 10) " SERVER_IP
-  SERVER_IP=${SERVER_IP:-"$SERVER_IP_DEFAULT"} && WS_SERVER_IP=$SERVER_IP
-  [ -z "$SERVER_IP" ] && error " $(text 47) "
+# 如果已经有默认的服务器IP可用，那么使用默认的IP
+SERVER_IP=${SERVER_IP_DEFAULT}
 
-  if [[ "${INSTALL_PROTOCALS[@]}" =~ 'i' ]]; then
-    local DOMAIN_ERROR_TIME=5
-    until [ -n "$VLESS_HOST_DOMAIN" ]; do
-      (( DOMAIN_ERROR_TIME-- )) || true
-      [ "$DOMAIN_ERROR_TIME" != 0 ] && TYPE=VLESS && reading "\n $(text 50) " VLESS_HOST_DOMAIN || error "\n $(text 3) \n"
-    done
-  fi
+# 如果服务器IP为空，那么提示用户输入
+[ -z "$SERVER_IP" ] && reading "\n $(text 10) " SERVER_IP
 
+# 检查服务器IP是否仍然为空，如果为空，显示错误消息并退出
+[ -z "$SERVER_IP" ] && error " $(text 47) "
 
   # 输入 UUID ，错误超过 5 次将会退出
   UUID_DEFAULT=$($TEMP_DIR/sing-box generate uuid)
