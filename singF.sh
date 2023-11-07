@@ -388,9 +388,17 @@ SERVER_IP=${SERVER_IP_DEFAULT}
 UUID_DEFAULT=$($TEMP_DIR/sing-box generate uuid)
 UUID=${UUID_DEFAULT}
 
-# 直接设置主机名为br
-NODE_NAME_DEFAULT=br
-NODE_NAME="${NODE_NAME:-"$NODE_NAME_DEFAULT"}"
+  # 输入节点名，以系统的 hostname 作为默认
+  if [ -s /etc/hostname ]; then
+    NODE_NAME_DEFAULT="$(cat /etc/hostname)"
+  elif [ $(type -p hostname) ]; then
+    NODE_NAME_DEFAULT="$(hostname)"
+  else
+    NODE_NAME_DEFAULT="Sing-Box"
+  fi
+  reading "\n $(text 13) " NODE_NAME
+  NODE_NAME="${NODE_NAME:-"$NODE_NAME_DEFAULT"}"
+}
 
 check_dependencies() {
   # 如果是 Alpine，先升级 wget ，安装 systemctl-py 版
