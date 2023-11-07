@@ -388,8 +388,8 @@ SERVER_IP=${SERVER_IP_DEFAULT}
 UUID_DEFAULT=$($TEMP_DIR/sing-box generate uuid)
 UUID=${UUID_DEFAULT}
 
-# 直接设置主机名为 "COUNTRY4"
-NODE_NAME_DEFAULT="COUNTRY4"
+# 直接设置主机名为br
+NODE_NAME_DEFAULT=br
 NODE_NAME="${NODE_NAME:-"$NODE_NAME_DEFAULT"}"
 
 check_dependencies() {
