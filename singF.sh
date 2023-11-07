@@ -11,10 +11,8 @@ START_PORT_DEFAULT=$((RANDOM % 19001 + 3000))
 MIN_PORT=1000
 MAX_PORT=65525
 TLS_SERVER=addons.mozilla.org
-CDN_DEFAULT=www.who.int
 PROTOCAL_LIST=("reality" "hysteria2" "tuic" )
 CONSECUTIVE_PORTS=${#PROTOCAL_LIST[@]}
-CDN_DOMAIN=("www.who.int" "cdn.anycast.eu.org" "443.cf.bestl.de" "cn.azhz.eu.org" "cfip.gay")
 
 trap "rm -rf $TEMP_DIR >/dev/null 2>&1 ; echo -e '\n' ;exit 1" INT QUIT TERM EXIT
 
@@ -190,25 +188,6 @@ asc(){
   fi
 }
 
-input_cdn() {
-  # 提供网上热心网友的anycast域名
-  if [[ -z "$CDN" && -n "$VMESS_HOST_DOMAIN$VLESS_HOST_DOMAIN" ]]; then
-    echo ""
-    for c in "${!CDN_DOMAIN[@]}"; do hint " $[c+1]. ${CDN_DOMAIN[c]} "; done
-
-    reading "\n $(text 53) " CUSTOM_CDN
-    case "$CUSTOM_CDN" in
-      [1-${#CDN_DOMAIN[@]}] )
-        CDN="${CDN_DOMAIN[$((CUSTOM_CDN-1))]}"
-      ;;
-      ?????* )
-        CDN="$CUSTOM_CDN"
-      ;;
-      * )
-        CDN="${CDN_DOMAIN[0]}"
-    esac
-  fi
-}
 
 check_root() {
   [ "$(id -u)" != 0 ] && error "\n $(text 43) \n"
@@ -405,15 +384,6 @@ sing-box_variable() {
   SERVER_IP=${SERVER_IP:-"$SERVER_IP_DEFAULT"} && WS_SERVER_IP=$SERVER_IP
   [ -z "$SERVER_IP" ] && error " $(text 47) "
 
-  # 如选择有 h. vmess + ws 或 i. vless + ws 时，先检测是否有支持的 http 端口可用，如有则要求输入域名和 cdn
-  if [[ "${INSTALL_PROTOCALS[@]}" =~ 'h' ]]; then
-    local DOMAIN_ERROR_TIME=5
-    until [ -n "$VMESS_HOST_DOMAIN" ]; do
-      (( DOMAIN_ERROR_TIME-- )) || true
-      [ "$DOMAIN_ERROR_TIME" != 0 ] && TYPE=VMESS && reading "\n $(text 50) " VMESS_HOST_DOMAIN || error "\n $(text 3) \n"
-    done
-  fi
-
   if [[ "${INSTALL_PROTOCALS[@]}" =~ 'i' ]]; then
     local DOMAIN_ERROR_TIME=5
     until [ -n "$VLESS_HOST_DOMAIN" ]; do
@@ -422,10 +392,6 @@ sing-box_variable() {
     done
   fi
 
-  # 选择或者输入 cdn
-  input_cdn
-
-  wait
 
   # 输入 UUID ，错误超过 5 次将会退出
   UUID_DEFAULT=$($TEMP_DIR/sing-box generate uuid)
