@@ -379,36 +379,18 @@ sing-box_variable() {
     enter_start_port ${#INSTALL_PROTOCALS[@]}
   fi
 
-# 如果已经有默认的服务器IP可用，那么使用默认的IP
+# 如果已经有默认的服务器IP可用，那么使用默认的IP，如果服务器IP为空，那么提示用户输入
 SERVER_IP=${SERVER_IP_DEFAULT}
-
-# 如果服务器IP为空，那么提示用户输入
 [ -z "$SERVER_IP" ] && reading "\n $(text 10) " SERVER_IP
-
-# 检查服务器IP是否仍然为空，如果为空，显示错误消息并退出
 [ -z "$SERVER_IP" ] && error " $(text 47) "
 
-  # 输入 UUID ，错误超过 5 次将会退出
-  UUID_DEFAULT=$($TEMP_DIR/sing-box generate uuid)
-  [ -z "$UUID" ] && reading "\n $(text 12) " UUID
-  local UUID_ERROR_TIME=5
-  until [[ -z "$UUID" || "$UUID" =~ ^[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}$ ]]; do
-    (( UUID_ERROR_TIME-- )) || true
-    [ "$UUID_ERROR_TIME" = 0 ] && error "\n $(text 3) \n" || reading "\n $(text 4) \n" UUID
-  done
-  UUID=${UUID:-"$UUID_DEFAULT"}
+# 生成默认的UUID并赋值给UUID变量
+UUID_DEFAULT=$($TEMP_DIR/sing-box generate uuid)
+UUID=${UUID_DEFAULT}
 
-  # 输入节点名，以系统的 hostname 作为默认
-  if [ -s /etc/hostname ]; then
-    NODE_NAME_DEFAULT="$(cat /etc/hostname)"
-  elif [ $(type -p hostname) ]; then
-    NODE_NAME_DEFAULT="$(hostname)"
-  else
-    NODE_NAME_DEFAULT="Sing-Box"
-  fi
-  reading "\n $(text 13) " NODE_NAME
-  NODE_NAME="${NODE_NAME:-"$NODE_NAME_DEFAULT"}"
-}
+# 直接设置主机名为 "COUNTRY4"
+NODE_NAME_DEFAULT="COUNTRY4"
+NODE_NAME="${NODE_NAME:-"$NODE_NAME_DEFAULT"}"
 
 check_dependencies() {
   # 如果是 Alpine，先升级 wget ，安装 systemctl-py 版
