@@ -1257,8 +1257,6 @@ EOF
 EOF
   cat $WORK_DIR/list
 
-  # 显示脚本使用情况数据
-  info "\n $(text 55) \n"
 }
 
 # 创建快捷方式
