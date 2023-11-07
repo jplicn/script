@@ -169,28 +169,6 @@ hint() { echo -e "\033[33m\033[01m$*\033[0m"; }   # 黄色
 reading() { read -rp "$(info "$1")" "$2"; }
 text() { grep -q '\$' <<< "${E[$*]}" && eval echo "\$(eval echo "\${${L}[$*]}")" || eval echo "\${${L}[$*]}"; }
 
- # 安装qrencode
-  local packages=("qrencode")
-  for package in "${packages[@]}"; do
-    if ! command -v "$package" &> /dev/null; then
-      echo "正在安装 $package..."
-      if [ -n "$(command -v apt)" ]; then
-        sudo apt update > /dev/null 2>&1
-        sudo apt install -y "$package" > /dev/null 2>&1
-      elif [ -n "$(command -v yum)" ]; then
-        sudo yum install -y "$package"
-      elif [ -n "$(command -v dnf)" ]; then
-        sudo dnf install -y "$package"
-      else
-        echo "无法安装 $package。请手动安装，并重新运行脚本。"
-        exit 1
-      fi
-      echo "$package 已安装。"
-    else
-      echo "$package 已经安装。"
-    fi
-  done
-
 
 # 选择中英语言
 select_language() {
@@ -883,7 +861,7 @@ export_list() {
 EOF
   [ -n "$PORT_REALITY" ] && cat >> $WORK_DIR/list << EOF
 
-qrencode -t UTF8 $(hint "vless://$(base64 -w0 <<< auto:$UUID@${SERVER_IP_2}:${PORT_REALITY} | sed "s/Cg==$//")?remarks=${NODE_NAME}%20vless-reality-vision&obfs=none&tls=1&peer=$TLS_SERVER&xtls=2&pbk=$REALITY_PUBLIC")
+$(hint "vless://$(base64 -w0 <<< auto:$UUID@${SERVER_IP_2}:${PORT_REALITY} | sed "s/Cg==$//")?remarks=${NODE_NAME}%20vless-reality-vision&obfs=none&tls=1&peer=$TLS_SERVER&xtls=2&pbk=$REALITY_PUBLIC")
 EOF
   [ -n "$PORT_HYSTERIA2" ] && cat >> $WORK_DIR/list << EOF
 
