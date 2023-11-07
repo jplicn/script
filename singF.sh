@@ -360,10 +360,6 @@ sing-box_variable() {
 MAX_CHOOSE_PROTOCALS=$(asc $[CONSECUTIVE_PORTS+96+1])
 INSTALL_PROTOCALS=($(eval echo {b..$MAX_CHOOSE_PROTOCALS}))
 
-  # 对选择协议的输入处理逻辑：先把所有的大写转为小写，并把所有没有去选项剔除掉，最后按输入的次序排序。如果选项为 a(all) 和其他选项并存，将会忽略 a，如 abc 则会处理为 bc
-  CHOOSE_PROTOCALS=$(tr '[:upper:]' '[:lower:]' <<< "$CHOOSE_PROTOCALS")
-  [[ ! "$CHOOSE_PROTOCALS" =~ [b-$MAX_CHOOSE_PROTOCALS] ]] && INSTALL_PROTOCALS=($(eval echo {b..$MAX_CHOOSE_PROTOCALS})) || INSTALL_PROTOCALS=($(grep -o . <<< "$CHOOSE_PROTOCALS" | sed "/[^b-$MAX_CHOOSE_PROTOCALS]/d" | awk '!seen[$0]++'))
-
   # 显示选择协议及其次序，输入开始端口号
   if [ -z "$START_PORT" ]; then
     hint "\n $(text 60) "
@@ -794,50 +790,11 @@ change_start_port() {
   [ "$(systemctl is-active sing-box)" = 'active' ] && info " Sing-box $(text 30) $(text 37) " || error " Sing-box $(text 30) $(text 38) "
 }
 
-# 增加或删除协议
-change_protocals() {
-  check_install
-  [ "$STATUS" = "$(text 26)" ] && error "\n Sing-box $(text 26) "
-
-  # 查找已安装的协议，并遍历其在所有协议列表中的名称，获取协议名后存放在 EXISTED_PROTOCALS
-  EXISTED_CHECK=($(sed -n "/tag/s/.*\"tag\":\"\([^-]*\).*/\1/gp" $WORK_DIR/conf/*_inbounds.json | sed "s/shadowtls/shadowTLS/; s/vmess/vmess@+@ws/; s/vless/vless@+@ws@+@tls/"))
-  for f in "${EXISTED_CHECK[@]}"; do
-    [[ "${PROTOCAL_LIST[@]// /@}" =~ "$f"  ]] && EXISTED_PROTOCALS+=("$f")
-  done
-
-  # 查找未安装的协议，并遍历所有协议列表的数组，获取协议名后存放在 NOT_EXISTED_PROTOCALS
-  for g in "${PROTOCAL_LIST[@]// /@}"; do
-    [[ ! "${EXISTED_CHECK[@]}" =~ "$g" ]] && NOT_EXISTED_PROTOCALS+=("$g")
-  done
-
   # 列出已安装协议
   hint "\n $(text 63) (${#EXISTED_PROTOCALS[@]})"
   for h in "${!EXISTED_PROTOCALS[@]}"; do
     hint " $(asc $[h+97]). ${EXISTED_PROTOCALS[h]//@/ } "
   done
-
-  # 从已安装的协议中选择需要删除的协议名，并存放在 REMOVE_PROTOCALS，把保存的协议的协议存放在 KEEP_PROTOCALS
-  reading "\n $(text 64) " REMOVE_SELECT
-  for ((j=0; j<${#REMOVE_SELECT}; j++)); do
-    REMOVE_PROTOCALS+=(${EXISTED_PROTOCALS[$[$(asc "$(awk "NR==$[j+1] {print}" <<< "$(grep -o . <<< "$REMOVE_SELECT")")") - 97]]})
-  done
-
-  for k in "${EXISTED_PROTOCALS[@]}"; do
-    [[ ! "${REMOVE_PROTOCALS[@]}" =~ "$k" ]] && KEEP_PROTOCALS+=("$k")
-  done
-
-  # 如有未安装的协议，列表显示并选择安装，把增加的协议存在放在 ADD_PROTOCALS
-  if [ "${#NOT_EXISTED_PROTOCALS[@]}" -gt 0 ]; then
-    hint "\n $(text 65) (${#NOT_EXISTED_PROTOCALS}) "
-    for i in "${!NOT_EXISTED_PROTOCALS[@]}"; do
-      hint " $(asc $[i+97]). ${NOT_EXISTED_PROTOCALS[i]//@/ } "
-    done
-    reading "\n $(text 66) " ADD_SELECT
-
-    for ((l=0; l<${#ADD_SELECT}; l++)); do
-      ADD_PROTOCALS+=(${NOT_EXISTED_PROTOCALS[$[$(asc "$(awk "NR==$[l+1] {print}" <<< "$(grep -o . <<< "$ADD_SELECT")")") - 97]]})
-    done
-  fi
 
   # 重新安装 = 保留 + 新增
   REINSTALL_PROTOCALS=(${KEEP_PROTOCALS[@]} ${ADD_PROTOCALS[@]})
