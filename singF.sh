@@ -1588,7 +1588,6 @@ menu() {
   fi
 }
 
-statistics_of_run-times
 
 # 传参
 [[ "$*" =~ -[Ee] ]] && L=E
