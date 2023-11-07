@@ -22,74 +22,143 @@ mkdir -p $TEMP_DIR
 
 E[0]="Language:\n 1. English (default) \n 2. 简体中文"
 C[0]="${E[0]}"
+E[1]="1. Sing-box Family bucket v1.0; 2. After installing, add [ sb ] shortcut."
 C[1]="1. Sing-box 全家桶 v1.0; 2. 安装后，增加 [ sb ] 的快捷运行方式"
+E[2]="This project is designed to add sing-box support for multiple protocols to VPS, details: [https://github.com/fscarmen/sing-box]\n Script Features:\n\t • Deploy multiple protocols with one click, there is always one for you!\n\t • Custom ports for nat machine with limited open ports.\n\t • Built-in warp chained proxy to unlock chatGPT.\n\t • No domain name is required.\n\t • Support system: Ubuntu, Debian, CentOS, Alpine and Arch Linux 3.\n\t • Support architecture: AMD,ARM and s390x\n"
 C[2]="本项目专为 VPS 添加 sing-box 支持的多种协议, 详细说明: [https://github.com/fscarmen/sing-box]\n 脚本特点:\n\t • 一键部署多协议，总有一款适合你\n\t • 自定义端口，适合有限开放端口的 nat 小鸡\n\t • 内置 warp 链式代理解锁 chatGPT\n\t • 不需要域名\n\t • 智能判断操作系统: Ubuntu 、Debian 、CentOS 、Alpine 和 Arch Linux,请务必选择 LTS 系统\n\t • 支持硬件结构类型: AMD 和 ARM\n"
+E[3]="Input errors up to 5 times.The script is aborted."
 C[3]="输入错误达5次,脚本退出"
+E[4]="UUID should be 36 characters, please re-enter \(\${UUID_ERROR_TIME} times remaining\):"
 C[4]="UUID 应为36位字符,请重新输入 \(剩余\${UUID_ERROR_TIME}次\):"
+E[5]="The script supports Debian, Ubuntu, CentOS, Alpine, Fedora or Arch systems only. Feedback: [https://github.com/fscarmen/sing-box/issues]"
 C[5]="本脚本只支持 Debian、Ubuntu、CentOS、Alpine、Fedora 或 Arch 系统,问题反馈:[https://github.com/fscarmen/sing-box/issues]"
+E[6]="Curren operating system is \$SYS.\\\n The system lower than \$SYSTEM \${MAJOR[int]} is not supported. Feedback: [https://github.com/fscarmen/sing-box/issues]"
 C[6]="当前操作是 \$SYS\\\n 不支持 \$SYSTEM \${MAJOR[int]} 以下系统,问题反馈:[https://github.com/fscarmen/sing-box/issues]"
+E[7]="Install dependence-list:"
 C[7]="安装依赖列表:"
+E[8]="All dependencies already exist and do not need to be installed additionally."
 C[8]="所有依赖已存在，不需要额外安装"
+E[9]="To upgrade, press [y]. No upgrade by default:"
 C[9]="升级请按 [y]，默认不升级:"
+E[10]="Please enter VPS IP \(Default is: \${SERVER_IP_DEFAULT}\):"
 C[10]="请输入 VPS IP \(默认为: \${SERVER_IP_DEFAULT}\):"
+E[11]="Please enter the starting port number. Must be \${MIN_PORT} - \${MAX_PORT}, consecutive \${NUM} free ports are required \(Default is: \${START_PORT_DEFAULT}\):"
 C[11]="请输入开始的端口号，必须是 \${MIN_PORT} - \${MAX_PORT}，需要连续\${NUM}个空闲的端口 \(默认为: \${START_PORT_DEFAULT}\):"
+E[12]="Please enter UUID \(Default is \${UUID_DEFAULT}\):"
 C[12]="请输入 UUID \(默认为 \${UUID_DEFAULT}\):"
+E[13]="Please enter the node name. \(Default is \${NODE_NAME_DEFAULT}\):"
 C[13]="请输入节点名称 \(默认为 \${NODE_NAME_DEFAULT}\):"
+E[14]="Node name only allow uppercase and lowercase letters and numeric characters, please re-enter \(\${a} times remaining\):"
 C[14]="节点名称只允许英文大小写及数字字符，请重新输入 \(剩余\${a}次\):"
+E[15]="Sing-box script has not been installed yet."
 C[15]="Sing-box 脚本还没有安装"
+E[16]="Sing-box is completely uninstalled."
 C[16]="Sing-box 已彻底卸载"
+E[17]="Version"
 C[17]="脚本版本"
+E[18]="New features"
 C[18]="功能新增"
+E[19]="System infomation"
 C[19]="系统信息"
+E[20]="Operating System"
 C[20]="当前操作系统"
+E[21]="Kernel"
 C[21]="内核"
+E[22]="Architecture"
 C[22]="处理器架构"
+E[23]="Virtualization"
 C[23]="虚拟化"
+E[24]="Choose:"
 C[24]="请选择:"
+E[25]="Curren architecture \$(uname -m) is not supported. Feedback: [https://github.com/fscarmen/sing-box/issues]"
 C[25]="当前架构 \$(uname -m) 暂不支持,问题反馈:[https://github.com/fscarmen/sing-box/issues]"
+E[26]="Not install"
 C[26]="未安装"
+E[27]="close"
 C[27]="关闭"
+E[28]="open"
 C[28]="开启"
+E[29]="View links (sb -n)"
 C[29]="查看节点信息 (sb -n)"
+E[30]="Change listen ports (sb -p)"
 C[30]="更换监听端口 (sb -p)"
+E[31]="Sync Sing-box to the latest version (sb -v)"
 C[31]="同步 Sing-box 至最新版本 (sb -v)"
+E[32]="Upgrade kernel, turn on BBR (sb -b)"
 C[32]="升级内核、安装BBR (sb -b)"
+E[33]="Uninstall (sb -u)"
 C[33]="卸载 (sb -u)"
+E[34]="Install script"
 C[34]="安装脚本"
+E[35]="Exit"
 C[35]="退出"
+E[36]="Please enter the correct number"
 C[36]="请输入正确数字"
+E[37]="successful"
 C[37]="成功"
+E[38]="failed"
 C[38]="失败"
+E[39]="Sing-box is not installed."
 C[39]="Sing-box 未安装"
+E[40]="Sing-box local verion: \$LOCAL.\\\t The newest verion: \$ONLINE"
 C[40]="Sing-box 本地版本: \$LOCAL.\\\t 最新版本: \$ONLINE"
+E[41]="No upgrade required."
 C[41]="不需要升级"
+E[42]="Downloading the latest version Sing-box failed, script exits. Feedback:[https://github.com/fscarmen/sing-box/issues]"
 C[42]="下载最新版本 Sing-box 失败，脚本退出，问题反馈:[https://github.com/fscarmen/sing-box/issues]"
+E[43]="The script must be run as root, you can enter sudo -i and then download and run again. Feedback:[https://github.com/fscarmen/sing-box/issues]"
 C[43]="必须以root方式运行脚本，可以输入 sudo -i 后重新下载运行，问题反馈:[https://github.com/fscarmen/sing-box/issues]"
+E[44]="Ports are in used:  \${IN_USED[*]}"
 C[44]="正在使用中的端口: \${IN_USED[*]}"
+E[45]="Ports used: \${NOW_START_PORT} - \$((NOW_START_PORT+NOW_CONSECUTIVE_PORTS-1))"
 C[45]="使用端口: \${NOW_START_PORT} - \$((NOW_START_PORT+NOW_CONSECUTIVE_PORTS-1))"
+E[46]="Warp / warp-go was detected to be running. Please enter the correct server IP:"
 C[46]="检测到 warp / warp-go 正在运行，请输入确认的服务器 IP:"
+E[47]="No server ip, script exits. Feedback:[https://github.com/fscarmen/sing-box/issues]"
 C[47]="没有 server ip，脚本退出，问题反馈:[https://github.com/fscarmen/sing-box/issues]"
+E[49]="Select more protocols to install (e.g. hgbd):\n a. all (default)"
 C[49]="多选需要安装协议(比如 hgbd):\n a. all (默认)"
+E[50]="Please enter the \$TYPE domain name:"
 C[50]="请输入 \$TYPE 域名:"
+E[51]="Please choose or custom a cdn, http support is required:"
 C[51]="请选择或输入 cdn，要求支持 http:"
+E[52]="Please set the ip \[\${WS_SERVER_IP}] to domain \[\${TYPE_HOST_DOMAIN}], and set the origin rule to \[\${TYPE_PORT_WS}] in Cloudflare."
 C[52]="请在 Cloudflare 绑定 \[\${WS_SERVER_IP}] 的域名为 \[\${TYPE_HOST_DOMAIN}], 并设置 origin rule 为 \[\${TYPE_PORT_WS}]"
+E[53]="Please select or enter the preferred domain, the default is \${CDN_DOMAIN[0]}:"
 C[53]="请选择或者填入优选域名，默认为 \${CDN_DOMAIN[0]}:"
+E[54]="The contents of the \$V2RAYN_PROTOCAL configuration file need to be updated for the \$V2RAYN_KERNEL kernel."
 C[54]="\$V2RAYN_PROTOCAL 配置文件内容，需要更新 \$V2RAYN_KERNEL 内核"
+E[56]="Process ID"
 C[56]="进程ID"
+E[57]="Runtime"
 C[57]="运行时长"
+E[58]="Memory Usage"
 C[58]="内存占用"
+E[59]="Install ArgoX scripts (argo + xray) [https://github.com/fscarmen/argox]"
 C[59]="安装 ArgoX 脚本 (argo + xray) [https://github.com/fscarmen/argox]"
+E[60]="The order of the selected protocols and ports is as follows:"
 C[60]="选择的协议及端口次序如下:"
+E[61]="(DNS your own domain in Cloudflare is required.)"
 C[61]="(必须在 Cloudflare 解析自有域名)"
+E[62]="Add / Remove protocols (sb -r)"
 C[62]="增加 / 删除协议 (sb -r)"
+E[63]="(1/3) Installed protocols."
 C[63]="(1/3) 已安装的协议"
+E[64]="Please select the protocols to be removed (multiple selections possible):"
 C[64]="请选择需要删除的协议（可以多选）:"
+E[65]="(2/3) Uninstalled protocols."
 C[65]="(2/3) 未安装的协议"
+E[66]="Please select the protocols to be added (multiple choices possible):"
 C[66]="请选择需要增加的协议（可以多选）:"
+E[67]="(3/3) Confirm all protocols for reloading."
 C[67]="(3/3) 确认重装的所有协议"
+E[68]="Press [n] if there is an error, other keys to continue:"
 C[68]="如有错误请按 [n]，其他键继续:"
+E[69]="Install sba scripts (argo + sing-box) [https://github.com/fscarmen/sba]"
 C[69]="安装 sba 脚本 (argo + sing-box) [https://github.com/fscarmen/sba]"
+E[70]="Please set inSecure in tls to true."
 C[70]="请把 tls 里的 inSecure 设置为 true"
+E[71]="Create shortcut [ sb ] successfully."
 C[71]="创建快捷 [ sb ] 指令成功!"
 
 # 自定义字体彩色，read 函数
@@ -106,7 +175,8 @@ select_language() {
     case $(cat $WORK_DIR/language 2>&1) in
       E ) L=E ;;
       C ) L=C ;;
-      * ) [ -z "$L" ] && L=C ;;
+      * ) [ -z "$L" ] && L=E && hint "\n $(text 0) \n" && reading " $(text 24) " LANGUAGE
+      [ "$LANGUAGE" = 2 ] && L=C ;;
     esac
   fi
 }
@@ -779,6 +849,161 @@ export_list() {
   fi
 
   # 生成配置文件
+  cat > $WORK_DIR/list << EOF
+*******************************************
+┌────────────────┐
+│                │
+│     $(warning "V2rayN")     │
+│                │
+└────────────────┘
+EOF
+  [ -n "$PORT_REALITY" ] && cat >> $WORK_DIR/list << EOF
+
+----------------------------
+$(info "vless://${UUID}@${SERVER_IP_1}:${PORT_REALITY}?encryption=none&flow=xtls-rprx-vision&security=reality&sni=${TLS_SERVER}&fp=chrome&pbk=${REALITY_PUBLIC}&type=tcp&headerType=none#${NODE_NAME} vless-reality-vision")
+EOF
+  [ -n "$PORT_HYSTERIA2" ] && V2RAYN_PROTOCAL=Hysteria2 && V2RAYN_KERNEL=hysteria2 && cat >> $WORK_DIR/list << EOF
+
+----------------------------
+$(info "$(text 54)
+
+server: \"${SERVER_IP_1}:${PORT_HYSTERIA2}\"
+auth: ${UUID}
+
+bandwidth:
+  up: 200 mbps
+  down: 1000 mbps
+
+obfs:
+  type: salamander
+  salamander:
+    password: ${UUID}
+
+tls:
+  insecure: true
+
+socks5:
+  listen: 127.0.0.1:${PORT_HYSTERIA2}")
+EOF
+  [ -n "$PORT_TUIC" ] && V2RAYN_PROTOCAL=Tuic && V2RAYN_KERNEL=sing_box && cat >> $WORK_DIR/list << EOF
+
+----------------------------
+$(info "$(text 54)
+
+{
+    \"log\":{
+        \"level\":\"info\"
+    },
+    \"inbounds\":[
+        {
+            \"domain_strategy\":\"\",
+            \"listen\":\"127.0.0.1\",
+            \"listen_port\":${PORT_TUIC},
+            \"sniff\":true,
+            \"sniff_override_destination\":false,
+            \"type\":\"mixed\"
+        }
+    ],
+    \"outbounds\":[
+        {
+            \"congestion_control\":\"bbr\",
+            \"domain_strategy\":\"\",
+            \"heartbeat\":\"10s\",
+            \"password\":\"${UUID}\",
+            \"server\":\"${SERVER_IP}\",
+            \"server_port\":${PORT_TUIC},
+            \"tag\":\"proxy\",
+            \"tls\":{
+                \"alpn\":[
+                    \"h3\",
+                    \"spdy/3.1\"
+                ],
+                \"certificate\":\"\",
+                \"disable_sni\":false,
+                \"enabled\":true,
+                \"insecure\":true,
+                \"server_name\":\"\"
+            },
+            \"type\":\"tuic\",
+            \"udp_relay_mode\":\"native\",
+            \"uuid\":\"${UUID}\",
+            \"zero_rtt_handshake\":false
+        }
+    ]
+}")
+EOF
+  [ -n "$PORT_SHADOWTLS" ] && V2RAYN_PROTOCAL=ShadowTLS && V2RAYN_KERNEL=sing_box && cat >> $WORK_DIR/list << EOF
+
+----------------------------
+$(info "$(text 54)
+
+{
+  \"log\":{
+      \"level\":\"info\"
+  },
+  \"inbounds\":[
+      {
+          \"domain_strategy\":\"\",
+          \"listen\":\"127.0.0.1\",
+          \"listen_port\":${PORT_SHADOWTLS},
+          \"sniff\":true,
+          \"sniff_override_destination\":false,
+          \"tag\":\"ShadowTLS\",
+          \"type\":\"mixed\"
+      }
+  ],
+  \"outbounds\":[
+      {
+          \"detour\":\"shadowtls-out\",
+          \"domain_strategy\":\"\",
+          \"method\":\"2022-blake3-aes-128-gcm\",
+          \"password\":\"${SHADOWTLS_PASSWORD}\",
+          \"type\":\"shadowsocks\",
+          \"udp_over_tcp\":false
+      },
+      {
+          \"domain_strategy\":\"\",
+          \"password\":\"${UUID}\",
+          \"server\":\"${SERVER_IP}\",
+          \"server_port\":${PORT_SHADOWTLS},
+          \"tag\":\"shadowtls-out\",
+          \"tls\":{
+              \"enabled\":true,
+              \"server_name\":\"${TLS_SERVER}\"
+          },
+          \"type\":\"shadowtls\",
+          \"version\":3
+      }
+  ]
+}")
+EOF
+  [ -n "$PORT_SHADOWSOCKS" ] && cat >> $WORK_DIR/list << EOF
+
+----------------------------
+$(info "ss://$(base64 -w0 <<< aes-128-gcm:${UUID}@${SERVER_IP_1}:${PORT_SHADOWSOCKS})#${NODE_NAME} ss")
+EOF
+  [ -n "$PORT_TROJAN" ] && cat >> $WORK_DIR/list << EOF
+
+----------------------------
+$(info "trojan://${UUID}@${SERVER_IP_1}:${PORT_TROJAN}?security=tls&type=tcp&headerType=none#\"${NODE_NAME} trojan\"
+
+$(text 70)")
+EOF
+  [ -n "$PORT_VMESS_WS" ] && TYPE_HOST_DOMAIN=$VMESS_HOST_DOMAIN && TYPE_PORT_WS=$PORT_VMESS_WS && cat >> $WORK_DIR/list << EOF
+
+----------------------------
+$(info "vmess://$(base64 -w0 <<< "{ \"v\": \"2\", \"ps\": \"${NODE_NAME} vmess ws\", \"add\": \"${CDN}\", \"port\": \"80\", \"id\": \"${UUID}\", \"aid\": \"0\", \"scy\": \"none\", \"net\": \"ws\", \"type\": \"none\", \"host\": \"${VMESS_HOST_DOMAIN}\", \"path\": \"/${UUID}-vmess\", \"tls\": \"\", \"sni\": \"\", \"alpn\": \"\" }" | sed "s/Cg==$//")
+
+$(text 52)")
+EOF
+  [ -n "$PORT_VLESS_WS" ] && TYPE_HOST_DOMAIN=$VLESS_HOST_DOMAIN && TYPE_PORT_WS=$PORT_VLESS_WS && cat >> $WORK_DIR/list << EOF
+
+----------------------------
+$(info "vless://${UUID}@${CDN}:443?encryption=none&security=tls&sni=${VLESS_HOST_DOMAIN}&type=ws&host=${VLESS_HOST_DOMAIN}&path=%2F${UUID}-vless%3Fed%3D2048#${NODE_NAME} vless ws
+
+$(text 52)")
+EOF
+
   cat >> $WORK_DIR/list << EOF
 *******************************************
 ┌────────────────┐
