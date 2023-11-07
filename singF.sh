@@ -937,33 +937,6 @@ change_protocals() {
     PORT_TUIC=${REINSTALL_PORTS[$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]}
   fi
 
-  # 获取原始 vmess + ws 配置信息
-  CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
-  if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
-    WS_SERVER_IP=$SERVER_IP
-    local DOMAIN_ERROR_TIME=5
-    until [ -n "$VMESS_HOST_DOMAIN" ]; do
-      (( DOMAIN_ERROR_TIME-- )) || true
-      [ "$DOMAIN_ERROR_TIME" != 0 ] && TYPE=VMESS && reading "\n $(text 50) " VMESS_HOST_DOMAIN || error "\n $(text 3) \n"
-    done
-    PORT_VMESS_WS=${REINSTALL_PORTS[$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]}
-  fi
-
-  # 获取原始 vless + ws + tls 配置信息
-  CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
-  if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
-    WS_SERVER_IP=$SERVER_IP
-    local DOMAIN_ERROR_TIME=5
-    until [ -n "$VLESS_HOST_DOMAIN" ]; do
-      (( DOMAIN_ERROR_TIME-- )) || true
-      [ "$DOMAIN_ERROR_TIME" != 0 ] && TYPE=VLESS && reading "\n $(text 50) " VLESS_HOST_DOMAIN || error "\n $(text 3) \n"
-    done
-    PORT_VLESS_WS=${REINSTALL_PORTS[$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]}
-  fi
-
-  # 选择可以输入 cdn
-  input_cdn
-
   # 生成各协议的 json 文件
   sing-box_json change
 
