@@ -730,7 +730,7 @@ EOF
 
 }
 
-vl_link="vless://$(base64 -w0 <<< auto:$UUID@${SERVER_IP_2}:${PORT_REALITY} | sed "s/Cg==$//")?remarks=${NODE_NAME}%20vless-reality-vision&obfs=none&tls=1&peer=$TLS_SERVER&xtls=2&pbk=$REALITY_PUBLIC")
+$vl_link="vless://$(base64 -w0 <<< auto:$UUID@${SERVER_IP_2}:${PORT_REALITY} | sed "s/Cg==$//")?remarks=${NODE_NAME}%20vless-reality-vision&obfs=none&tls=1&peer=$TLS_SERVER&xtls=2&pbk=$REALITY_PUBLIC")
 echo "vl_link"
 qrencode -t UTF8 $vl_link
 
