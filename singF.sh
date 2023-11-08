@@ -712,6 +712,12 @@ EOF
   [ -n "$PORT_REALITY" ] && cat >> $WORK_DIR/list << EOF
 ----------------------------
 $(hint "vless://${UUID}@${SERVER_IP_1}:${PORT_REALITY}?security=reality&sni=${TLS_SERVER}&fp=chrome&pbk=${REALITY_PUBLIC}&type=tcp&flow=xtls-rprx-vision&encryption=none#${NODE_NAME}%20vless-reality-vision")
+
+[ -n "$PORT_REALITY" ] && {
+  echo "VLESS Reality QR Code:"
+  qrencode -t ansiutf8 "vless://${UUID}@${SERVER_IP_1}:${PORT_REALITY}?security=reality&sni=${TLS_SERVER}&fp=chrome&pbk=${REALITY_PUBLIC}&type=tcp&flow=xtls-rprx-vision&encryption=none#${NODE_NAME}%20vless-reality-vision"
+}
+
 EOF
   [ -n "$PORT_HYSTERIA2" ] && cat >> $WORK_DIR/list << EOF
 ----------------------------
