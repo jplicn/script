@@ -857,7 +857,7 @@ menu_setting() {
     OPTION[3]="3.  $(text 30)"
     OPTION[4]="4.  $(text 31)"
     OPTION[5]="5.  $(text 32)"
-    OPTION[6]="7.  $(text 33)"
+    OPTION[6]="6.  $(text 33)"
 
     ACTION[1]() { export_list; exit 0; }
     [ "$STATUS" = "$(text 28)" ] && ACTION[2]() { cmd_systemctl disable sing-box; [ "$(systemctl is-active sing-box)" = 'inactive' ] && info " Sing-box $(text 27) $(text 37)" || error " Sing-box $(text 27) $(text 38) "; } || ACTION[2]() { cmd_systemctl enable sing-box && [ "$(systemctl is-active sing-box)" = 'active' ] && info " Sing-box $(text 28) $(text 37)" || error " Sing-box $(text 28) $(text 38) "; }
