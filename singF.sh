@@ -797,17 +797,6 @@ change_protocals() {
   check_install
   [ "$STATUS" = "$(text 26)" ] && error "\n Sing-box $(text 26) "
 
-  # 查找已安装的协议，并遍历其在所有协议列表中的名称，获取协议名后存放在 EXISTED_PROTOCALS
-  EXISTED_CHECK=($(sed -n "/tag/s/.*\"tag\":\"\([^-]*\).*/\1/gp" $WORK_DIR/conf/*_inbounds.json | sed "s/shadowtls/shadowTLS/; s/vmess/vmess@+@ws/; s/vless/vless@+@ws@+@tls/"))
-  for f in "${EXISTED_CHECK[@]}"; do
-    [[ "${PROTOCAL_LIST[@]// /@}" =~ "$f"  ]] && EXISTED_PROTOCALS+=("$f")
-  done
-
-  # 查找未安装的协议，并遍历所有协议列表的数组，获取协议名后存放在 NOT_EXISTED_PROTOCALS
-  for g in "${PROTOCAL_LIST[@]// /@}"; do
-    [[ ! "${EXISTED_CHECK[@]}" =~ "$g" ]] && NOT_EXISTED_PROTOCALS+=("$g")
-  done
-
   # 列出已安装协议
   hint "\n $(text 63) (${#EXISTED_PROTOCALS[@]})"
   for h in "${!EXISTED_PROTOCALS[@]}"; do
