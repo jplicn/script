@@ -728,6 +728,14 @@ EOF
   cat $WORK_DIR/list
 
 }
+  echo "VLESS Reality QR Code:"
+  qrencode -t ansiutf8 "vless://${UUID}@${SERVER_IP_1}:${PORT_REALITY}?security=reality&sni=${TLS_SERVER}&fp=chrome&pbk=${REALITY_PUBLIC}&type=tcp&flow=xtls-rprx-vision&encryption=none#${NODE_NAME}%20vless-reality-vision"
+  echo "Hysteria2 QR Code:" 
+  qrencode -t ansiutf8 "hy2://${UUID}@${SERVER_IP_1}:${PORT_HYSTERIA2}?obfs=salamander&obfs-password=${UUID}&insecure=1#${NODE_NAME}%20hysteria2"
+  echo "Tuic QR Code:"
+  qrencode -t ansiutf8 "tuic://${UUID}:${UUID}@${SERVER_IP_1}:${PORT_TUIC}?congestion_control=bbr&alpn=h3&udp_relay_mode=native&allow_insecure=1&disable_sni=1#${NODE_NAME}%20tuic"  
+
+
 
 # 创建快捷方式
 create_shortcut() {
