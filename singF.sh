@@ -689,7 +689,7 @@ export_list() {
 EOF
   [ -n "$PORT_REALITY" ] && cat >> $WORK_DIR/list << EOF
 
-vl_link="vless://$(base64 -w0 <<< auto:$UUID@${SERVER_IP_2}:${PORT_REALITY} | sed "s/Cg==$//")?remarks=${NODE_NAME}%20vless-reality-vision&obfs=none&tls=1&peer=$TLS_SERVER&xtls=2&pbk=$REALITY_PUBLIC")
+$(hint "vless://$(base64 -w0 <<< auto:$UUID@${SERVER_IP_2}:${PORT_REALITY} | sed "s/Cg==$//")?remarks=${NODE_NAME}%20vless-reality-vision&obfs=none&tls=1&peer=$TLS_SERVER&xtls=2&pbk=$REALITY_PUBLIC")
 
 EOF
   [ -n "$PORT_HYSTERIA2" ] && cat >> $WORK_DIR/list << EOF
@@ -730,7 +730,8 @@ EOF
 
 }
 
-eco "vl_link"
+vl_link="vless://$(base64 -w0 <<< auto:$UUID@${SERVER_IP_2}:${PORT_REALITY} | sed "s/Cg==$//")?remarks=${NODE_NAME}%20vless-reality-vision&obfs=none&tls=1&peer=$TLS_SERVER&xtls=2&pbk=$REALITY_PUBLIC")
+echo "vl_link"
 qrencode -t UTF8 $vl_link
 
 # 创建快捷方式
