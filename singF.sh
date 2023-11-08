@@ -797,23 +797,6 @@ change_protocals() {
   check_install
   [ "$STATUS" = "$(text 26)" ] && error "\n Sing-box $(text 26) "
 
-  # 列出已安装协议
-  hint "\n $(text 63) (${#EXISTED_PROTOCALS[@]})"
-  for h in "${!EXISTED_PROTOCALS[@]}"; do
-    hint " $(asc $[h+97]). ${EXISTED_PROTOCALS[h]//@/ } "
-  done
-
-  # 重新安装 = 保留 + 新增
-  REINSTALL_PROTOCALS=(${KEEP_PROTOCALS[@]} ${ADD_PROTOCALS[@]})
-
-  # 显示重新安装的协议列表，并确认是否正确
-  hint "\n $(text 67) (${#REINSTALL_PROTOCALS[@]})"
-  for r in "${!REINSTALL_PROTOCALS[@]}"; do
-    hint " $[r+1]. ${REINSTALL_PROTOCALS[r]//@/ } "
-  done
-  reading "\n $(text 68) " CONFIRM
-  [[ "$CONFIRM" = [Nn] ]] && exit 0
-
   # 把确认安装的协议遍历所有协议列表的数组，找出其下标并变为英文小写的形式
   for m in "${!REINSTALL_PROTOCALS[@]}"; do
     for n in "${!PROTOCAL_LIST[@]}"; do
@@ -1012,7 +995,6 @@ menu() {
     warning " $(text 36) [0-$((${#OPTION[*]}-1))] " && sleep 1 && menu
   fi
 }
-
 
 # 传参
 [[ "$*" =~ -[Ee] ]] && L=E
