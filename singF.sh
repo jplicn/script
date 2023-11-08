@@ -828,7 +828,7 @@ menu_setting() {
     [ "$STATUS" = "$(text 28)" ] && ACTION[2]() { cmd_systemctl disable sing-box; [ "$(systemctl is-active sing-box)" = 'inactive' ] && info " Sing-box $(text 27) $(text 37)" || error " Sing-box $(text 27) $(text 38) "; } || ACTION[2]() { cmd_systemctl enable sing-box && [ "$(systemctl is-active sing-box)" = 'active' ] && info " Sing-box $(text 28) $(text 37)" || error " Sing-box $(text 28) $(text 38) "; }
     ACTION[3]() { change_start_port; exit; }
     ACTION[4]() { version; exit; }
-    ACTION[5]() { bash <(curl -Lso- https://git.io/kernel.sh); exit; }
+    ACTION[5]() { bash <(curl -L -s https://raw.githubusercontent.com/teddysun/across/master/bbr.sh); exit; }
     ACTION[6]() { uninstall; exit; }
 
   else
@@ -836,7 +836,7 @@ menu_setting() {
     OPTION[2]="2.  $(text 32)"
 
     ACTION[1]() { install_sing-box; export_list; create_shortcut; exit; }
-    ACTION[2]() { bash <(curl -Lso- https://git.io/kernel.sh); exit; }
+    ACTION[2]() { bash <(curl -L -s https://raw.githubusercontent.com/teddysun/across/master/bbr.sh); exit; }
   fi
 }
 
