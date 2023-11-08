@@ -902,22 +902,6 @@ menu() {
   fi
 }
 
-# 传参
-[[ "$*" =~ -[Ee] ]] && L=E
-[[ "$*" =~ -[Cc] ]] && L=C
-
-while getopts ":P:p:OoUuVvNnBbRr" OPTNAME; do
-  case "$OPTNAME" in
-    'P'|'p' ) START_PORT=$OPTARG; select_language; check_install; [ "$STATUS" = "$(text 26)" ] && error "\n Sing-box $(text 26) "; change_start_port; exit 0 ;;
-    'O'|'o' ) select_language; check_system_info; check_install; [ "$STATUS" = "$(text 26)" ] && error "\n Sing-box $(text 26) "; [ "$STATUS" = "$(text 28)" ] && ( cmd_systemctl disable sing-box; [ "$(systemctl is-active sing-box)" = 'inactive' ] && info "\n Sing-box $(text 27) $(text 37)" ) || ( cmd_systemctl enable sing-box && [ "$(systemctl is-active sing-box)" = 'active' ] && info "\n Sing-box $(text 28) $(text 37)" ); exit 0;;
-    'U'|'u' ) select_language; check_system_info; uninstall; exit 0 ;;
-    'N'|'n' ) select_language; [ ! -s $WORK_DIR/list ] && error " Sing-box $(text 26) "; export_list; exit 0 ;;
-    'V'|'v' ) select_language; check_arch; version; exit 0 ;;
-    'B'|'b' ) select_language; bash <(curl -Lso- https://git.io/kernel.sh); exit ;;
-    'R'|'r' ) select_language; check_system_info; change_protocals; exit 0 ;;
-  esac
-done
-
 select_language
 check_root
 check_arch
