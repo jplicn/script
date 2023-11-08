@@ -390,8 +390,6 @@ UUID=${UUID_DEFAULT}
   else
     NODE_NAME_DEFAULT="Sing-Box"
   fi
-  reading "\n $(text 13) " NODE_NAME
-  NODE_NAME="${NODE_NAME:-"$NODE_NAME_DEFAULT"}"
 }
 
 check_dependencies() {
