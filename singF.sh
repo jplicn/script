@@ -557,8 +557,8 @@ EOF
                 ],
                 "min_version":"1.3",
                 "max_version":"1.3",
-                "certificate_path":"$WORK_DIR/cert/cert.pem",
-                "key_path":"$WORK_DIR/cert/private.key"
+                "certificate_path":"/root/cert.crt",
+                "key_path":"/root/private.key"
             }
         }
     ]
@@ -592,8 +592,8 @@ EOF
                 "alpn":[
                     "h3"
                 ],
-                "certificate_path":"$WORK_DIR/cert/cert.pem",
-                "key_path":"$WORK_DIR/cert/private.key"
+                "certificate_path":"/root/cert.crt",
+                "key_path":"/root/private.key"
             }
         }
     ]
