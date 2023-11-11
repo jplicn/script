@@ -5,3 +5,5 @@ sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/jplicn/script/maste
 bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/sing.sh)
 
 bash <(wget -qO- https://raw.githubusercontent.com/jplicn/script/master/singF.sh)
+
+bash <(wget -qO- https://raw.githubusercontent.com/jplicn/script/master/acme.sh)
