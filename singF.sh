@@ -337,6 +337,16 @@ INSTALL_PROTOCALS=($(eval echo {b..$MAX_CHOOSE_PROTOCALS}))
     enter_start_port ${#INSTALL_PROTOCALS[@]}
   fi
 
+# 获取用户输入域名
+read -rp "请输入域名: " domain
+
+if [[ -z $domain ]]; then
+    echo "未提供域名。脚本终止。"
+    exit 1
+fi
+
+echo "您输入的域名是: $domain"
+
 # 如果已经有默认的服务器IP可用，那么使用默认的IP，如果服务器IP为空，那么提示用户输入
 SERVER_IP=${SERVER_IP_DEFAULT}
 [ -z "$SERVER_IP" ] && reading "\n $(text 10) " SERVER_IP
@@ -551,15 +561,20 @@ EOF
             },
             "tls":{
                 "enabled":true,
-                "server_name":"",
+                "server_name":$domain,
                 "alpn":[
                     "h3"
                 ],
                 "min_version":"1.3",
                 "max_version":"1.3",
-                "certificate_path":"$WORK_DIR/cert/cert.pem",
-                "key_path":"$WORK_DIR/cert/private.key"
+                "acme": {
+                   "domain": $domain,
+                   "data_directory": $WORK_DIR,
+                    "default_server_name": "",
+                     "email": $(date +%s%N | md5sum | cut -c 1-16),
+                     "provider": "letsencrypt"
             }
+       }
         }
     ]
 }
@@ -589,12 +604,20 @@ EOF
             "congestion_control":"bbr",
             "tls":{
                 "enabled":true,
+                "server_name":$domain,
                 "alpn":[
                     "h3"
                 ],
-                "certificate_path":"$WORK_DIR/cert/cert.pem",
-                "key_path":"$WORK_DIR/cert/private.key"
+                "min_version":"1.3",
+                "max_version":"1.3",
+                "acme": {
+                   "domain": $domain,
+                   "data_directory": $WORK_DIR,
+                    "default_server_name": "",
+                     "email": $(date +%s%N | md5sum | cut -c 1-16),
+                     "provider": "letsencrypt"
             }
+       }
         }
     ]
 }
