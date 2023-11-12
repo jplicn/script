@@ -610,44 +610,32 @@ EOF
   fi
 
   # 生成 vless + ws + tls 配置
-  CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
-  if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
-    [ -z "$PORT_VLESS_WS" ] && PORT_VLESS_WS=$[START_PORT+$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]
     cat > $WORK_DIR/conf/18_VLESS_WS_inbounds.json << EOF
-{
-    "inbounds":[
+    {
+      "type": "vless",
+      "tag": "VLESS-WS+TLS+CDN+Padding",  // 可改，给节点一个备注
+      "listen": "::",  // 可改，未限制，监听所有来访IP，来访IP只要有正确的配置，即可连接
+      "listen_port": 443,  // 改，节点的端口
+      "sniff": true,  // 开启嗅探
+      "sniff_override_destination": false,  // 无特殊需求，此项可不开，具体请看Sing-Box官方文档
+      "users": [
         {
-            "type":"vless",
-            "sniff_override_destination":true,
-            "sniff":true,
-            "tag":"vless-ws-in",
-            "listen":"::",
-            "listen_port":${PORT_VLESS_WS},
-            "tcp_fast_open":false,
-            "proxy_protocol":false,
-            "users":[
-                {
-                    "name":"sing-box",
-                    "uuid":"${UUID}"
-                }
-            ],
-            "transport":{
-                "type":"ws",
-                "path":"/${UUID}-vless",
-                "max_early_data":2048,
-                "early_data_header_name":"Sec-WebSocket-Protocol"
-            },
-            "tls":{
-                "enabled":true,
-                "server_name":"$(cat /root/domain.txt)",
-                "min_version":"1.3",
-                "max_version":"1.3",
-                "certificate_path":"/root/cert.crt",
-                "key_path":"/root/private.key"
-            }
+          "uuid": "${UUID}",  // 改，节点UUID，使用 sing-box generate uuid 生成（无法使用请补全sing-box所在的绝对路径 /绝对/路径/sing-box generate uuid）
+          "flow": ""  // 注意，启用Padding，流控需要留空，与vision冲突
         }
-    ]
-}
+      ],
+      "tls": {
+        "enabled": true,
+        "certificate_path": "/root/cert.crt",  // 改，域名证书存放的绝对路径
+        "key_path": "/root/private.key"  // 改，域名私钥存放的绝对路径
+      },
+      "transport": {
+        "type": "ws",  // 启用ws
+        "path": "${UUID}-vless",  // 改，ws路径
+        "max_early_data": 2048,  // 可改，请求中允许的最大有效负载大小。默认启用，具体请看Sing-Box官方文档
+        "early_data_header_name": "Sec-WebSocket-Protocol"  // 可改，填写Sec-WebSocket-Protocol，就会和Xray-core兼容
+      }
+    }
 EOF
   fi
 
@@ -770,7 +758,6 @@ EOF
 fi
 
 # 生成 vless 链接和二维码
-if [ -n "$PORT_VLESS_WS" ]; then
    vless_link="vless://${UUID}@$(cat /root/domain.txt):443?security=tls&sni=$(cat /root/domain.txt)&type=ws&path=/${UUID}-vless?ed%3D2048&host=$(cat /root/domain.txt)&encryption=none#${NODE_NAME}%20vless%20ws
    cat >> $WORK_DIR/list << EOF
 ----------------------------
