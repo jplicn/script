@@ -696,7 +696,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "openai"
         ],
         "outbound": "wireguard-out" 
-      },
+      }
     ]  
 }
 EOF
