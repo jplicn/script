@@ -182,6 +182,35 @@ if ! command -v qrencode &> /dev/null; then
     sudo apt-get install -y qrencode &> /dev/null
 fi
 
+# 为了适配 alpine，定义 cmd_systemctl 的函数
+cmd_systemctl() {
+  local ENABLE_DISABLE=$1
+  local APP=$2
+  if [ "$ENABLE_DISABLE" = 'enable' ]; then
+    if [ "$SYSTEM" = 'Alpine' ]; then
+      systemctl start $APP
+      cat > /etc/local.d/$APP.start << EOF
+#!/usr/bin/env bash
+
+systemctl start $APP
+EOF
+      chmod +x /etc/local.d/$APP.start
+      rc-update add local >/dev/null 2>&1
+    else
+      systemctl enable --now $APP
+    fi
+
+  elif [ "$ENABLE_DISABLE" = 'disable' ]; then
+    if [ "$SYSTEM" = 'Alpine' ]; then
+      systemctl stop $APP
+      rm -f /etc/local.d/$APP.start
+    else
+      systemctl disable --now $APP
+    fi
+  fi
+}
+
+
 # 检测 sing-box 的状态
 check_sing-box_stats(){
   case "$STATUS" in
