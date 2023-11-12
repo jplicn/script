@@ -305,7 +305,7 @@ revoke_cert() {
         bash ~/.acme.sh/acme.sh --remove -d ${domain} --ecc
 
         rm -rf ~/.acme.sh/${domain}_ecc
-        rm -f /root/cert.crt /root/private.key
+        rm -f /root/cert.crt /root/private.key /root/domain.txt
 
         green "撤销 ${domain} 的域名证书成功"
     else
