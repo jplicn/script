@@ -700,6 +700,12 @@ EOF
 $(hint "tuic://${UUID}:${UUID}@${SERVER_IP_1}:${PORT_TUIC}?congestion_control=bbr&alpn=h3&udp_relay_mode=native&sni=$(cat /root/domain.txt)#${NODE_NAME}%20tuic")
 EOF
 
+  cat >> $WORK_DIR/list << EOF
+*******************************************
+EOF
+  cat $WORK_DIR/list
+
+
 }
 
 # 创建快捷方式
