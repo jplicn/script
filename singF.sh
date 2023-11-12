@@ -810,9 +810,11 @@ menu_setting() {
   else
     OPTION[1]="1.  $(text 34)"
     OPTION[2]="2.  $(text 32)"
+    OPTION[3]="3.  安装acme脚本"
 
     ACTION[1]() { install_sing-box; export_list; create_shortcut; exit; }
     ACTION[2]() { bash <(curl -L -s https://raw.githubusercontent.com/teddysun/across/master/bbr.sh); exit; }
+    ACTION[3]() { bash <(wget -qO- https://raw.githubusercontent.com/jplicn/script/master/acme.sh); exit; }
   fi
 }
 
