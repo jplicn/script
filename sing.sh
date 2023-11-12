@@ -661,21 +661,47 @@ cat > /root/sbox/sbconfig_server.json << EOF
         }
     }
   ],
-  "outbounds": [
+"outbounds": [
     {
       "type": "direct",
       "tag": "direct"
     },
+    // 附赠 WARP-free，如想更改，具体请参考Sing-Box官方文档
     {
-      "type": "block",
-      "tag": "block"
+      "type": "wireguard",
+      "tag": "wireguard-out",
+      "server": "engage.cloudflareclient.com",
+      "server_port": 2408,
+      "local_address": [
+        "172.16.0.2/32",
+        "2606:4700:110:812a:4929:7d2a:af62:351c/128"
+      ],
+      "private_key": "gBthRjevHDGyV0KvYwYE52NIPy29sSrVr6rcQtYNcXA=",
+      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+      "reserved":[6,146,6]
     }
-  ]
+  ],
+  "route": {
+    "geosite": {
+      "download_url": "https://github.com/SagerNet/sing-geosite/releases/latest/download/geosite.db",
+      "download_detour": "direct"
+      },
+    "geoip": {
+      "download_url": "https://github.com/soffchen/sing-geoip/releases/latest/download/geoip.db",
+      "download_detour": "direct"
+      },
+    "rules": [
+      {
+        // 使用 WARP解锁Netflix和OpenAI，还需解锁什么，请参考V2ray官方域名库，自行按照格式添加（https://github.com/v2fly/domain-list-community/tree/master/data）
+        "geosite": [
+          "netflix",
+          "openai"
+        ],
+        "outbound": "wireguard-out"  // 使用warp节点通讯
+      },
+    ]  
 }
 EOF
-
-
-
 
 
 # Create sing-box.service
