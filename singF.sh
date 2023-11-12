@@ -690,9 +690,13 @@ if [ -n "$PORT_REALITY" ]; then
   vless_link="vless://${UUID}@${SERVER_IP_1}:${PORT_REALITY}?security=reality&sni=${TLS_SERVER}&fp=chrome&pbk=${REALITY_PUBLIC}&type=tcp&flow=xtls-rprx-vision&encryption=none#${NODE_NAME}%20vless-reality-vision"
   cat >> $WORK_DIR/list << EOF
 ----------------------------
+echo ""
 $(hint "$vless_link")
+echo ""
 EOF
+echo ""
   qrencode -t UTF8 "$vless_link"
+echo ""
 fi
 
 # 生成 hy2 链接和二维码
@@ -700,9 +704,13 @@ if [ -n "$PORT_HYSTERIA2" ]; then
   hy2_link="hy2://${UUID}@${SERVER_IP_1}:${PORT_HYSTERIA2}?obfs=salamander&obfs-password=${UUID}&sni=$(cat /root/domain.txt)#${NODE_NAME}%20hysteria2"
   cat >> $WORK_DIR/list << EOF
 ----------------------------
+echo ""
 $(hint "$hy2_link")
+echo ""
 EOF
-  qrencode -t UTF8 "$hy2_link"
+echo ""
+qrencode -t UTF8 "$hy2_link"
+echo ""
 fi
 
 # 生成 tuic 链接和二维码
@@ -710,9 +718,13 @@ if [ -n "$PORT_TUIC" ]; then
   tuic_link="tuic://${UUID}:${UUID}@${SERVER_IP_1}:${PORT_TUIC}?congestion_control=bbr&alpn=h3&udp_relay_mode=native&allow_insecure=0&sni=$(cat /root/domain.txt)#${NODE_NAME}%20tuic"
   cat >> $WORK_DIR/list << EOF
 ----------------------------
+echo ""
 $(hint "$tuic_link")
+echo ""
 EOF
-  qrencode -t UTF8 "$tuic_link"
+echo ""
+qrencode -t UTF8 "$tuic_link"
+echo ""
 fi
 
   cat >> $WORK_DIR/list << EOF
