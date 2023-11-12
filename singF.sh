@@ -180,6 +180,14 @@ check_install() {
   fi
 }
 
+
+# 检查qrencode并安装
+if ! command -v qrencode &> /dev/null; then
+    
+    sudo apt-get install -y qrencode &> /dev/null
+
+fi
+
 # 检测 sing-box 的状态
 check_sing-box_stats(){
   case "$STATUS" in
