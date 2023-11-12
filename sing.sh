@@ -666,7 +666,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "type": "direct",
       "tag": "direct"
     },
-    // 附赠 WARP-free，如想更改，具体请参考Sing-Box官方文档
     {
       "type": "wireguard",
       "tag": "wireguard-out",
@@ -692,12 +691,11 @@ cat > /root/sbox/sbconfig_server.json << EOF
       },
     "rules": [
       {
-        // 使用 WARP解锁Netflix和OpenAI，还需解锁什么，请参考V2ray官方域名库，自行按照格式添加（https://github.com/v2fly/domain-list-community/tree/master/data）
         "geosite": [
           "netflix",
           "openai"
         ],
-        "outbound": "wireguard-out"  // 使用warp节点通讯
+        "outbound": "wireguard-out" 
       },
     ]  
 }
