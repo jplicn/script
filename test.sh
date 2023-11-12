@@ -58,6 +58,8 @@ E[23]="Virtualization"
 C[23]="虚拟化"
 E[24]="Choose:"
 C[24]="请选择:"
+E[25]="Curren architecture \$(uname -m) is not supported. Feedback: [https://github.com/fscarmen/sing-box/issues]"
+C[25]="当前架构 \$(uname -m) 暂不支持,问题反馈:[https://github.com/fscarmen/sing-box/issues]"
 E[26]="Not install"
 C[26]="未安装"
 E[27]="close"
@@ -92,6 +94,8 @@ E[41]="No upgrade required."
 C[41]="不需要升级"
 E[42]="Downloading the latest version Sing-box failed, script exits. Feedback:[https://github.com/fscarmen/sing-box/issues]"
 C[42]="下载最新版本 Sing-box 失败，脚本退出，问题反馈:[https://github.com/fscarmen/sing-box/issues]"
+E[43]="The script must be run as root, you can enter sudo -i and then download and run again. Feedback:[https://github.com/fscarmen/sing-box/issues]"
+C[43]="必须以root方式运行脚本，可以输入 sudo -i 后重新下载运行，问题反馈:[https://github.com/fscarmen/sing-box/issues]"
 E[44]="Ports are in used:  \${IN_USED[*]}"
 C[44]="正在使用中的端口: \${IN_USED[*]}"
 E[45]="Ports used: \${NOW_START_PORT} - \$((NOW_START_PORT+NOW_CONSECUTIVE_PORTS-1))"
@@ -150,7 +154,7 @@ asc(){
 }
 
 check_root() {
-  [ "$(id -u)" != 0 ] && error "\n 必须以root方式运行脚本，可以输入 sudo -i 后重新下载运行 \n"
+  [ "$(id -u)" != 0 ] && error "\n $(text 43) \n"
 }
 
 check_arch() {
@@ -159,7 +163,7 @@ check_arch() {
     aarch64|arm64 ) SING_BOX_ARCH=arm64 ;;
     x86_64|amd64 ) [[ "$(awk -F ':' '/flags/{print $2; exit}' /proc/cpuinfo)" =~ avx2 ]] && SING_BOX_ARCH=amd64v3 || SING_BOX_ARCH=amd64 ;;
     armv7l ) SING_BOX_ARCH=armv7 ;;
-    * ) error " 当前架构 \$(uname -m) 暂不支持 "
+    * ) error " $(text 25) "
   esac
 }
 
@@ -179,8 +183,24 @@ check_install() {
 
 # 检查qrencode并安装
 if ! command -v qrencode &> /dev/null; then
+    
     sudo apt-get install -y qrencode &> /dev/null
+
 fi
+
+# 检测 sing-box 的状态
+check_sing-box_stats(){
+  case "$STATUS" in
+    "$(text 26)" )
+      error "\n Sing-box $(text 28) $(text 38) \n"
+      ;;
+    "$(text 27)" )
+      cmd_systemctl enable sing-box && info "\n Sing-box $(text 28) $(text 37) \n" || error "\n Sing-box $(text 28) $(text 38) \n"
+      ;;
+    "$(text 28)" )
+      info "\n Sing-box $(text 28) $(text 37) \n"
+  esac
+}
 
 # 为了适配 alpine，定义 cmd_systemctl 的函数
 cmd_systemctl() {
@@ -208,21 +228,6 @@ EOF
       systemctl disable --now $APP
     fi
   fi
-}
-
-
-# 检测 sing-box 的状态
-check_sing-box_stats(){
-  case "$STATUS" in
-    "$(text 26)" )
-      error "\n Sing-box $(text 28) $(text 38) \n"
-      ;;
-    "$(text 27)" )
-      cmd_systemctl enable sing-box && info "\n Sing-box $(text 28) $(text 37) \n" || error "\n Sing-box $(text 28) $(text 38) \n"
-      ;;
-    "$(text 28)" )
-      info "\n Sing-box $(text 28) $(text 37) \n"
-  esac
 }
 
 check_system_info() {
@@ -327,14 +332,18 @@ sing-box_variable() {
 MAX_CHOOSE_PROTOCALS=$(asc $[CONSECUTIVE_PORTS+96+1])
 INSTALL_PROTOCALS=($(eval echo {b..$MAX_CHOOSE_PROTOCALS}))
 
-# 显示选择协议及其次序，输入开始端口号
-if [ -z "$START_PORT" ]; then
-  hint "\n $(text 60) "
-  for d in "${!INSTALL_PROTOCALS[@]}"; do
-    hint " $[d+1]. ${PROTOCAL_LIST[$(($(asc ${INSTALL_PROTOCALS[d]}) - 98))]} "
-  done
-  enter_start_port ${#INSTALL_PROTOCALS[@]}
-fi
+  # 对选择协议的输入处理逻辑：先把所有的大写转为小写，并把所有没有去选项剔除掉，最后按输入的次序排序。如果选项为 a(all) 和其他选项并存，将会忽略 a，如 abc 则会处理为 bc
+  CHOOSE_PROTOCALS=$(tr '[:upper:]' '[:lower:]' <<< "$CHOOSE_PROTOCALS")
+  [[ ! "$CHOOSE_PROTOCALS" =~ [b-$MAX_CHOOSE_PROTOCALS] ]] && INSTALL_PROTOCALS=($(eval echo {b..$MAX_CHOOSE_PROTOCALS})) || INSTALL_PROTOCALS=($(grep -o . <<< "$CHOOSE_PROTOCALS" | sed "/[^b-$MAX_CHOOSE_PROTOCALS]/d" | awk '!seen[$0]++'))
+
+  # 显示选择协议及其次序，输入开始端口号
+  if [ -z "$START_PORT" ]; then
+    hint "\n $(text 60) "
+    for d in "${!INSTALL_PROTOCALS[@]}"; do
+      hint " $[d+1]. ${PROTOCAL_LIST[$(($(asc ${INSTALL_PROTOCALS[d]}) - 98))]} "
+    done
+    enter_start_port ${#INSTALL_PROTOCALS[@]}
+  fi
 
 # 如果已经有默认的服务器IP可用，那么使用默认的IP，如果服务器IP为空，那么提示用户输入
 SERVER_IP=${SERVER_IP_DEFAULT}
@@ -385,6 +394,12 @@ check_dependencies() {
   else
     info "\n $(text 8) \n"
   fi
+}
+
+# 生成100年的自签证书
+ssl_certificate() {
+  mkdir -p $WORK_DIR/cert
+  openssl ecparam -genkey -name prime256v1 -out $WORK_DIR/cert/private.key && openssl req -new -x509 -days 36500 -key $WORK_DIR/cert/private.key -out $WORK_DIR/cert/cert.pem -subj "/CN=$(awk -F . '{print $(NF-1)"."$NF}' <<< "$TLS_SERVER")"
 }
 
 # 生成 sing-box 配置文件
@@ -594,7 +609,7 @@ EOF
 EOF
   fi
 
- # 生成 vless + ws + tls 配置
+  # 生成 vless + ws + tls 配置
   CHECK_PROTOCALS=$(asc "$CHECK_PROTOCALS" ++)
   if [[ "${INSTALL_PROTOCALS[@]}" =~ "$CHECK_PROTOCALS" ]]; then
     [ -z "$PORT_VLESS_WS" ] && PORT_VLESS_WS=$[START_PORT+$(awk -v target=$CHECK_PROTOCALS '{ for(i=1; i<=NF; i++) if($i == target) { print i-1; break } }' <<< "${INSTALL_PROTOCALS[*]}")]
@@ -635,6 +650,7 @@ EOF
 }
 EOF
   fi
+
 
 }
 
@@ -701,7 +717,6 @@ export_list() {
     [ -s $WORK_DIR/conf/*_REALITY_inbounds.json ] && PORT_REALITY=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_REALITY_inbounds.json)
     [ -s $WORK_DIR/conf/*_HYSTERIA2_inbounds.json ] && PORT_HYSTERIA2=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_HYSTERIA2_inbounds.json)
     [ -s $WORK_DIR/conf/*_TUIC_inbounds.json ] && PORT_TUIC=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_TUIC_inbounds.json)
-    [ -s $WORK_DIR/conf/*_VLESS_WS_inbounds.json ] && WS_SERVER_IP=${WS_SERVER_IP:-"$(grep -A2 "{name.*vless[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $2}')"} && VLESS_HOST_DOMAIN=${VLESS_HOST_DOMAIN:-"$(grep -A2 "{name.*vless[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $4}')"} && PORT_VLESS_WS=${PORT_VLESS_WS:-"$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_VLESS_WS_inbounds.json)"} && CDN=${CDN:-"$(sed -n "s/.*{name.*vless[ ]\+ws.*server:[ ]\+\([^,]\+\).*/\1/gp" $WORK_DIR/list)"}
   fi
 
   # IPv6 时的 IP 处理
@@ -752,26 +767,22 @@ EOF
  
 fi
 
-# 生成Vless链接和二维码
-
+# 生成 vless 链接和二维码
 if [ -n "$PORT_VLESS_WS" ]; then
-
-  vless_link="vless://${UUID}@$(cat /root/domain.txt):443?security=tls&sni=${cat /root/domain.txt}&type=ws&path=/${UUID}-vless?ed%3D2048&host=${cat /root/domain.txt}&encryption=none#${NODE_NAME}%20vless%20ws
-  cat >> $WORK_DIR/list << EOF
+   vless_link="vless://${UUID}@${CDN}:443?security=tls&sni=${VLESS_HOST_DOMAIN}&type=ws&path=/${UUID}-vless?ed%3D2048&host=${VLESS_HOST_DOMAIN}&encryption=none#${NODE_NAME}%20vless%20ws
+   cat >> $WORK_DIR/list << EOF
 ----------------------------
-$(hint "vless_link")
+$(hint "$vless_link")
 EOF
-
-
 
   cat >> $WORK_DIR/list << EOF
 *******************************************
 EOF
   cat $WORK_DIR/list
-  qrencode -t UTF8 "$vless_link"
-  qrencode -t UTF8 "$hy2_link"
-  qrencode -t UTF8 "$tuic_link"
-  qrencode -t UTF8 "$vless_link"
+    qrencode -t UTF8 "$vless_link"
+    qrencode -t UTF8 "$hy2_link"
+    qrencode -t UTF8 "$tuic_link"
+    qrencode -t UTF8 "$vless_link"
 
 }
 
@@ -785,6 +796,22 @@ EOF
   chmod +x $WORK_DIR/sb.sh
   ln -sf $WORK_DIR/sb.sh /usr/bin/sb
   [ -s /usr/bin/sb ] && info "\n $(text 71) "
+}
+
+# 更换各协议的监听端口
+change_start_port() {
+  OLD_PORTS=$(awk -F ':|,' '/listen_port/{print $2}' $WORK_DIR/conf/*)
+  OLD_START_PORT=$(awk 'NR == 1 { min = $0 } { if ($0 < min) min = $0; count++ } END {print min}' <<< "$OLD_PORTS")
+  OLD_CONSECUTIVE_PORTS=$(awk 'END { print NR }' <<< "$OLD_PORTS")
+  enter_start_port $OLD_CONSECUTIVE_PORTS
+  systemctl stop sing-box
+  for ((a=0; a<$OLD_CONSECUTIVE_PORTS; a++)) do
+    [ -s $WORK_DIR/conf/${CONF_FILES[a]} ] && sed -i "s/\(.*listen_port.*:\)$((OLD_START_PORT+a))/\1$((START_PORT+a))/" $WORK_DIR/conf/*
+  done
+  systemctl start sing-box
+  sleep 2
+  export_list
+  [ "$(systemctl is-active sing-box)" = 'active' ] && info " Sing-box $(text 30) $(text 37) " || error " Sing-box $(text 30) $(text 38) "
 }
 
 # 卸载 Sing-box 全家桶
