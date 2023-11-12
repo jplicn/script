@@ -681,29 +681,6 @@ export_list() {
 *******************************************
 ┌────────────────┐
 │                │
-│  $(warning "Shadowrocket")  │
-│                │
-└────────────────┘
-----------------------------
-EOF
-  [ -n "$PORT_REALITY" ] && cat >> $WORK_DIR/list << EOF
-
-$(hint "vless://$(base64 -w0 <<< auto:$UUID@${SERVER_IP_2}:${PORT_REALITY} | sed "s/Cg==$//")?remarks=${NODE_NAME}%20vless-reality-vision&obfs=none&tls=1&peer=$TLS_SERVER&xtls=2&pbk=$REALITY_PUBLIC")
-EOF
-  [ -n "$PORT_HYSTERIA2" ] && cat >> $WORK_DIR/list << EOF
-
-$(hint "hysteria2://${UUID}@${SERVER_IP_2}:${PORT_HYSTERIA2}?insecure=0&sni=$(cat /root/domain.txt)&obfs=none&obfs-password=${UUID}#${NODE_NAME}%20hysteria2")
-EOF
-  [ -n "$PORT_TUIC" ] && cat >> $WORK_DIR/list << EOF
-
-$(hint "tuic://${UUID}:${UUID}@${SERVER_IP_2}:${PORT_TUIC}?congestion_control=bbr&udp_relay_mode=native&alpn=h3&allow_insecure=0&sni=$(cat /root/domain.txt)#${NODE_NAME}%20tuic")
-EOF
-
-
-  cat >> $WORK_DIR/list << EOF
-*******************************************
-┌────────────────┐
-│                │
 │    $(warning "NekoBox")     │
 │                │
 └────────────────┘
@@ -718,7 +695,7 @@ $(hint "hy2://${UUID}@${SERVER_IP_1}:${PORT_HYSTERIA2}?obfs=salamander&obfs-pass
 EOF
   [ -n "$PORT_TUIC" ] && cat >> $WORK_DIR/list << EOF
 ----------------------------
-$(hint "tuic://${UUID}:${UUID}@${SERVER_IP_1}:${PORT_TUIC}?congestion_control=bbr&alpn=h3&udp_relay_mode=native&allow_insecure=0&sni=$(cat /root/domain.txt)&disable_sni=1#${NODE_NAME}%20tuic")
+$(hint "tuic://${UUID}:${UUID}@${SERVER_IP_1}:${PORT_TUIC}?congestion_control=bbr&alpn=h3&udp_relay_mode=native&allow_insecure=0&sni=$(cat /root/domain.txt)#${NODE_NAME}%20tuic")
 EOF
 
   cat >> $WORK_DIR/list << EOF
