@@ -692,7 +692,7 @@ if [ -n "$PORT_REALITY" ]; then
 ----------------------------
 $(hint "$vless_link")
 EOF
-  qrencode -t UTF8 "$vless_link"
+
 fi
 
 # 生成 hy2 链接和二维码
@@ -702,7 +702,7 @@ if [ -n "$PORT_HYSTERIA2" ]; then
 ----------------------------
 $(hint "$hy2_link")
 EOF
-  qrencode -t UTF8 "$hy2_link"
+  
 fi
 
 # 生成 tuic 链接和二维码
@@ -712,13 +712,16 @@ if [ -n "$PORT_TUIC" ]; then
 ----------------------------
 $(hint "$tuic_link")
 EOF
-  qrencode -t UTF8 "$tuic_link"
+ 
 fi
 
   cat >> $WORK_DIR/list << EOF
 *******************************************
 EOF
   cat $WORK_DIR/list
+    qrencode -t UTF8 "$vless_link"
+    qrencode -t UTF8 "$hy2_link"
+    qrencode -t UTF8 "$tuic_link"
 
 }
 
