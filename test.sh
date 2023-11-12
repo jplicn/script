@@ -717,6 +717,8 @@ export_list() {
     [ -s $WORK_DIR/conf/*_REALITY_inbounds.json ] && PORT_REALITY=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_REALITY_inbounds.json)
     [ -s $WORK_DIR/conf/*_HYSTERIA2_inbounds.json ] && PORT_HYSTERIA2=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_HYSTERIA2_inbounds.json)
     [ -s $WORK_DIR/conf/*_TUIC_inbounds.json ] && PORT_TUIC=$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_TUIC_inbounds.json)
+    [ -s $WORK_DIR/conf/*_VLESS_WS_inbounds.json ] && WS_SERVER_IP=${WS_SERVER_IP:-"$(grep -A2 "{name.*vless[ ]\+ws" $WORK_DIR/list | awk -F'[][]' 'NR==3 {print $2}')"} && PORT_VLESS_WS=${PORT_VLESS_WS:-"$(sed -n '/listen_port/s/[^0-9]\+//gp' $WORK_DIR/conf/*_VLESS_WS_inbounds.json)"}
+
   fi
 
   # IPv6 时的 IP 处理
@@ -769,7 +771,7 @@ fi
 
 # 生成 vless 链接和二维码
 if [ -n "$PORT_VLESS_WS" ]; then
-   vless_link="vless://${UUID}@${CDN}:443?security=tls&sni=${VLESS_HOST_DOMAIN}&type=ws&path=/${UUID}-vless?ed%3D2048&host=${VLESS_HOST_DOMAIN}&encryption=none#${NODE_NAME}%20vless%20ws
+   vless_link="vless://${UUID}@$(cat /root/domain.txt):443?security=tls&sni=$(cat /root/domain.txt)&type=ws&path=/${UUID}-vless?ed%3D2048&host=$(cat /root/domain.txt)&encryption=none#${NODE_NAME}%20vless%20ws
    cat >> $WORK_DIR/list << EOF
 ----------------------------
 $(hint "$vless_link")
