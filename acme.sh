@@ -188,6 +188,7 @@ acme_standalone(){
 
     read -rp "请输入解析完成的域名: " domain
     [[ -z $domain ]] && red "未输入域名，无法执行操作！" && exit 1
+    echo "$domain" > /root/domain.txt  # 将输入的域名写入文件
     green "已输入的域名：$domain" && sleep 1
 
     domainIP=$(curl -sm8 ipget.net/?ip="${domain}")
