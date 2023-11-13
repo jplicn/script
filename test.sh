@@ -708,7 +708,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "type": "tuic",
       "tag": "tuic-in", 
       "listen": "::", 
-      "listen_port": 1$tuic_port,
+      "listen_port": $tuic_port,
       "sniff": true,  
       "sniff_override_destination": false,  
       "users": [
