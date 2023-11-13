@@ -546,7 +546,7 @@ echo ""
 green "开始配置tuic"
 echo ""
 # Generate hysteria necessary values
-tuic_uuid=$(/root/sbox/sing-box generate rand --hex 8)
+tuic_uuid=$(/root/sbox/sing-box generate uuid)
 echo "自动生成了UUID"
 echo ""
 # Ask for listen port
