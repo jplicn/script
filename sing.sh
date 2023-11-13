@@ -183,7 +183,7 @@ show_client_configuration() {
   hy_password=$(grep -o "HY_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the hy link
-  hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=1&sni=$hy_server_name"
+  hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=1&sni=$hy_server_name#hy2"
 
   echo ""
   echo "" 
@@ -232,6 +232,34 @@ socks5:
   listen: 127.0.0.1:50000
 
 EOF
+
+  # tuic port
+  tuic_port=$(grep -o "TUIC_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
+  # tuic sni
+  hy_server_name=$(grep -o "HY_SERVER_NAME='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
+  # tuic UUID
+  tuic_UUID=$(grep -o "TUIC_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
+  
+  # Generate the tuic link
+  tuic_link="tuic://${tuic_UUID}:${tuic_UUID}@${server_ip}:${tuic_port}?congestion_control=bbr&alpn=h3&udp_relay_mode=native&allow_insecure=1&sni=$hy_server_name#tuic"
+
+  echo ""
+  echo "" 
+  show_notice "$(green "TUIC 通用链接和二维码和通用参数")"
+  echo ""
+  echo "" 
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━tuic 通用链接格式━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "$tuic_link"
+  echo ""
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "" 
+  echo ""
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━tuic 二维码━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  qrencode -t UTF8 $tuic_link
+  echo ""
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   sleep 3
   cat /root/sbox/argo.log | grep trycloudflare.com | awk 'NR==2{print}' | awk -F// '{print $2}' | awk '{print $1}' | xargs -I {} sed -i "s/ARGO_DOMAIN='.*'/ARGO_DOMAIN='{}'/g" /root/sbox/config
@@ -468,8 +496,8 @@ echo "uuid和短id 生成完成"
 echo ""
 # Ask for listen port
 while true; do
-    read -p "请输入Reality端口号 (default: 443): " reality_port
-    reality_port=${reality_port:-443}
+    read -p "请输入Reality端口号 (default: 4430): " reality_port
+    reality_port=${reality_port:-4430}
 
     # 检测端口是否被占用
     if ss -tuln | grep -q ":$reality_port\b"; then
@@ -493,12 +521,33 @@ echo "自动生成了8位随机密码"
 echo ""
 # Ask for listen port
 while true; do
-    read -p "请输入hysteria2监听端口 (default: 8443): " hy_port
-    hy_port=${hy_port:-8443}
+    read -p "请输入hysteria2监听端口 (default: 8433): " hy_port
+    hy_port=${hy_port:-8433}
 
     # 检测端口是否被占用
     if ss -tuln | grep -q ":$hy_port\b"; then
         echo "端口 $hy_port 已经被占用，请选择其他端口。"
+    else
+        break
+    fi
+done
+echo ""
+
+# tuic
+green "开始配置tuic"
+echo ""
+# Generate hysteria necessary values
+tuic_uuid=$(/root/sbox/sing-box generate uuid)
+echo "自动生成了UUID"
+echo ""
+# Ask for listen port
+while true; do
+    read -p "请输入TUIC监听端口 (default: 28443): " tuic_port
+    tuic_port=${tuic_port:-28443}
+
+    # 检测端口是否被占用
+    if ss -tuln | grep -q ":$tuic_port\b"; then
+        echo "端口 $tuic_port 已经被占用，请选择其他端口。"
     else
         break
     fi
@@ -554,6 +603,10 @@ REALITY_SERVER_NAME='$reality_server_name'
 HY_PORT='$hy_port'
 HY_SERVER_NAME='$hy_server_name'
 HY_PASSWORD='$hy_password'
+# Tuic
+TUIC_PORT='$tuic_port'
+TUIC_UUID='$tuic_uuid'
+TUIC_PASSWORD='$tuic_uuid'
 # Vmess
 VMESS_PORT=$vmess_port
 VMESS_UUID='$vmess_uuid'
@@ -643,6 +696,27 @@ cat > /root/sbox/sbconfig_server.json << EOF
         }
     },
     {
+      "type": "tuic",
+      "tag": "tuic-in", 
+      "listen": "::", 
+      "listen_port": $tuic_port,
+      "sniff": true,  
+      "sniff_override_destination": false,  
+      "users": [
+        {
+          "uuid": "$tuic_uuid", 
+          "password": "$tuic_uuid" 
+        }
+      ],
+      "congestion_control": "bbr", 
+      "tls": {
+        "enabled": true,
+        "alpn": [ "h3" ], 
+        "certificate_path": "/root/sbox/self-cert/cert.pem",
+        "key_path": "/root/sbox/self-cert/private.key" 
+      }
+    },
+    {
         "type": "vmess",
         "tag": "vmess-in",
         "listen": "::",
@@ -658,8 +732,8 @@ cat > /root/sbox/sbconfig_server.json << EOF
             "path": "$ws_path",
             "max_early_data":2048,
             "early_data_header_name":"Sec-WebSocket-Protocol"
-        }
-    }
+          }
+     }
   ],
 "outbounds": [
     {
