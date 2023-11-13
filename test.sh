@@ -496,8 +496,8 @@ echo "uuid和短id 生成完成"
 echo ""
 # Ask for listen port
 while true; do
-    read -p "请输入Reality端口号 (default: 443): " reality_port
-    reality_port=${reality_port:-443}
+    read -p "请输入Reality端口号 (default: 4430): " reality_port
+    reality_port=${reality_port:-4430}
 
     # 检测端口是否被占用
     if ss -tuln | grep -q ":$reality_port\b"; then
@@ -521,8 +521,8 @@ echo "自动生成了8位随机密码"
 echo ""
 # Ask for listen port
 while true; do
-    read -p "请输入hysteria2监听端口 (default: 8443): " hy_port
-    hy_port=${hy_port:-8443}
+    read -p "请输入hysteria2监听端口 (default: 8433): " hy_port
+    hy_port=${hy_port:-8433}
 
     # 检测端口是否被占用
     if ss -tuln | grep -q ":$hy_port\b"; then
