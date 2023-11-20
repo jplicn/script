@@ -318,57 +318,6 @@ enable_bbr() {
     bash <(curl -L -s https://raw.githubusercontent.com/teddysun/across/master/bbr.sh)
     echo ""
 }
-#修改sb
-modify_singbox() {
-    #modifying reality configuration
-    show_notice "开始修改reality端口号和域名"
-    reality_current_port=$(grep -o "REALITY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-    while true; do
-        read -p "请输入想要修改的端口号 (当前端口号为 $reality_current_port): " reality_port
-        reality_port=${reality_port:-$reality_current_port}
-        if [ "$reality_port" -eq "$reality_current_port" ]; then
-            break
-        fi
-        if ss -tuln | grep -q ":$reality_port\b"; then
-            echo "端口 $reality_port 已经被占用，请选择其他端口。"
-        else
-            break
-        fi
-    done
-    reality_current_server_name=$(grep -o "REALITY_SERVER_NAME='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-    read -p "请输入想要偷取的域名 (当前域名为 $reality_current_server_name): " reality_server_name
-    reality_server_name=${reality_server_name:-$reality_current_server_name}
-    echo ""
-    # modifying hysteria2 configuration
-    show_notice "开始修改hysteria2端口号"
-    echo ""
-    hy_current_port=$(grep -o "HY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-    while true; do
-        read -p "请输入想要修改的端口号 (当前端口号为 $hy_current_port): " hy_port
-        hy_port=${hy_port:-$hy_current_port}
-        if [ "$hy_port" -eq "$hy_current_port" ]; then
-            break
-        fi
-        if ss -tuln | grep -q ":$hy_port\b"; then
-            echo "端口 $hy_port 已经被占用，请选择其他端口。"
-        else
-            break
-        fi
-    done
-
-    # 修改sing-box
-    sed -i -e "/\"listen_port\":/{N; s/\"[0-9]*\"/\"$hy_port\"/}" \
-          -e "/\"listen_port\":/{N; s/\"[0-9]*\"/\"$reality_port\"/}" \
-          -e "/\"tls\": {/,/\"server\":/{ /\"server_name\":/{N; s/\"server_name\": \".*\"/\"server_name\": \"$reality_server_name\"/ }}"
-
-    #修改config
-    sed -i "s/REALITY_PORT='[^']*'/REALITY_PORT='$reality_port'/" /root/sbox/config
-    sed -i "s/REALITY_SERVER_NAME='[^']*'/REALITY_SERVER_NAME='$reality_server_name'/" /root/sbox/config
-    sed -i "s/HY_PORT='[^']*'/HY_PORT='$hy_port'/" /root/sbox/config
-
-    # Restart sing-box service
-    systemctl restart sing-box
-}
 
 uninstall_singbox() {
     # Stop and disable services
