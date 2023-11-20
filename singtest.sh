@@ -353,15 +353,14 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
     echo "请选择选项:"
     echo ""
     echo "1. 重新安装"
-    echo "2. 修改配置"
-    echo "3. 显示客户端配置"
-    echo "4. 卸载"
-    echo "5. 更新sing-box内核"
-    echo "6. 手动重启cloudflared"
-    echo "7. 一键开启bbr"
-    echo "8. 重启sing-box"
+    echo "2. 显示客户端配置"
+    echo "3. 卸载"
+    echo "4. 更新sing-box内核"
+    echo "5. 手动重启cloudflared"
+    echo "6. 一键开启bbr"
+    echo "7. 重启sing-box"
     echo ""
-    read -p "Enter your choice (1-8): " choice
+    read -p "Enter your choice (1-7): " choice
 
     case $choice in
       1)
@@ -369,23 +368,16 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
           # Uninstall previous installation
           uninstall_singbox
         ;;
-      2)
-          #修改sb
-          modify_singbox
-          # show client configuration
-          show_client_configuration
-          exit 0
-        ;;
-      3)  
+      2)  
           # show client configuration
           show_client_configuration
           exit 0
       ;;	
-      4)
+      3)
           uninstall_singbox
           exit 0
           ;;
-      5)
+      4)
           show_notice "更新 Sing-box..."
           download_singbox
           # Check configuration and start the service
@@ -396,18 +388,18 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
           echo ""  
           exit 0
           ;;
-      6)
+      5)
           systemctl stop argo
           systemctl start argo
           echo "重新启动完成，查看新的客户端信息"
           show_client_configuration
           exit 0
           ;;
-      7)
+      6)
           enable_bbr
           exit 0
           ;;
-      8)
+      7)
           systemctl restart sing-box
           echo "重启完成"
           ;;
