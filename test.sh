@@ -733,6 +733,14 @@ cat > /root/sbox/sbconfig_server.json << EOF
             "max_early_data":2048,
             "early_data_header_name":"Sec-WebSocket-Protocol"
           }
+  	"tls":{
+		"enabled": false,
+		"server_name": "$hy_server_name",
+		"min_version": "1.2",
+		"max_version": "1.3",
+		"certificate_path": "/root/sbox/self-cert/cert.pem",
+		"key_path": "/root/sbox/self-cert/private.key"
+            }
      }
   ],
 "outbounds": [
