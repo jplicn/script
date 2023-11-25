@@ -717,7 +717,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "enabled": true,
         "alpn": [ "h3" ], 
         "certificate_path": "/root/cert.crt",
-        "key_path": "/root/sbox/private.key" 
+        "key_path": "/root/private.key" 
       }
     },
     {
