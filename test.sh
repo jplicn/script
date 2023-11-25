@@ -57,7 +57,7 @@ install_base(){
   done
 }
 
-# 下载cloudflared和sb
+# 下载sb
 download_singbox(){
   arch=$(uname -m)
   echo "Architecture: $arch"
@@ -100,29 +100,6 @@ download_singbox(){
   chmod +x /root/sbox/sing-box
 }
 
-download_cloudflared(){
-  arch=$(uname -m)
-  # Map architecture names
-  case ${arch} in
-      x86_64)
-          cf_arch="amd64"
-          ;;
-      aarch64)
-          cf_arch="arm64"
-          ;;
-      armv7l)
-          cf_arch="arm"
-          ;;
-  esac
-
-  # install cloudflared linux
-  cf_url="https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${cf_arch}"
-  curl -sLo "/root/sbox/cloudflared-linux" "$cf_url"
-  chmod +x /root/sbox/cloudflared-linux
-  echo ""
-}
-
-
 # client configuration
 show_client_configuration() {
 
@@ -162,17 +139,6 @@ show_client_configuration() {
 
   echo ""
   echo ""
-  red "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━Reality 客户端通用参数-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo "服务器ip: $server_ip"
-  echo "监听端口: $reality_port"
-  echo "UUID: $reality_uuid"
-  echo "域名SNI: $reality_server_name"
-  echo "Public Key: $public_key"
-  echo "Short ID: $short_id"
-  echo ""
-  red "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
   echo ""
 
   # hy port
@@ -183,7 +149,7 @@ show_client_configuration() {
   hy_password=$(grep -o "HY_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the hy link
-  hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=1&sni=$hy_server_name#hy2"
+  hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=1&obfs=none&obfs-password=$hy_password&sni=$hy_server_name#hy2"
 
   echo ""
   echo "" 
@@ -203,35 +169,7 @@ show_client_configuration() {
   echo ""
   green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""  
-  echo ""
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━Hysteria2 客户端通用参数━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" 
-  echo "" 
-  echo "服务器ip: $server_ip"
-  echo "端口号: $hy_port"
-  echo "密码password: $hy_password"
-  echo "域名SNI: $hy_server_name"
-  echo "跳过证书验证（允许不安全）: True"
-  echo ""
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo ""
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━Hysteria2 官方内核yaml文件（可搭配v2rayN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" 
-cat << EOF
 
-server: $server_ip:$hy_port
-auth: $hy_password
-tls:
-  sni: $hy_server_name
-  insecure: true
-# 可自己修改对应带宽，不添加则默认为bbr，否则使用hy2的brutal拥塞控制
-# bandwidth:
-#   up: 100 mbps
-#   down: 100 mbps
-fastOpen: true
-socks5:
-  listen: 127.0.0.1:50000
-
-EOF
 
   # tuic port
   tuic_port=$(grep -o "TUIC_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
@@ -262,16 +200,12 @@ EOF
   green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   sleep 3
-  cat /root/sbox/argo.log | grep trycloudflare.com | awk 'NR==2{print}' | awk -F// '{print $2}' | awk '{print $1}' | xargs -I {} sed -i "s/ARGO_DOMAIN='.*'/ARGO_DOMAIN='{}'/g" /root/sbox/config
-  rm -f /root/sbox/argo.log
-  #argo域名
-  argo_domain=$(grep -o "ARGO_DOMAIN='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
 
   vmess_uuid=$(grep -o "VMESS_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   ws_path=$(grep -o "WS_PATH='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
-  vmesswss_link='vmess://'$(echo '{"add":"speed.cloudflare.com","aid":"0","host":"'$argo_domain'","id":"'$vmess_uuid'","net":"ws","path":"'${ws_path}?ed=2048'","port":"443","ps":"sing-box-vmess-tls","tls":"tls","type":"none","v":"2"}' | base64 -w 0)
-  vmessws_link='vmess://'$(echo '{"add":"'$server_ip'","aid":"0","host":"'$(cat /root/domain.txt)'","id":"'$vmess_uuid'","net":"ws","path":"'${ws_path}?ed=2048'","port":"443","ps":"sing-box-vmess","tls":"tls","type":"none","v":"2"}' | base64 -w 0)
+  vmesswss_link='vmess://'$(echo '{"add":"speed.cloudflare.com","aid":"0","host":"'$(cat /root/domain.txt)'","id":"'$vmess_uuid'","net":"ws","path":"'${ws_path}?ed=2048'","port":"443","ps":"sing-box-vmess-tls","tls":"tls","type":"none","v":"2"}' | base64 -w 0)
+  
   echo ""
   echo ""
   show_notice "$(yellow "vmess ws(s) 通用链接和二维码")"
@@ -293,21 +227,6 @@ EOF
   echo ""
   yellow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
-  yellow "━━━━━━━━━━━━━━━━━━━━━━━以下为vmess ws链接，替换speed.cloudflare.com为自己的优选ip可获得极致体验━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo "$vmessws_link"
-  echo ""
-  yellow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  yellow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━vmess ws 二维码━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  qrencode -t UTF8 $vmessws_link
-  echo ""
-  yellow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  red "上述链接为ws 端口 80 可改为 8080 8880 2052 2082 2086 2095" 
-  echo ""
-  yellow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
 
 }
@@ -318,71 +237,18 @@ enable_bbr() {
     bash <(curl -L -s https://raw.githubusercontent.com/teddysun/across/master/bbr.sh)
     echo ""
 }
-#修改sb
-modify_singbox() {
-    #modifying reality configuration
-    show_notice "开始修改reality端口号和域名"
-    reality_current_port=$(grep -o "REALITY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-    while true; do
-        read -p "请输入想要修改的端口号 (当前端口号为 $reality_current_port): " reality_port
-        reality_port=${reality_port:-$reality_current_port}
-        if [ "$reality_port" -eq "$reality_current_port" ]; then
-            break
-        fi
-        if ss -tuln | grep -q ":$reality_port\b"; then
-            echo "端口 $reality_port 已经被占用，请选择其他端口。"
-        else
-            break
-        fi
-    done
-    reality_current_server_name=$(grep -o "REALITY_SERVER_NAME='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-    read -p "请输入想要偷取的域名 (当前域名为 $reality_current_server_name): " reality_server_name
-    reality_server_name=${reality_server_name:-$reality_current_server_name}
-    echo ""
-    # modifying hysteria2 configuration
-    show_notice "开始修改hysteria2端口号"
-    echo ""
-    hy_current_port=$(grep -o "HY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-    while true; do
-        read -p "请输入想要修改的端口号 (当前端口号为 $hy_current_port): " hy_port
-        hy_port=${hy_port:-$hy_current_port}
-        if [ "$hy_port" -eq "$hy_current_port" ]; then
-            break
-        fi
-        if ss -tuln | grep -q ":$hy_port\b"; then
-            echo "端口 $hy_port 已经被占用，请选择其他端口。"
-        else
-            break
-        fi
-    done
-
-    # 修改sing-box
-    sed -i -e "/\"listen_port\":/{N; s/\"[0-9]*\"/\"$hy_port\"/}" \
-          -e "/\"listen_port\":/{N; s/\"[0-9]*\"/\"$reality_port\"/}" \
-          -e "/\"tls\": {/,/\"server\":/{ /\"server_name\":/{N; s/\"server_name\": \".*\"/\"server_name\": \"$reality_server_name\"/ }}"
-
-    #修改config
-    sed -i "s/REALITY_PORT='[^']*'/REALITY_PORT='$reality_port'/" /root/sbox/config
-    sed -i "s/REALITY_SERVER_NAME='[^']*'/REALITY_SERVER_NAME='$reality_server_name'/" /root/sbox/config
-    sed -i "s/HY_PORT='[^']*'/HY_PORT='$hy_port'/" /root/sbox/config
-
-    # Restart sing-box service
-    systemctl restart sing-box
-}
 
 uninstall_singbox() {
     # Stop and disable services
-    systemctl stop sing-box argo
-    systemctl disable sing-box argo > /dev/null 2>&1
+    systemctl stop sing-box
+    systemctl disable sing-box > /dev/null 2>&1
 
     # Remove service files
     rm -f /etc/systemd/system/sing-box.service
-    rm -f /etc/systemd/system/argo.service
 
     # Remove configuration and executable files
     rm -f /root/sbox/sbconfig_server.json
     rm -f /root/sbox/sing-box
-    rm -f /root/sbox/cloudflared-linux
     rm -f /root/sbox/self-cert/private.key
     rm -f /root/sbox/self-cert/cert.pem
     rm -f /root/sbox/config
@@ -404,11 +270,9 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
     echo "请选择选项:"
     echo ""
     echo "1. 重新安装"
-    echo "2. 修改配置"
     echo "3. 显示客户端配置"
     echo "4. 卸载"
     echo "5. 更新sing-box内核"
-    echo "6. 手动重启cloudflared"
     echo "7. 一键开启bbr"
     echo "8. 重启sing-box"
     echo ""
@@ -419,13 +283,6 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
           show_notice "开始卸载..."
           # Uninstall previous installation
           uninstall_singbox
-        ;;
-      2)
-          #修改sb
-          modify_singbox
-          # show client configuration
-          show_client_configuration
-          exit 0
         ;;
       3)  
           # show client configuration
@@ -447,13 +304,6 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
           echo ""  
           exit 0
           ;;
-      6)
-          systemctl stop argo
-          systemctl start argo
-          echo "重新启动完成，查看新的客户端信息"
-          show_client_configuration
-          exit 0
-          ;;
       7)
           enable_bbr
           exit 0
@@ -472,8 +322,6 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
 mkdir -p "/root/sbox/"
 
 download_singbox
-
-download_cloudflared
 
 # reality
 red "开始配置Reality"
@@ -612,23 +460,13 @@ VMESS_PORT=$vmess_port
 VMESS_UUID='$vmess_uuid'
 WS_PATH='$ws_path'
 
-# Argo
-ARGO_DOMAIN=''
-
 EOF
 
-#TODO argo开启
-echo "设置argo"
-cat > /etc/systemd/system/argo.service << EOF
-[Unit]
-Description=Cloudflare Tunnel
-After=network.target
 
 [Service]
 Type=simple
 NoNewPrivileges=yes
 TimeoutStartSec=0
-ExecStart=/bin/bash -c "/root/sbox/cloudflared-linux tunnel --url http://localhost:$vmess_port --no-autoupdate --edge-ip-version auto --protocol http2>/root/sbox/argo.log 2>&1 "
 Restart=on-failure
 RestartSec=5s
 
@@ -638,8 +476,6 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl enable argo > /dev/null 2>&1
-systemctl start argo
 
 
 # sbox配置文件
