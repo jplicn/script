@@ -149,7 +149,7 @@ show_client_configuration() {
   hy_password=$(grep -o "HY_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the hy link
-  hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=1&obfs=none&obfs-password=$hy_password&sni=$hy_server_name#hy2"
+  hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=0&obfs=none&obfs-password=$hy_password&sni=$(cat /root/domain.txt)#hy2"
 
   echo ""
   echo "" 
@@ -179,7 +179,7 @@ show_client_configuration() {
   tuic_UUID=$(grep -o "TUIC_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the tuic link
-  tuic_link="tuic://${tuic_UUID}:${tuic_UUID}@${server_ip}:${tuic_port}?congestion_control=bbr&alpn=h3&udp_relay_mode=native&allow_insecure=1&sni=$hy_server_name#tuic"
+  tuic_link="tuic://${tuic_UUID}:${tuic_UUID}@${server_ip}:${tuic_port}?congestion_control=bbr&alpn=h3&udp_relay_mode=native&allow_insecure=0&sni=$(cat /root/domain.txt)#tuic"
 
   echo ""
   echo "" 
@@ -198,8 +198,7 @@ show_client_configuration() {
   qrencode -t UTF8 $tuic_link
   echo ""
   green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  sleep 3
+  echo ""
 
   vmess_uuid=$(grep -o "VMESS_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   ws_path=$(grep -o "WS_PATH='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
