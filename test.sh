@@ -271,7 +271,7 @@ EOF
   ws_path=$(grep -o "WS_PATH='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   vmesswss_link='vmess://'$(echo '{"add":"speed.cloudflare.com","aid":"0","host":"'$argo_domain'","id":"'$vmess_uuid'","net":"ws","path":"'${ws_path}?ed=2048'","port":"443","ps":"sing-box-vmess-tls","tls":"tls","type":"none","v":"2"}' | base64 -w 0)
-  vmessws_link='vmess://'$(echo '{"add":"speed.cloudflare.com","aid":"0","host":"'$argo_domain'","id":"'$vmess_uuid'","net":"ws","path":"'${ws_path}?ed=2048'","port":"80","ps":"sing-box-vmess","tls":"","type":"none","v":"2"}' | base64 -w 0)
+  vmessws_link='vmess://'$(echo '{"add":"'$server_ip'","aid":"0","host":"'$(cat /root/domain.txt)'","id":"'$vmess_uuid'","net":"ws","path":"'${ws_path}?ed=2048'","port":"443","ps":"sing-box-vmess","tls":"tls","type":"none","v":"2"}' | base64 -w 0)
   echo ""
   echo ""
   show_notice "$(yellow "vmess ws(s) 通用链接和二维码")"
@@ -568,8 +568,8 @@ echo ""
 # Generate hysteria necessary values
 vmess_uuid=$(/root/sbox/sing-box generate uuid)
 while true; do
-    read -p "请输入vmess端口，默认为18443(和tunnel通信用不会暴露在外): " vmess_port
-    vmess_port=${vmess_port:-18443}
+    read -p "请输入vmess端口，默认为443(和tunnel通信用不会暴露在外): " vmess_port
+    vmess_port=${vmess_port:-443}
 
     # 检测端口是否被占用
     if ss -tuln | grep -q ":$vmess_port\b"; then
@@ -686,13 +686,17 @@ cat > /root/sbox/sbconfig_server.json << EOF
                 "password": "$hy_password"
             }
         ],
+         "obfs":{
+                "type":"salamander",
+                "password":"$hy_password"
+            },
         "tls": {
             "enabled": true,
             "alpn": [
                 "h3"
             ],
-            "certificate_path": "/root/sbox/self-cert/cert.pem",
-            "key_path": "/root/sbox/self-cert/private.key"
+            "certificate_path": "/root/cert.crt",
+            "key_path": "/root/private.key"
         }
     },
     {
@@ -712,13 +716,15 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "tls": {
         "enabled": true,
         "alpn": [ "h3" ], 
-        "certificate_path": "/root/sbox/self-cert/cert.pem",
-        "key_path": "/root/sbox/self-cert/private.key" 
+        "certificate_path": "/root/cert.crt",
+        "key_path": "/root/sbox/private.key" 
       }
     },
     {
         "type": "vmess",
-        "tag": "vmess-in",
+        "sniff": true,
+        "sniff_override_destination": false,
+        "tag": "vmess-sb",
         "listen": "::",
         "listen_port": $vmess_port,
         "users": [
@@ -729,19 +735,17 @@ cat > /root/sbox/sbconfig_server.json << EOF
         ],
         "transport": {
             "type": "ws",
-            "path": "$ws_path",
-            "max_early_data":2048,
-            "early_data_header_name":"Sec-WebSocket-Protocol"
-          }
-  	"tls": {
-		"enabled": false,
-		"server_name": "www.bing.com",
-		"min_version": "1.2",
-		"max_version": "1.3",
-		"certificate_path": "/root/sbox/self-cert/cert.pem",
-		"key_path": "/root/sbox/self-cert/private.key"
+            "path": "$ws_path"
+        },
+        "tls":{
+                "enabled": true,
+                "server_name": "$(cat /root/domain.txt)",
+                "min_version": "1.2",
+                "max_version": "1.3",
+                "certificate_path": "/root/cert.crt",
+                "key_path": "/root/private.key"
             }
-     }
+    }
   ],
 "outbounds": [
     {
