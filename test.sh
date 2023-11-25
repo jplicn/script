@@ -179,7 +179,7 @@ show_client_configuration() {
   tuic_UUID=$(grep -o "TUIC_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the tuic link
-  tuic_link="tuic://${tuic_UUID}:${tuic_UUID}@${server_ip}:${tuic_port}?congestion_control=bbr&alpn=h3&udp_relay_mode=native&allow_insecure=0&sni=$(cat /root/domain.txt)#tuic"
+  tuic_link="tuic://${tuic_UUID}:${tuic_UUID}@${server_ip}:${tuic_port}?congestion_control=bbr&alpn=h3&udp_relay_mode=quic&allow_insecure=0&sni=$(cat /root/domain.txt)#tuic"
 
   echo ""
   echo "" 
@@ -203,7 +203,7 @@ show_client_configuration() {
   vmess_uuid=$(grep -o "VMESS_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   ws_path=$(grep -o "WS_PATH='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
-  vmesswss_link='vmess://'$(echo '{"add":"'$(cat /root/domain.txt)'","aid":"0","host":"'$(cat /root/domain.txt)'","id":"'$vmess_uuid'","net":"ws","path":"'${ws_path}?ed=2048'","port":"'$vmess_port'","ps":"sing-box-vmess-tls","tls":"tls","type":"none","v":"2"}' | base64 -w 0)
+  vmesswss_link='vmess://'$(echo '{"add":"'$(cat /root/domain.txt)'","aid":"0","host":"'$(cat /root/domain.txt)'","id":"'$vmess_uuid'","net":"ws","path":"'${ws_path}'","port":"'$vmess_port'","ps":"sing-box-vmess-tls","tls":"tls","type":"none","v":"2"}' | base64 -w 0)
   
   echo ""
   echo ""
@@ -219,10 +219,6 @@ show_client_configuration() {
   yellow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━vmess wss 二维码━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
   qrencode -t UTF8 $vmesswss_link
-  echo ""
-  yellow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  red  "上述链接为wss 端口 443 可改为 2053 2083 2087 2096 8443"
   echo ""
   yellow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
@@ -404,7 +400,7 @@ echo ""
 # Generate hysteria necessary values
 vmess_uuid=$(/root/sbox/sing-box generate uuid)
 while true; do
-    read -p "请输入vmess端口，默认为443(和tunnel通信用不会暴露在外): " vmess_port
+    read -p "请输入vmess端口，默认为443: " vmess_port
     vmess_port=${vmess_port:-443}
 
     # 检测端口是否被占用
