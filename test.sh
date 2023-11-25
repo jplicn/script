@@ -248,12 +248,9 @@ uninstall_singbox() {
     # Remove configuration and executable files
     rm -f /root/sbox/sbconfig_server.json
     rm -f /root/sbox/sing-box
-    rm -f /root/sbox/self-cert/private.key
-    rm -f /root/sbox/self-cert/cert.pem
     rm -f /root/sbox/config
 
     # Remove directories
-    rm -rf /root/sbox/self-cert/
     rm -rf /root/sbox/
 
     echo "卸载完成"
@@ -399,14 +396,6 @@ while true; do
         break
     fi
 done
-echo ""
-
-# Ask for self-signed certificate domain
-read -p "输入自签证书域名 (default: bing.com): " hy_server_name
-hy_server_name=${hy_server_name:-bing.com}
-mkdir -p /root/sbox/self-cert/ && openssl ecparam -genkey -name prime256v1 -out /root/sbox/self-cert/private.key && openssl req -new -x509 -days 36500 -key /root/sbox/self-cert/private.key -out /root/sbox/self-cert/cert.pem -subj "/CN=${hy_server_name}"
-echo ""
-echo "自签证书生成完成"
 echo ""
 
 # vmess ws
