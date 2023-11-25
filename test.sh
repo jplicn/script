@@ -735,7 +735,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
           }
   	"tls": {
 		"enabled": false,
-		"server_name": "$hy_server_name",
+		"server_name": "www.bing.com",
 		"min_version": "1.2",
 		"max_version": "1.3",
 		"certificate_path": "/root/sbox/self-cert/cert.pem",
