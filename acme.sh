@@ -231,63 +231,6 @@ acme_standalone(){
     checktls
 }
 
-acme_cfapiTLD(){
-    [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && inst_acme
-    
-    check_ip
-
-    read -rp "请输入需要申请证书的域名: " domain
-    if [[ $(echo ${domain:0-2}) =~ cf|ga|gq|ml|tk ]]; then
-        red "检测为 Freenom 免费域名, 由于 CloudFlare API 不支持, 故无法使用本模式申请!"
-        exit
-    fi
-
-    read -rp "请输入 CloudFlare Global API Key: " cfgak
-    [[ -z $cfgak ]] && red "未输入 CloudFlare Global API Key, 无法执行操作!" && exit 1
-    export CF_Key="$cfgak"
-    read -rp "请输入 CloudFlare 的登录邮箱: " cfemail
-    [[ -z $domain ]] && red "未输入 CloudFlare 的登录邮箱, 无法执行操作!" && exit 1
-    export CF_Email="$cfemail"
-    
-    if [[ -z $ipv4 ]]; then
-        bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "${domain}" -k ec-256 --listen-v6 --insecure
-    else
-        bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "${domain}" -k ec-256 --insecure
-    fi
-
-    bash ~/.acme.sh/acme.sh --install-cert -d "${domain}" --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
-    checktls
-}
-
-acme_cfapiNTLD(){
-    [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && inst_acme
-    
-    check_ip
-    
-    read -rp "请输入需要申请证书的泛域名 (输入格式：example.com): " domain
-    [[ -z $domain ]] && red "未输入域名，无法执行操作！" && exit 1
-    if [[ $(echo ${domain:0-2}) =~ cf|ga|gq|ml|tk ]]; then
-        red "检测为 Freenom 免费域名, 由于 CloudFlare API 不支持, 故无法使用本模式申请!"
-        back2menu
-    fi
-
-    read -rp "请输入 CloudFlare Global API Key: " cfgak
-    [[ -z $cfgak ]] && red "未输入 CloudFlare Global API Key, 无法执行操作！" && exit 1
-    export CF_Key="$cfgak"
-    read -rp "请输入 CloudFlare 的登录邮箱: " cfemail
-    [[ -z $domain ]] && red "未输入 CloudFlare 的登录邮箱, 无法执行操作!" && exit 1
-    export CF_Email="$cfemail"
-
-    if [[ -z $ipv4 ]]; then
-        bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "*.${domain}" -d "${domain}" -k ec-256 --listen-v6 --insecure
-    else
-        bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "*.${domain}" -d "${domain}" -k ec-256 --insecure
-    fi
-
-    bash ~/.acme.sh/acme.sh --install-cert -d "*.${domain}" --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
-    checktls
-}
-
 view_cert(){
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && inst_acme
     bash ~/.acme.sh/acme.sh --list
@@ -340,12 +283,10 @@ menu() {
     echo -e "#                   ${RED}Acme  证书一键申请脚本${PLAIN}                  #"
     echo "#############################################################"
     echo ""
-    echo -e " ${GREEN}1.${PLAIN} 安装 Acme.sh 域名证书申请脚本"
+    echo -e " ${GREEN}1.${PLAIN} 申请单域名证书 ${YELLOW}(80端口申请)${PLAIN}"    
     echo -e " ${GREEN}2.${PLAIN} ${RED}卸载 Acme.sh 域名证书申请脚本${PLAIN}"
     echo " -------------"
-    echo -e " ${GREEN}3.${PLAIN} 申请单域名证书 ${YELLOW}(80端口申请)${PLAIN}"
-    echo -e " ${GREEN}4.${PLAIN} 申请单域名证书 ${YELLOW}(CF API申请)${PLAIN} ${GREEN}(无需解析)${PLAIN} ${RED}(不支持freenom域名)${PLAIN}"
-    echo -e " ${GREEN}5.${PLAIN} 申请泛域名证书 ${YELLOW}(CF API申请)${PLAIN} ${GREEN}(无需解析)${PLAIN} ${RED}(不支持freenom域名)${PLAIN}"
+
     echo " -------------"
     echo -e " ${GREEN}6.${PLAIN} 查看已申请的证书"
     echo -e " ${GREEN}7.${PLAIN} 撤销并删除已申请的证书"
@@ -356,11 +297,8 @@ menu() {
     echo ""
     read -rp "请输入选项 [0-9]: " menuInput
     case "$menuInput" in
-        1 ) inst_acme ;;
         2 ) unst_acme ;;
-        3 ) acme_standalone ;;
-        4 ) acme_cfapiTLD ;;
-        5 ) acme_cfapiNTLD ;;
+        1 ) acme_standalone ;;
         6 ) view_cert ;;
         7 ) revoke_cert ;;
         8 ) renew_cert ;;
