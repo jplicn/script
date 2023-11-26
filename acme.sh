@@ -92,6 +92,7 @@ unst_acme() {
     ~/.acme.sh/acme.sh --uninstall
     sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
     rm -rf ~/.acme.sh
+    rm -rf /root/domain.txt
     green "Acme.sh 证书一键申请脚本已彻底卸载!"
 }
 
