@@ -13,6 +13,7 @@ if command -v acme.sh &>/dev/null; then
         rm -rf /root/server.crt
         rm -rf /root/domain.txt
         echo "acme.sh 已成功卸载。"
+        exit 0
     else
         echo "选择保留 acme.sh，继续执行脚本。"
     fi
