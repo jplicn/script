@@ -3,7 +3,7 @@
 # 检查是否已安装acme.sh
 if command -v acme.sh &>/dev/null; then
     echo "已检测到 acme.sh 已安装在系统中。"
-    
+    /root/.acme.sh/acme.sh --list
     read -p "是否要卸载 acme.sh? (yes/no): " uninstall_choice
     if [[ $uninstall_choice == "yes" ]]; then
         echo "正在卸载 acme.sh..."
