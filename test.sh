@@ -643,6 +643,10 @@ cat > /root/sbox/sbconfig_server.json << EOF
     }
   ],
 "outbounds": [
+	{
+      "type": "direct",
+      "tag": "direct"
+    	},
       {
         "type": "direct",
         "tag": "warp-IPv4-out",
