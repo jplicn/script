@@ -26,7 +26,7 @@ apt install socat
 
 # 生成随机字符串作为邮箱用户名
 random_string=$(head /dev/urandom | tr -dc a-z0-9 | head -c 8)
-random_email="$random_string@example.com"
+random_email="$random_string@gmail.com"
 
 echo "随机生成的邮箱地址为: $random_email"
 
