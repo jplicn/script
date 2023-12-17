@@ -29,7 +29,7 @@ ln -s /root/.acme.sh/acme.sh /usr/local/bin/acme.sh
 
 # 生成随机字符串作为邮箱用户名
 random_string=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 10)
-random_email="$random_string@gmail.com"
+random_email="$random_string@example.com"
 
 echo "随机生成的邮箱地址为: $random_email"
 
