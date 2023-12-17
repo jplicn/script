@@ -16,6 +16,7 @@ if command -v acme.sh &>/dev/null; then
         exit 0
     else
         echo "选择保留 acme.sh，继续执行脚本。"
+        exit 0
     fi
 fi
 
