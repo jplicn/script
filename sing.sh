@@ -31,11 +31,10 @@ show_notice() {
     echo -e "${green_bg}${white_fg}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${reset}"
 }
 
-
 # 安装依赖
 install_base(){
-  # 安装qrencode
-  local packages=("qrencode")
+  # 安装qrencode jq
+  local packages=("qrencode" "jq" "iptables")
   for package in "${packages[@]}"; do
     if ! command -v "$package" &> /dev/null; then
       echo "正在安装 $package..."
@@ -52,7 +51,7 @@ install_base(){
       fi
       echo "$package 已安装。"
     else
-      echo "$package 已经安装。"
+      echo "$package 已安装。"
     fi
   done
 }
@@ -233,6 +232,45 @@ enable_bbr() {
     echo ""
 }
 
+# 创建快捷方式
+create_shortcut() {
+  cat > /root/sbox/sing.sh << EOF
+#!/usr/bin/env bash
+bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/sing.sh) \$1
+EOF
+  chmod +x /root/sbox/sing.sh
+  ln -sf /root/sbox/sing.sh /usr/bin/sing
+
+}
+
+# 开启hysteria2端口跳跃
+enable_hy2hopping(){
+  echo "开启端口跳跃"
+    hy_current_port=$(grep -o "HY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
+    read -p "输入UDP端口范围的起始值(默认20000): " -r start_port
+    start_port=${start_port:-20000}
+    read -p "输入UDP端口范围的结束值(默认30000): " -r end_port
+    end_port=${end_port:-30000}
+    iptables -t nat -A PREROUTING -i eth0 -p udp --dport $start_port:$end_port -j DNAT --to-destination :$hy_current_port
+    ip6tables -t nat -A PREROUTING -i eth0 -p udp --dport $start_port:$end_port -j DNAT --to-destination :$hy_current_port
+
+    sed -i "s/HY_HOPPING=FALSE/HY_HOPPING='TRUE'/" /root/sbox/config
+
+
+}
+
+disable_hy2hopping(){
+    echo "关闭端口跳跃"
+  hy_current_port=$(grep -o "HY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
+
+  iptables -t nat -F PREROUTING >/dev/null 2>&1
+  ip6tables -t nat -F PREROUTING >/dev/null 2>&1
+  sed -i "s/HY_HOPPING='TRUE'/HY_HOPPING=FALSE/" /root/sbox/config
+
+
+}
+
+
 uninstall_singbox() {
     # Stop and disable services
     systemctl stop sing-box
@@ -245,6 +283,8 @@ uninstall_singbox() {
     rm -f /root/sbox/sbconfig_server.json
     rm -f /root/sbox/sing-box
     rm -f /root/sbox/config
+    rm -f /usr/bin/sing
+    rm -f /root/sbox/sing.sh
 
     # Remove directories
     rm -rf /root/sbox/
@@ -265,6 +305,7 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
     echo "3. 显示客户端配置"
     echo "4. 卸载"
     echo "5. 更新sing-box内核"
+    echo "6. Hy2端口跳跃"
     echo "7. 一键开启bbr"
     echo "8. 重启sing-box"
     echo ""
@@ -296,6 +337,56 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
           echo ""  
           exit 0
           ;;
+        6)
+                while true; do
+            ishopping=$(grep '^HY_HOPPING=' /root/sbox/config | cut -d'=' -f2)
+
+            if [ "$ishopping" = "FALSE" ]; then
+                # 开启端口跳跃
+                echo "开始设置端口跳跃范围"
+                enable_hy2hopping
+                
+            else
+                yellow "端口跳跃已开启"
+                echo ""
+                green "请选择选项："
+                echo ""
+                green "1. 关闭端口跳跃"
+                green "2. 重新设置"
+                green "3. 查看规则"
+                green "0. 退出"
+                echo ""
+                read -p "请输入对应数字（0-3）: " hopping_input
+                echo ""
+                case $hopping_input in
+                    1)
+                    disable_hy2hopping
+                    echo "端口跳跃规则已删除"
+                    ;;
+                    2)
+                    disable_hy2hopping
+                    echo "端口跳跃规则已删除"
+                    echo "开始重新设置端口跳跃"
+                    enable_hy2hopping
+                    ;;
+                    3)
+                    # 查看IPv4的NAT规则
+                    iptables -t nat -L -n -v | grep "udp"
+                    # 查看IPv6的NAT规则
+                    ip6tables -t nat -L -n -v | grep "udp"
+                    ;;
+                    0)
+                    echo "退出"
+                    break
+                    ;;
+                    *)
+                    echo "无效的选项"
+                    ;;
+                esac
+            fi
+            done
+            exit 0
+            ;;
       7)
           enable_bbr
           exit 0
@@ -552,10 +643,34 @@ cat > /root/sbox/sbconfig_server.json << EOF
     }
   ],
 "outbounds": [
-    {
+	{
       "type": "direct",
       "tag": "direct"
-    },
+    	},
+      {
+        "type": "direct",
+        "tag": "warp-IPv4-out",
+        "detour": "wireguard-out",
+        "domain_strategy": "ipv4_only"
+      },
+      {
+        "type": "direct",
+        "tag": "warp-IPv6-out",
+        "detour": "wireguard-out",
+        "domain_strategy": "ipv6_only"
+      },
+      {
+        "type": "direct",
+        "tag": "warp-IPv6-prefer-out",
+        "detour": "wireguard-out",
+        "domain_strategy": "prefer_ipv6"
+      },
+      {
+        "type": "direct",
+        "tag": "warp-IPv4-prefer-out",
+        "detour": "wireguard-out",
+        "domain_strategy": "prefer_ipv4"
+      },
     {
       "type": "wireguard",
       "tag": "wireguard-out",
@@ -571,24 +686,47 @@ cat > /root/sbox/sbconfig_server.json << EOF
     }
   ],
   "route": {
-    "geosite": {
-      "download_url": "https://github.com/SagerNet/sing-geosite/releases/latest/download/geosite.db",
-      "download_detour": "direct"
-      },
-    "geoip": {
-      "download_url": "https://github.com/soffchen/sing-geoip/releases/latest/download/geoip.db",
-      "download_detour": "direct"
-      },
-    "rules": [
-      {
-        "geosite": [
-          "netflix",
-          "openai"
-        ],
-        "outbound": "wireguard-out" 
-      }
-    ]  
- }
+      "final": "direct",
+      "rules": [
+        {
+          "rule_set": ["geosite-openai","geosite-netflix"],
+          "outbound": "warp-IPv6-out"
+        },
+        {
+          "rule_set": "geosite-disney",
+          "outbound": "warp-IPv6-out" 
+        },
+        {
+          "domain_keyword": [
+            "ipaddress"
+          ],
+          "outbound": "warp-IPv6-out" 
+        }
+      ],
+      "rule_set": [
+        { 
+          "tag": "geosite-openai",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/openai.srs",
+          "download_detour": "direct"
+        },
+        {
+          "tag": "geosite-netflix",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/netflix.srs",
+          "download_detour": "direct"
+        },
+        {
+          "tag": "geosite-disney",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/disney.srs",
+          "download_detour": "direct"
+        }
+      ]
+    } 
 }
 EOF
 
