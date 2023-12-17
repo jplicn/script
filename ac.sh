@@ -9,7 +9,7 @@ if command -v acme.sh &>/dev/null; then
         echo "正在卸载 acme.sh..."
         /root/.acme.sh/acme.sh --uninstall
         rm -rf /root/.acme.sh
-        rm -rf /root/server.key
+        rm -rf /root/private.key
         rm -rf /root/cert.crt
         rm -rf /root/domain.txt
         echo "acme.sh 已成功卸载。"
@@ -65,4 +65,4 @@ ufw allow 80
 /root/.acme.sh/acme.sh --issue -d "$domain" --standalone -k ec-256 --server "$ca"
 
 # 安装证书
-/root/.acme.sh/acme.sh --installcert -d "$domain" --ecc --key-file /root/server.key --fullchain-file /root/cert.crt
+/root/.acme.sh/acme.sh --installcert -d "$domain" --ecc --key-file /root/private.key --fullchain-file /root/cert.crt
