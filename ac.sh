@@ -12,6 +12,7 @@ if command -v acme.sh &>/dev/null; then
         rm -rf /root/server.key
         rm -rf /root/server.crt
         rm -rf /root/domain.txt
+        rm -rf /usr/local/bin/acme.sh
         echo "acme.sh 已成功卸载。"
         exit 0
     else
