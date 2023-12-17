@@ -61,7 +61,7 @@ fi
 # 开放 80 端口
 ufw allow 80
 
-/root/.acme.sh/acme.sh --issue -d "$domain" --standalone -k ec-256 --ca "$ca"
+/root/.acme.sh/acme.sh --issue -d "$domain" --standalone -k ec-256 --server "$ca"
 
 # 安装证书
 /root/.acme.sh/acme.sh --installcert -d "$domain" --ecc --key-file /root/server.key --fullchain-file /root/server.crt
