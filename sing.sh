@@ -758,7 +758,7 @@ if /root/sbox/sing-box check -c /root/sbox/sbconfig_server.json; then
     systemctl enable sing-box > /dev/null 2>&1
     systemctl start sing-box
     systemctl restart sing-box
-
+    create_shortcut
     show_client_configuration
 
 
