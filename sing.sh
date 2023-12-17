@@ -760,6 +760,7 @@ if /root/sbox/sing-box check -c /root/sbox/sbconfig_server.json; then
     systemctl restart sing-box
     create_shortcut
     show_client_configuration
+    sing
 
 
 else
