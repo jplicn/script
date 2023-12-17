@@ -6,7 +6,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/sing.sh
 
 bash <(wget -qO- https://raw.githubusercontent.com/jplicn/script/master/test.sh)
 
-bash <(wget -qO- https://raw.githubusercontent.com/jplicn/script/master/acme.sh)
+bash <(wget -qO- https://raw.githubusercontent.com/jplicn/script/master/ac.sh)
 
 
 申请证书：
