@@ -252,7 +252,6 @@ inscertificate(){
         certificatec_tuic='/root/ygkkkca/cert.crt'
         certificatep_tuic='/root/ygkkkca/private.key'
         }
-
     zqzs(){
     ym_vl_re=www.yahoo.com
     blue "Vless-reality的SNI域名默认为 www.yahoo.com"
