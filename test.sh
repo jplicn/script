@@ -166,7 +166,6 @@ v6(){
     ipv=prefer_ipv4
     fi
     }
-
     warpcheck
     if [[ ! $wgcfv4 =~ on|plus && ! $wgcfv6 =~ on|plus ]]; then
     v4orv6
@@ -265,7 +264,6 @@ inscertificate(){
     certificatec_tuic='/etc/s-box/cert.pem'
     certificatep_tuic='/etc/s-box/private.key'
     }
-
     red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     green "二、生成并设置相关证书"
     echo
@@ -308,9 +306,6 @@ inscertificate(){
     fi
     fi
 }
-
-
-
 
 chooseport(){
     if [[ -z $port ]]; then
@@ -401,264 +396,259 @@ insport(){
 
 
 inssbjsonser(){
-
 cat > /etc/s-box/sb.json <<EOF
-
+{
+"log": {
+    "disabled": false,
+    "level": "info",
+    "timestamp": true
+  },
+  
+  "inbounds": [
     {
-    "log": {
-        "disabled": false,
-        "level": "info",
-        "timestamp": true
-      },
-      
-      "inbounds": [
+      "type": "vless",
+      "sniff": true,
+      "sniff_override_destination": true,
+      "tag": "vless-sb",
+      "listen": "::",
+      "listen_port": ${port_vl_re},
+      "users": [
         {
-          "type": "vless",
-          "sniff": true,
-          "sniff_override_destination": true,
-          "tag": "vless-sb",
-          "listen": "::",
-          "listen_port": ${port_vl_re},
-          "users": [
+          "uuid": "${uuid}",
+          "flow": "xtls-rprx-vision"
+        }
+      ],
+      "tls": {
+        "enabled": true,
+        "server_name": "${ym_vl_re}",
+          "reality": {
+          "enabled": true,
+          "handshake": {
+            "server": "${ym_vl_re}",
+            "server_port": 443
+          },
+          "private_key": "$private_key",
+          "short_id": ["$short_id"]
+        }
+      }
+    },
+     {
+        "type": "vmess",
+        "sniff": true,
+        "sniff_override_destination": true,
+        "tag": "vmess-sb",
+        "listen": "::",
+        "listen_port": ${port_vm_ws},
+        "users": [
             {
-              "uuid": "${uuid}",
-              "flow": "xtls-rprx-vision"
+                "uuid": "${uuid}",
+                "alterId": 0
             }
-          ],
-          "tls": {
-            "enabled": true,
-            "server_name": "${ym_vl_re}",
-              "reality": {
-              "enabled": true,
-              "handshake": {
-                "server": "${ym_vl_re}",
-                "server_port": 443
-              },
-              "private_key": "$private_key",
-              "short_id": ["$short_id"]
-            }
-          }
+        ],
+        "transport": {
+            "type": "ws",
+            "path": "${uuid}-vm"
         },
-         {
-            "type": "vmess",
+        "tls":{
+                "enabled": ${tlsyn},
+                "server_name": "${ym_vm_ws}",
+                "min_version": "1.2",
+                "max_version": "1.3",
+                "certificate_path": "$certificatec_vmess_ws",
+                "key_path": "$certificatep_vmess_ws"
+            }
+    }, 
+    {
+        "type": "hysteria2",
+        "sniff": true,
+        "sniff_override_destination": true,
+        "tag": "hy2-sb",
+        "listen": "::",
+        "listen_port": ${port_hy2},
+        "users": [
+            {
+                "password": "${uuid}"
+            }
+        ],
+        "ignore_client_bandwidth":false,
+        "tls": {
+            "enabled": true,
+            "alpn": [
+                "h3"
+            ],
+            "min_version":"1.2",
+            "max_version":"1.3",
+            "certificate_path": "$certificatec_hy2",
+            "key_path": "$certificatep_hy2"
+        }
+    },
+        {
+            "type":"tuic",
             "sniff": true,
             "sniff_override_destination": true,
-            "tag": "vmess-sb",
+            "tag": "tuic5-sb",
             "listen": "::",
-            "listen_port": ${port_vm_ws},
+            "listen_port": ${port_tu},
             "users": [
                 {
                     "uuid": "${uuid}",
-                    "alterId": 0
-                }
-            ],
-            "transport": {
-                "type": "ws",
-                "path": "${uuid}-vm"
-            },
-            "tls":{
-                    "enabled": ${tlsyn},
-                    "server_name": "${ym_vm_ws}",
-                    "min_version": "1.2",
-                    "max_version": "1.3",
-                    "certificate_path": "$certificatec_vmess_ws",
-                    "key_path": "$certificatep_vmess_ws"
-                }
-        }, 
-        {
-            "type": "hysteria2",
-            "sniff": true,
-            "sniff_override_destination": true,
-            "tag": "hy2-sb",
-            "listen": "::",
-            "listen_port": ${port_hy2},
-            "users": [
-                {
                     "password": "${uuid}"
                 }
             ],
-            "ignore_client_bandwidth":false,
-            "tls": {
+            "congestion_control": "bbr",
+            "tls":{
                 "enabled": true,
                 "alpn": [
                     "h3"
                 ],
-                "min_version":"1.2",
-                "max_version":"1.3",
-                "certificate_path": "$certificatec_hy2",
-                "key_path": "$certificatep_hy2"
+                "certificate_path": "$certificatec_tuic",
+                "key_path": "$certificatep_tuic"
             }
-        },
-            {
-                "type":"tuic",
-                "sniff": true,
-                "sniff_override_destination": true,
-                "tag": "tuic5-sb",
-                "listen": "::",
-                "listen_port": ${port_tu},
-                "users": [
-                    {
-                        "uuid": "${uuid}",
-                        "password": "${uuid}"
-                    }
-                ],
-                "congestion_control": "bbr",
-                "tls":{
-                    "enabled": true,
-                    "alpn": [
-                        "h3"
-                    ],
-                    "certificate_path": "$certificatec_tuic",
-                    "key_path": "$certificatep_tuic"
-                }
-            }
-    ],
-    
-    "outbounds": [
-        {
-        "type":"direct",
-        "tag":"direct",
-        "domain_strategy": "$ipv"
-        },
-        {
-        "type":"direct",
-        "tag": "vps-outbound-v4", 
-        "domain_strategy":"ipv4_only"
-        },
-        {
-        "type":"direct",
-        "tag": "vps-outbound-v6",
-        "domain_strategy":"ipv6_only"
-        },
-        {
-        "type": "socks",
-        "tag": "socks-out",
-        "server": "127.0.0.1",
-        "server_port": 40000,
-        "version": "5"
-        },
-        {
-        "type":"direct",
-        "tag":"socks-IPv4-out",
-        "detour":"socks-out",
-        "domain_strategy":"ipv4_only"
-        },
-        {
-        "type":"direct",
-        "tag":"socks-IPv6-out",
-        "detour":"socks-out",
-        "domain_strategy":"ipv6_only"
-        },
-        {
-        "type":"direct",
-        "tag":"warp-IPv4-out",
-        "detour":"wireguard-out",
-        "domain_strategy":"ipv4_only"
-        },
-        {
-        "type":"direct",
-        "tag":"warp-IPv6-out",
-        "detour":"wireguard-out",
-        "domain_strategy":"ipv6_only"
-        },
-        {
-        "type":"wireguard",
-        "tag":"wireguard-out",
-        "server":"$endip",
-        "server_port":1701,
-        "local_address":[
-        "172.16.0.2/32",
-        "2606:4700:110:891c:6ee2:7df4:5e99:b7cf/128"
-        ],
-        "private_key":"aJkrp4MMgL/Oi2bO4Fww9J8aqAW1ojeOZ22RK0nXYWY=",
-        "peer_public_key":"bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-        "reserved":[230,25,169]
-        },
-        {
-        "type": "block",
-        "tag": "block"
         }
-        ],
-   
-    "route":{
-      "geoip":{
-      "download_url":"https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.db",
-      "download_detour":"direct"
-      },
-      "geosite":{
-      "download_url":"https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.db",
-      "download_detour":"direct"
-      },
-      "rules":[
-      {
-      "protocol": ["quic"],
-      "port": [ 443 ],
-      "outbound": "block"
-      },
-      {
-      "outbound":"warp-IPv4-out",
-      "domain": [
-      "yg_kkk"
-      ],
-      "geosite": [
-      "yg_kkk"
-      ]
-    },
-      {
-      "outbound":"warp-IPv6-out",
-      "domain": [
-      "yg_kkk"
-      ],
-      "geosite": [
-      "yg_kkk"
-      ]
-      },
+],
+"outbounds": [
     {
-    "outbound":"socks-IPv4-out",
-    "domain": [
-    "yg_kkk"
+    "type":"direct",
+    "tag":"direct",
+    "domain_strategy": "$ipv"
+    },
+    {
+    "type":"direct",
+    "tag": "vps-outbound-v4", 
+    "domain_strategy":"ipv4_only"
+    },
+    {
+    "type":"direct",
+    "tag": "vps-outbound-v6",
+    "domain_strategy":"ipv6_only"
+    },
+    {
+    "type": "socks",
+    "tag": "socks-out",
+    "server": "127.0.0.1",
+    "server_port": 40000,
+    "version": "5"
+    },
+    {
+    "type":"direct",
+    "tag":"socks-IPv4-out",
+    "detour":"socks-out",
+    "domain_strategy":"ipv4_only"
+    },
+    {
+    "type":"direct",
+    "tag":"socks-IPv6-out",
+    "detour":"socks-out",
+    "domain_strategy":"ipv6_only"
+    },
+    {
+    "type":"direct",
+    "tag":"warp-IPv4-out",
+    "detour":"wireguard-out",
+    "domain_strategy":"ipv4_only"
+    },
+    {
+    "type":"direct",
+    "tag":"warp-IPv6-out",
+    "detour":"wireguard-out",
+    "domain_strategy":"ipv6_only"
+    },
+    {
+    "type":"wireguard",
+    "tag":"wireguard-out",
+    "server":"$endip",
+    "server_port":1701,
+    "local_address":[
+    "172.16.0.2/32",
+    "2606:4700:110:891c:6ee2:7df4:5e99:b7cf/128"
     ],
-    "geosite": [
-    "yg_kkk"
-    ]
+    "private_key":"aJkrp4MMgL/Oi2bO4Fww9J8aqAW1ojeOZ22RK0nXYWY=",
+    "peer_public_key":"bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+    "reserved":[230,25,169]
     },
     {
-    "outbound":"socks-IPv6-out",
-    "domain": [
-    "yg_kkk"
+    "type": "block",
+    "tag": "block"
+    }
     ],
-    "geosite": [
-    "yg_kkk"
-    ]
-    },
-    {
-    "outbound":"vps-outbound-v4",
-    "domain": [
-    "yg_kkk"
-    ],
-    "geosite": [
-    "yg_kkk"
-    ]
-    },
-    {
-    "outbound":"vps-outbound-v6",
-    "domain": [
-    "yg_kkk"
-    ],
-    "geosite": [
-    "yg_kkk"
-    ]
-    },
-    {
-    "outbound": "direct",
-    "network": "udp,tcp"
-    }
-    ]
-    }
-    }
-    EOF
-    }
-
+"route":{
+  "geoip":{
+  "download_url":"https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.db",
+  "download_detour":"direct"
+  },
+  "geosite":{
+  "download_url":"https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.db",
+  "download_detour":"direct"
+  },
+  "rules":[
+  {
+  "protocol": ["quic"],
+  "port": [ 443 ],
+  "outbound": "block"
+  },
+  {
+  "outbound":"warp-IPv4-out",
+  "domain": [
+  "yg_kkk"
+  ],
+  "geosite": [
+  "yg_kkk"
+  ]
+},
+  {
+  "outbound":"warp-IPv6-out",
+  "domain": [
+  "yg_kkk"
+  ],
+  "geosite": [
+  "yg_kkk"
+  ]
+  },
+{
+"outbound":"socks-IPv4-out",
+"domain": [
+"yg_kkk"
+],
+"geosite": [
+"yg_kkk"
+]
+},
+{
+"outbound":"socks-IPv6-out",
+"domain": [
+"yg_kkk"
+],
+"geosite": [
+"yg_kkk"
+]
+},
+{
+"outbound":"vps-outbound-v4",
+"domain": [
+"yg_kkk"
+],
+"geosite": [
+"yg_kkk"
+]
+},
+{
+"outbound":"vps-outbound-v6",
+"domain": [
+"yg_kkk"
+],
+"geosite": [
+"yg_kkk"
+]
+},
+{
+"outbound": "direct",
+"network": "udp,tcp"
+}
+]
+}
+}
+EOF
+}
 
 sbservice(){
     cat > /etc/systemd/system/sing-box.service <<EOF
@@ -845,7 +835,6 @@ reshy2(){
     white "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo
     }
-
 
 restu5(){
     echo
