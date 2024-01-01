@@ -239,18 +239,18 @@ inssb(){
 
 inscertificate(){
     ymzs(){
-        ym_vl_re=www.yahoo.com
-        blue "Vless-reality的SNI域名默认为 www.yahoo.com"
-        blue "Vmess-ws将开启TLS，Hysteria-2、Tuic-v5将使用 $(cat /root/ygkkkca/ca.log 2>/dev/null) 证书，并开启SNI证书验证"
-        tlsyn=true
-        ym_vm_ws=$(cat /root/ygkkkca/ca.log 2>/dev/null)
-        certificatec_vmess_ws='/root/ygkkkca/cert.crt'
-        certificatep_vmess_ws='/root/ygkkkca/private.key'
-        certificatec_hy2='/root/ygkkkca/cert.crt'
-        certificatep_hy2='/root/ygkkkca/private.key'
-        certificatec_tuic='/root/ygkkkca/cert.crt'
-        certificatep_tuic='/root/ygkkkca/private.key'
-        }
+    ym_vl_re=www.yahoo.com
+    blue "Vless-reality的SNI域名默认为 www.yahoo.com"
+    blue "Vmess-ws将开启TLS，Hysteria-2、Tuic-v5将使用 $(cat /root/ygkkkca/ca.log 2>/dev/null) 证书，并开启SNI证书验证"
+    tlsyn=true
+    ym_vm_ws=$(cat /root/ygkkkca/ca.log 2>/dev/null)
+    certificatec_vmess_ws='/root/ygkkkca/cert.crt'
+    certificatep_vmess_ws='/root/ygkkkca/private.key'
+    certificatec_hy2='/root/ygkkkca/cert.crt'
+    certificatep_hy2='/root/ygkkkca/private.key'
+    certificatec_tuic='/root/ygkkkca/cert.crt'
+    certificatep_tuic='/root/ygkkkca/private.key'
+    }
     zqzs(){
     ym_vl_re=www.yahoo.com
     blue "Vless-reality的SNI域名默认为 www.yahoo.com"
