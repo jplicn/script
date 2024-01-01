@@ -866,418 +866,416 @@ restu5(){
 
 sb_client(){
     
-    cat > /etc/s-box/sing_box_client.json <<EOF
-    
-    {
-      "log": {
-        "disabled": false,
-        "level": "info",
-        "timestamp": true
-      },
-        "dns": {
-            "servers": [
-                {
-                    "tag": "remote",
-                    "address": "$sbdnsip",             
-                    "detour": "select"
-                },
-                {
-                    "tag": "local",
-                    "address": "h3://223.5.5.5/dns-query",
-                    "detour": "direct"
-                },
-                {
-                    "address": "rcode://success",
-                    "tag": "block"
-                },
-                {
-                    "tag": "dns_fakeip",
-                    "address": "fakeip"
-                }
-            ],
-            "rules": [
-                {
-                    "outbound": "any",
-                    "server": "local",
-                    "disable_cache": true
-                },
-                {
-                    "clash_mode": "Global",
-                    "server": "remote"
-                },
-                {
-                    "clash_mode": "Direct",
-                    "server": "local"
-                },
-                {
-                    "geosite": "cn",
-                    "server": "local"
-                },
-                {
-                    "geosite": "geolocation-!cn",
-                    "server": "remote"
-                },
-                {
-                    "geosite": "geolocation-!cn",             
-                    "query_type": [
-                        "A",
-                        "AAAA"
-                    ],
-                    "server": "dns_fakeip"
-                }
-              ],
-              "fakeip": {
-              "enabled": true,
-              "inet4_range": "198.18.0.0/15",
-              "inet6_range": "fc00::/18"
+cat > /etc/s-box/sing_box_client.json <<EOF
+{
+  "log": {
+    "disabled": false,
+    "level": "info",
+    "timestamp": true
+  },
+    "dns": {
+        "servers": [
+            {
+                "tag": "remote",
+                "address": "$sbdnsip",             
+                "detour": "select"
             },
-              "independent_cache": true,
-              "final": "remote"
+            {
+                "tag": "local",
+                "address": "h3://223.5.5.5/dns-query",
+                "detour": "direct"
             },
-          "inbounds": [
-        {
-          "type": "tun",
-          "inet4_address": "172.19.0.1/30",
-          "inet6_address": "fdfe:dcba:9876::1/126",
-          "auto_route": true,
-          "strict_route": true,
-          "stack": "mixed",
-          "sniff": true
-        }
-      ],
-      "experimental": {
-        "clash_api": {
-          "external_controller": "127.0.0.1:9090",
-          "external_ui": "ui",
-          "external_ui_download_url": "",
-          "external_ui_download_detour": "",
-          "secret": "",
-          "default_mode": "Rule",
-          "store_mode": true,
-          "store_selected": true,
-          "store_fakeip": true
-        }
-      },
-      "outbounds": [
-        {
-          "tag": "select",
-          "type": "selector",
-          "default": "auto",
-          "outbounds": [
-            "auto",
-            "vless-sb",
-            "vmess-sb",
-            "hy2-sb",
-            "tuic5-sb"
-          ]
-        },
-        {
-          "type": "vless",
-          "tag": "vless-sb",
-          "server": "$server_ipcl",
-          "server_port": $vl_port,
-          "uuid": "$uuid",
-          "flow": "xtls-rprx-vision",
-          "tls": {
-            "enabled": true,
-            "server_name": "$vl_name",
-            "utls": {
-              "enabled": true,
-              "fingerprint": "chrome"
+            {
+                "address": "rcode://success",
+                "tag": "block"
             },
-          "reality": {
-              "enabled": true,
-              "public_key": "$public_key",
-              "short_id": "$short_id"
+            {
+                "tag": "dns_fakeip",
+                "address": "fakeip"
             }
-          }
+        ],
+        "rules": [
+            {
+                "outbound": "any",
+                "server": "local",
+                "disable_cache": true
+            },
+            {
+                "clash_mode": "Global",
+                "server": "remote"
+            },
+            {
+                "clash_mode": "Direct",
+                "server": "local"
+            },
+            {
+                "geosite": "cn",
+                "server": "local"
+            },
+            {
+                "geosite": "geolocation-!cn",
+                "server": "remote"
+            },
+            {
+                "geosite": "geolocation-!cn",             
+                "query_type": [
+                    "A",
+                    "AAAA"
+                ],
+                "server": "dns_fakeip"
+            }
+          ],
+          "fakeip": {
+          "enabled": true,
+          "inet4_range": "198.18.0.0/15",
+          "inet6_range": "fc00::/18"
+        },
+          "independent_cache": true,
+          "final": "remote"
+        },
+      "inbounds": [
+    {
+      "type": "tun",
+      "inet4_address": "172.19.0.1/30",
+      "inet6_address": "fdfe:dcba:9876::1/126",
+      "auto_route": true,
+      "strict_route": true,
+      "stack": "mixed",
+      "sniff": true
+    }
+  ],
+  "experimental": {
+    "clash_api": {
+      "external_controller": "127.0.0.1:9090",
+      "external_ui": "ui",
+      "external_ui_download_url": "",
+      "external_ui_download_detour": "",
+      "secret": "",
+      "default_mode": "Rule",
+      "store_mode": true,
+      "store_selected": true,
+      "store_fakeip": true
+    }
+  },
+  "outbounds": [
+    {
+      "tag": "select",
+      "type": "selector",
+      "default": "auto",
+      "outbounds": [
+        "auto",
+        "vless-sb",
+        "vmess-sb",
+        "hy2-sb",
+        "tuic5-sb"
+      ]
+    },
+    {
+      "type": "vless",
+      "tag": "vless-sb",
+      "server": "$server_ipcl",
+      "server_port": $vl_port,
+      "uuid": "$uuid",
+      "flow": "xtls-rprx-vision",
+      "tls": {
+        "enabled": true,
+        "server_name": "$vl_name",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+      "reality": {
+          "enabled": true,
+          "public_key": "$public_key",
+          "short_id": "$short_id"
+        }
+      }
+    },
+{
+            "server": "$cl_vm_ip",
+            "server_port": $vm_port,
+            "tag": "vmess-sb",
+            "tls": {
+                "enabled": $tls,
+                "server_name": "$vm_name",
+                "insecure": false,
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "chrome"
+                }
+            },
+            "transport": {
+                "headers": {
+                    "Host": [
+                        "$vm_name"
+                    ]
+                },
+                "path": "$uuid-vm",
+                "type": "ws"
+            },
+            "type": "vmess",
+            "security": "auto",
+            "uuid": "$uuid"
         },
     {
-                "server": "$cl_vm_ip",
-                "server_port": $vm_port,
-                "tag": "vmess-sb",
-                "tls": {
-                    "enabled": $tls,
-                    "server_name": "$vm_name",
-                    "insecure": false,
-                    "utls": {
-                        "enabled": true,
-                        "fingerprint": "chrome"
-                    }
-                },
-                "transport": {
-                    "headers": {
-                        "Host": [
-                            "$vm_name"
-                        ]
-                    },
-                    "path": "$uuid-vm",
-                    "type": "ws"
-                },
-                "type": "vmess",
-                "security": "auto",
-                "uuid": "$uuid"
-            },
+        "type": "hysteria2",
+        "tag": "hy2-sb",
+        "server": "$cl_hy2_ip",
+        "server_port": $hy2_port,
+        "password": "$uuid",
+        "tls": {
+            "enabled": true,
+            "server_name": "$hy2_name",
+            "insecure": $hy2_ins,
+            "alpn": [
+                "h3"
+            ]
+        }
+    },
         {
-            "type": "hysteria2",
-            "tag": "hy2-sb",
-            "server": "$cl_hy2_ip",
-            "server_port": $hy2_port,
+            "type":"tuic",
+            "tag": "tuic5-sb",
+            "server": "$cl_tu5_ip",
+            "server_port": $tu5_port,
+            "uuid": "$uuid",
             "password": "$uuid",
-            "tls": {
+            "congestion_control": "bbr",
+            "udp_relay_mode": "native",
+            "udp_over_stream": false,
+            "zero_rtt_handshake": false,
+            "heartbeat": "10s",
+            "tls":{
                 "enabled": true,
-                "server_name": "$hy2_name",
-                "insecure": $hy2_ins,
+                "server_name": "$tu5_name",
+                "insecure": $tu5_ins,
                 "alpn": [
                     "h3"
                 ]
             }
         },
-            {
-                "type":"tuic",
-                "tag": "tuic5-sb",
-                "server": "$cl_tu5_ip",
-                "server_port": $tu5_port,
-                "uuid": "$uuid",
-                "password": "$uuid",
-                "congestion_control": "bbr",
-                "udp_relay_mode": "native",
-                "udp_over_stream": false,
-                "zero_rtt_handshake": false,
-                "heartbeat": "10s",
-                "tls":{
-                    "enabled": true,
-                    "server_name": "$tu5_name",
-                    "insecure": $tu5_ins,
-                    "alpn": [
-                        "h3"
-                    ]
-                }
-            },
-        {
-          "tag": "direct",
-          "type": "direct"
-        },
-        {
-          "tag": "block",
-          "type": "block"
-        },
-        {
-          "tag": "dns-out",
-          "type": "dns"
-        },
-        {
-          "tag": "auto",
-          "type": "urltest",
-          "outbounds": [
-            "vless-sb",
-            "vmess-sb",
-            "hy2-sb",
-            "tuic5-sb"
-          ],
-          "url": "https://cp.cloudflare.com/generate_204",
-          "interval": "1m",
-          "tolerance": 50,
-          "interrupt_exist_connections": false
-        }
-      ],
-      "route": {
-          "geoip": {
-          "download_url": "https://mirror.ghproxy.com/https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.db",
-          "download_detour": "select"
-        },
-        "geosite": {
-          "download_url": "https://mirror.ghproxy.com/https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.db",
-          "download_detour": "select"
-        },
-        "auto_detect_interface": true,
-        "final": "select",
-        "rules": [
-          {
-            "outbound": "dns-out",
-            "protocol": "dns"
-          },
-          {
-            "clash_mode": "Direct",
-            "outbound": "direct"
-          },
-          {
-            "clash_mode": "Global",
-            "outbound": "select"
-          },
-          {
-            "geosite": "cn",
-            "geoip": [
-              "cn",
-              "private"
-            ],
-            "outbound": "direct"
-          },
-          {
-            "geosite": "geolocation-!cn",
-            "outbound": "select"
-          }
-        ]
-      },
-        "ntp": {
-        "enabled": true,
-        "server": "time.apple.com",
-        "server_port": 123,
-        "interval": "30m",
-        "detour": "direct"
-      }
-    }
-    EOF
-
-    cat > /etc/s-box/clash_meta_client.yaml <<EOF
-    
-    port: 7890
-    allow-lan: true
-    mode: rule
-    log-level: info
-    unified-delay: true
-    global-client-fingerprint: chrome
-    dns:
-      enable: true
-      listen: :53
-      ipv6: true
-      enhanced-mode: fake-ip
-      fake-ip-range: 198.18.0.1/16
-      default-nameserver: 
-        - 223.5.5.5
-        - 8.8.8.8
-      nameserver:
-        - https://dns.alidns.com/dns-query
-        - https://doh.pub/dns-query
-      fallback:
-        - https://1.0.0.1/dns-query
-        - tls://dns.google
-      fallback-filter:
-        geoip: true
-        geoip-code: CN
-        ipcidr:
-          - 240.0.0.0/4
-    proxies:
-    - name: vless-reality-vision节点               
-      type: vless
-      server: $server_ipcl                           
-      port: $vl_port                                
-      uuid: $uuid   
-      network: tcp
-      udp: true
-      tls: true
-      flow: xtls-rprx-vision
-      servername: $vl_name                 
-      reality-opts: 
-        public-key: $public_key    
-        short-id: $short_id                      
-      client-fingerprint: chrome                  
-    - name: vmess-ws节点                         
-      type: vmess
-      server: $cl_vm_ip                        
-      port: $vm_port                                     
-      uuid: $uuid       
-      alterId: 0
-      cipher: auto
-      udp: true
-      tls: $tls
-      network: ws
-      servername: $vm_name                    
-      ws-opts:
-        path: "$uuid-vm"                             
-        headers:
-          Host: $vm_name                     
-    - name: hysteria2节点                            
-      type: hysteria2                                      
-      server: $cl_hy2_ip                               
-      port: $hy2_port                                
-      password: $uuid                              
-      alpn:
-        - h3
-      sni: $hy2_name                               
-      skip-cert-verify: $hy2_ins
-      fast-open: true
-    - name: tuic5节点                            
-      server: $cl_tu5_ip                      
-      port: $tu5_port                                    
-      type: tuic
-      uuid: $uuid       
-      password: $uuid   
-      alpn: [h3]
-      disable-sni: true
-      reduce-rtt: true
-      udp-relay-mode: native
-      congestion-controller: bbr
-      sni: $tu5_name                                
-      skip-cert-verify: $tu5_ins  
-    proxy-groups:
-    - name: 负载均衡
-      type: load-balance
-      url: https://cp.cloudflare.com/generate_204
-      interval: 300
-      strategy: round-robin
-      proxies:
-        - vless-reality-vision节点                              
-        - vmess-ws节点
-        - hysteria2节点
-        - tuic5节点
-    - name: 自动选择
-      type: url-test
-      url: https://cp.cloudflare.com/generate_204
-      interval: 300
-      tolerance: 50
-      proxies:
-        - vless-reality-vision节点                              
-        - vmess-ws节点
-        - hysteria2节点
-        - tuic5节点
-        
-    - name: 🌍选择代理节点
-      type: select
-      proxies:
-        - 负载均衡                                         
-        - 自动选择
-        - DIRECT
-        - vless-reality-vision节点                              
-        - vmess-ws节点
-        - hysteria2节点
-        - tuic5节点
-    rules:
-      - GEOIP,LAN,DIRECT
-      - GEOIP,CN,DIRECT
-      - MATCH,🌍选择代理节点
-    EOF
-
-    cat > /etc/s-box/v2rayn_hy2.yaml <<EOF
-    server: $sb_hy2_ip:$hy2_port
-    auth: $uuid
-    tls:
-      sni: $hy2_name
-      insecure: $hy2_ins
-    fastOpen: true
-    socks5:
-      listen: 127.0.0.1:50000
-    lazy: true
-    transport:
-      udp:
-        hopInterval: 30s
-    EOF
-
-    cat > /etc/s-box/v2rayn_tu5.json <<EOF
     {
-        "relay": {
-            "server": "$sb_tu5_ip:$tu5_port",
-            "uuid": "$uuid",
-            "password": "$uuid",
-            "congestion_control": "bbr",
-            "alpn": ["h3", "spdy/3.1"]
-        },
-        "local": {
-            "server": "127.0.0.1:55555"
-        },
-        "log_level": "info"
+      "tag": "direct",
+      "type": "direct"
+    },
+    {
+      "tag": "block",
+      "type": "block"
+    },
+    {
+      "tag": "dns-out",
+      "type": "dns"
+    },
+    {
+      "tag": "auto",
+      "type": "urltest",
+      "outbounds": [
+        "vless-sb",
+        "vmess-sb",
+        "hy2-sb",
+        "tuic5-sb"
+      ],
+      "url": "https://cp.cloudflare.com/generate_204",
+      "interval": "1m",
+      "tolerance": 50,
+      "interrupt_exist_connections": false
     }
-    EOF
+  ],
+  "route": {
+      "geoip": {
+      "download_url": "https://mirror.ghproxy.com/https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.db",
+      "download_detour": "select"
+    },
+    "geosite": {
+      "download_url": "https://mirror.ghproxy.com/https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.db",
+      "download_detour": "select"
+    },
+    "auto_detect_interface": true,
+    "final": "select",
+    "rules": [
+      {
+        "outbound": "dns-out",
+        "protocol": "dns"
+      },
+      {
+        "clash_mode": "Direct",
+        "outbound": "direct"
+      },
+      {
+        "clash_mode": "Global",
+        "outbound": "select"
+      },
+      {
+        "geosite": "cn",
+        "geoip": [
+          "cn",
+          "private"
+        ],
+        "outbound": "direct"
+      },
+      {
+        "geosite": "geolocation-!cn",
+        "outbound": "select"
+      }
+    ]
+  },
+    "ntp": {
+    "enabled": true,
+    "server": "time.apple.com",
+    "server_port": 123,
+    "interval": "30m",
+    "detour": "direct"
+  }
+}
+EOF
+
+cat > /etc/s-box/clash_meta_client.yaml <<EOF 
+port: 7890
+allow-lan: true
+mode: rule
+log-level: info
+unified-delay: true
+global-client-fingerprint: chrome
+dns:
+  enable: true
+  listen: :53
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  default-nameserver: 
+    - 223.5.5.5
+    - 8.8.8.8
+  nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  fallback:
+    - https://1.0.0.1/dns-query
+    - tls://dns.google
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+proxies:
+- name: vless-reality-vision节点               
+  type: vless
+  server: $server_ipcl                           
+  port: $vl_port                                
+  uuid: $uuid   
+  network: tcp
+  udp: true
+  tls: true
+  flow: xtls-rprx-vision
+  servername: $vl_name                 
+  reality-opts: 
+    public-key: $public_key    
+    short-id: $short_id                      
+  client-fingerprint: chrome                  
+- name: vmess-ws节点                         
+  type: vmess
+  server: $cl_vm_ip                        
+  port: $vm_port                                     
+  uuid: $uuid       
+  alterId: 0
+  cipher: auto
+  udp: true
+  tls: $tls
+  network: ws
+  servername: $vm_name                    
+  ws-opts:
+    path: "$uuid-vm"                             
+    headers:
+      Host: $vm_name                     
+- name: hysteria2节点                            
+  type: hysteria2                                      
+  server: $cl_hy2_ip                               
+  port: $hy2_port                                
+  password: $uuid                              
+  alpn:
+    - h3
+  sni: $hy2_name                               
+  skip-cert-verify: $hy2_ins
+  fast-open: true
+- name: tuic5节点                            
+  server: $cl_tu5_ip                      
+  port: $tu5_port                                    
+  type: tuic
+  uuid: $uuid       
+  password: $uuid   
+  alpn: [h3]
+  disable-sni: true
+  reduce-rtt: true
+  udp-relay-mode: native
+  congestion-controller: bbr
+  sni: $tu5_name                                
+  skip-cert-verify: $tu5_ins  
+proxy-groups:
+- name: 负载均衡
+  type: load-balance
+  url: https://cp.cloudflare.com/generate_204
+  interval: 300
+  strategy: round-robin
+  proxies:
+    - vless-reality-vision节点                              
+    - vmess-ws节点
+    - hysteria2节点
+    - tuic5节点
+- name: 自动选择
+  type: url-test
+  url: https://cp.cloudflare.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies:
+    - vless-reality-vision节点                              
+    - vmess-ws节点
+    - hysteria2节点
+    - tuic5节点
+    
+- name: 🌍选择代理节点
+  type: select
+  proxies:
+    - 负载均衡                                         
+    - 自动选择
+    - DIRECT
+    - vless-reality-vision节点                              
+    - vmess-ws节点
+    - hysteria2节点
+    - tuic5节点
+rules:
+  - GEOIP,LAN,DIRECT
+  - GEOIP,CN,DIRECT
+  - MATCH,🌍选择代理节点
+EOF
+
+cat > /etc/s-box/v2rayn_hy2.yaml <<EOF
+server: $sb_hy2_ip:$hy2_port
+auth: $uuid
+tls:
+  sni: $hy2_name
+  insecure: $hy2_ins
+fastOpen: true
+socks5:
+  listen: 127.0.0.1:50000
+lazy: true
+transport:
+  udp:
+    hopInterval: 30s
+EOF
+
+cat > /etc/s-box/v2rayn_tu5.json <<EOF
+{
+    "relay": {
+        "server": "$sb_tu5_ip:$tu5_port",
+        "uuid": "$uuid",
+        "password": "$uuid",
+        "congestion_control": "bbr",
+        "alpn": ["h3", "spdy/3.1"]
+    },
+    "local": {
+        "server": "127.0.0.1:55555"
+    },
+    "log_level": "info"
+}
+EOF
 
     if [[ -n $hy2_ports ]]; then
     hy2_ports=",$hy2_ports"
