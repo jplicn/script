@@ -1,11 +1,17 @@
 # script
 
 ### Docker安装
+````
 sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/docker_install.sh)"
+````
 ### Singbox脚本
+````
 bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/sing.sh)
+````
 ### 申请证书：
+````
 bash <(wget -qO- https://raw.githubusercontent.com/jplicn/script/master/ac.sh)
+````
 
 
 #### 其他细节：
@@ -25,8 +31,10 @@ bash <(wget -qO- https://raw.githubusercontent.com/jplicn/script/master/ac.sh)
   - 生成证书：openssl req -new -x509 -days 36500 -key ca.key -out ca.crt  -subj "/CN=bing.com"
 
 ### 解包（其中tuic.sh为举例）
-> wget https://gitlab.com/rwkgyg/tuic-yg/raw/main/tuic.sh
-> bash <(curl https://raw.githubusercontent.com/jplicn/script/master/unpack.sh) tuic.sh
+````
+wget https://gitlab.com/rwkgyg/tuic-yg/raw/main/tuic.sh
+bash <(curl https://raw.githubusercontent.com/jplicn/script/master/unpack.sh) tuic.sh
+````
 
 ### 其他测试
 bash <(wget -qO- https://raw.githubusercontent.com/jplicn/script/master/test.sh)
