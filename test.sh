@@ -867,6 +867,7 @@ restu5(){
 sb_client(){
     
     cat > /etc/s-box/sing_box_client.json <<EOF
+    
     {
       "log": {
         "disabled": false,
@@ -1126,9 +1127,10 @@ sb_client(){
         "detour": "direct"
       }
     }
-EOF
+    EOF
 
     cat > /etc/s-box/clash_meta_client.yaml <<EOF
+    
     port: 7890
     allow-lan: true
     mode: rule
