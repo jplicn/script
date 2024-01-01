@@ -244,6 +244,15 @@ EOF
 }
 
 # 开启hysteria2端口跳跃
+
+interface=$(ip route get 8.8.8.8 | awk '{print $5}')
+
+# 检查是否获取到了网卡名称
+if [ -z "$interface" ]; then
+  echo "无法获取网卡信息"
+  exit 1
+fi
+
 enable_hy2hopping(){
   echo "开启端口跳跃"
     hy_current_port=$(grep -o "HY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
@@ -251,8 +260,8 @@ enable_hy2hopping(){
     start_port=${start_port:-20000}
     read -p "输入UDP端口范围的结束值(默认30000): " -r end_port
     end_port=${end_port:-30000}
-    iptables -t nat -A PREROUTING -i eth0 -p udp --dport $start_port:$end_port -j DNAT --to-destination :$hy_current_port
-    ip6tables -t nat -A PREROUTING -i eth0 -p udp --dport $start_port:$end_port -j DNAT --to-destination :$hy_current_port
+    iptables -t nat -A PREROUTING -i "$interface" -p udp --dport $start_port:$end_port -j DNAT --to-destination :$hy_current_port
+    ip6tables -t nat -A PREROUTING -i "$interface" -p udp --dport $start_port:$end_port -j DNAT --to-destination :$hy_current_port
 
     sed -i "s/HY_HOPPING=FALSE/HY_HOPPING='TRUE'/" /root/sbox/config
 
