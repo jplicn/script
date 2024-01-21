@@ -590,10 +590,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
                 "password": "$hy_password"
             }
         ],
-         "obfs":{
-                "type":"salamander",
-                "password":"$hy_password"
-            },
         "tls": {
             "enabled": true,
             "alpn": [
