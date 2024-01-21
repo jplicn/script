@@ -702,7 +702,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "outbound": "warp-IPv6-out"
         },
         {
-          "rule_set": "geosite-disney",
+          "rule_set": "geosite-tiktok",
           "outbound": "warp-IPv6-out" 
         },
         {
@@ -728,10 +728,10 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "download_detour": "direct"
         },
         {
-          "tag": "geosite-disney",
+          "tag": "geosite-tiktok",
           "type": "remote",
           "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/disney.srs",
+          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/tiktok.srs",
           "download_detour": "direct"
         }
       ]
