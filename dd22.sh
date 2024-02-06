@@ -2,7 +2,7 @@
 ##
 ## License: GPL
 ## It can reinstall Debian, Ubuntu, Kali, AlpineLinux, CentOS, AlmaLinux, RockyLinux, Fedora and Windows OS via network automatically without any other external measures and manual operations.
-## Default root password: ayVZ30HJB5pyzKj8hJDF
+## Default root password: 123456
 ## Written By MoeClub.org
 ## Blog: https://moeclub.org
 ## Modified By 秋水逸冰
@@ -3464,7 +3464,7 @@ echo -ne "\n${aoiBlue}# Hostname${plain}\n\n"
 echo "$HostName"
 
 if [[ -z "$tmpWORD" || "$linux_relese" == 'alpinelinux' ]]; then
-	tmpWORD='ayVZ30HJB5pyzKj8hJDF'
+	tmpWORD='123456'
 	myPASSWORD='$6$qE9Lqgrd0QTOq46i$YMECmKvIw2SeBP4X411I0ZWmtyMsRcBi4Rxu7HYRsqdwqSApi6zjds5UJyM4HrAoBcuLBmjPyLatGydulmCDb0'
 else
 	# "-1" is MD5, "-5" is SHA256, "-6" is SHA512. MD5 is no longer secure.
