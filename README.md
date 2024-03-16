@@ -1,6 +1,6 @@
 # script
 
-##使用前从private变为public
+## 使用前从private变为public
 
 ### Docker安装
 ````
