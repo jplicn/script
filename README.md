@@ -36,5 +36,9 @@ wget https://gitlab.com/rwkgyg/tuic-yg/raw/main/tuic.sh
 bash <(curl https://raw.githubusercontent.com/jplicn/script/master/unpack.sh) tuic.sh
 ````
 
+### DD系统
+
+dd.sh & dd22.sh, 指令在电报
+
 ### 其他测试
 bash <(wget -qO- https://raw.githubusercontent.com/jplicn/script/master/test.sh)
