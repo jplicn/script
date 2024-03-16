@@ -1,5 +1,7 @@
 # script
 
+##使用前从private变为public
+
 ### Docker安装
 ````
 sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/docker_install.sh)"
@@ -11,16 +13,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/sing.sh
 
 ### Hy2脚本
 ````
-bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/hy2.sh?token=GHSAT0AAAAAACBXO6LJUK4X3PA2G62CZ63WZPVWWIA)
-````
-
-以上发生错误，token会变，另外需要先下载重命名为hy2.sh再运行
-
-
-
-````
-curl -o hy2.sh -fsSL "https://raw.githubusercontent.com/jplicn/script/master/hy2.sh?token=GHSAT0AAAAAACBXO6LIYKCGBTKO44Y32AWCZPVXHAA"
-bash hy2.sh
+bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/hy2.sh)
 ````
 
 ### 申请证书：
