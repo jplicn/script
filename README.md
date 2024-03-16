@@ -14,6 +14,14 @@ bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/sing.sh
 bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/hy2.sh?token=GHSAT0AAAAAACBXO6LJUK4X3PA2G62CZ63WZPVWWIA)
 ````
 
+以上发生错误：
+
+应该为先下载重命名为hy2.sh
+
+````
+bash <(curl -o hy2.sh -fsSL "https://raw.githubusercontent.com/jplicn/script/master/hy2.sh?token=GHSAT0AAAAAACBXO6LJUK4X3PA2G62CZ63WZPVWWIA")
+````
+
 ### 申请证书：
 ````
 bash <(wget -qO- https://raw.githubusercontent.com/jplicn/script/master/ac.sh)
