@@ -8,6 +8,12 @@ sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/jplicn/script/maste
 ````
 bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/sing.sh)
 ````
+
+### Hy2脚本
+````
+bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/hy2.sh?token=GHSAT0AAAAAACBXO6LJUK4X3PA2G62CZ63WZPVWWIA)
+````
+
 ### 申请证书：
 ````
 bash <(wget -qO- https://raw.githubusercontent.com/jplicn/script/master/ac.sh)
