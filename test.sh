@@ -502,10 +502,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "type": "block",
       "tag": "block"
     },
-    {
-      "type": "dns",
-      "tag": "dns-out"
-    },
       {
         "type": "direct",
         "tag": "warp-IPv4-out",
