@@ -576,6 +576,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       }
     ],
     "final": "cloudflare",
+    "strategy": "",
     "disable_cache": false,
     "disable_expire": false
   },
@@ -785,7 +786,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       }
       ],
        "final": "direct"
-    } 
+    }, 
   "experimental": {
     "cache_file": {
       "enabled": true,
