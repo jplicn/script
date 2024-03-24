@@ -421,6 +421,32 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "level": "info",
     "timestamp": true
   },
+  "dns": {
+    "servers": [
+      {
+        "tag": "cloudflare",
+        "address": "https://1.1.1.1/dns-query",
+        "strategy": "ipv4_only",
+        "detour": "direct"
+      },
+      {
+        "tag": "block",
+        "address": "rcode://success"
+      }
+    ],
+    "rules": [
+      {
+        "rule_set": [
+          "geosite-category-ads-all"
+        ],
+        "server": "block"
+      }
+    ],
+    "final": "cloudflare",
+    "strategy": "",
+    "disable_cache": false,
+    "disable_expire": false
+  },
   "inbounds": [
     {
         "type": "hysteria2",
@@ -469,10 +495,18 @@ cat > /root/sbox/sbconfig_server.json << EOF
     }
   ],
 "outbounds": [
-	{
+     {
       "type": "direct",
       "tag": "direct"
-    	},
+    },
+    {
+      "type": "block",
+      "tag": "block"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    },
       {
         "type": "direct",
         "tag": "warp-IPv4-out",
