@@ -104,41 +104,6 @@ show_client_configuration() {
 
   # 获取当前ip
   server_ip=$(grep -o "SERVER_IP='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  
-  # reality
-  # reality当前端口
-  reality_port=$(grep -o "REALITY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  # 当前偷取的网站
-  reality_server_name=$(grep -o "REALITY_SERVER_NAME='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  # 当前reality uuid
-  reality_uuid=$(grep -o "REALITY_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  # 获取公钥
-  public_key=$(grep -o "PUBLIC_KEY='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  # 获取short_id
-  short_id=$(grep -o "SHORT_ID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  #聚合reality
-  reality_link="vless://$reality_uuid@$server_ip:$reality_port?encryption=none&flow=xtls-rprx-vision&security=reality&sni=$reality_server_name&fp=chrome&pbk=$public_key&sid=$short_id&type=tcp&headerType=none#SING-BOX-REALITY"
-  echo ""
-  echo ""
-  show_notice "$(red "Reality 通用链接和二维码和通用参数")" 
-  echo ""
-  echo ""
-  red "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━Reality 通用链接如下━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo "$reality_link"
-  echo ""
-  red "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo "" 
-  red "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━Reality 二维码如下━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  qrencode -t UTF8 $reality_link
-  echo ""
-  red "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-  echo ""
-  echo ""
-  echo ""
 
   # hy port
   hy_port=$(grep -o "HY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
@@ -170,34 +135,6 @@ show_client_configuration() {
   echo ""  
 
 
-  # tuic port
-  tuic_port=$(grep -o "TUIC_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  # tuic sni
-  hy_server_name=$(grep -o "HY_SERVER_NAME='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  # tuic UUID
-  tuic_UUID=$(grep -o "TUIC_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  
-  # Generate the tuic link
-  tuic_link="tuic://${tuic_UUID}:${tuic_UUID}@${server_ip}:${tuic_port}?congestion_control=bbr&alpn=h3&udp_relay_mode=quic&allow_insecure=0&sni=$(cat /root/domain.txt)#tuic"
-
-  echo ""
-  echo "" 
-  show_notice "$(green "TUIC 通用链接和二维码和通用参数")"
-  echo ""
-  echo "" 
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━tuic 通用链接格式━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo "$tuic_link"
-  echo ""
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "" 
-  echo ""
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━tuic 二维码━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  qrencode -t UTF8 $tuic_link
-  echo ""
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
 
   vmess_uuid=$(grep -o "VMESS_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   ws_path=$(grep -o "WS_PATH='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
