@@ -577,7 +577,15 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "download_detour": "direct"
         }
       ]
-    } 
+    }, 
+    "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "path": "cache.db",
+      "cache_id": "mycacheid",
+      "store_fakeip": true
+    }
+  }
 }
 EOF
 
