@@ -562,12 +562,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
         {
           "rule_set": "geosite-copilot",
           "outbound": "warp-IPv6-out" 
-        },
-        {
-          "domain_keyword": [
-            "ipaddress"
-          ],
-          "outbound": "warp-IPv6-out" 
         }
       ],
       "rule_set": [
