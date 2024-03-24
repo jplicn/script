@@ -424,10 +424,28 @@ cat > /root/sbox/sbconfig_server.json << EOF
 "dns": {
     "servers": [
       {
-        "tag": "google",
-        "address": "udp://8.8.8.8"
+        "tag": "cloudflare",
+        "address": "https://1.1.1.1/dns-query",
+        "strategy": "ipv4_only",
+        "detour": "direct"
+      },
+      {
+        "tag": "block",
+        "address": "rcode://success"
       }
-    ]
+    ],
+    "rules": [
+      {
+        "rule_set": [
+          "geosite-category-ads-all"
+        ],
+        "server": "block"
+      }
+    ],
+    "final": "cloudflare",
+    "strategy": "",
+    "disable_cache": false,
+    "disable_expire": false
   },
   "inbounds": [
     {
@@ -481,6 +499,14 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "type": "direct",
       "tag": "direct"
     	},
+     {
+      "type": "block",
+      "tag": "block"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    },
       {
         "type": "direct",
         "tag": "warp-IPv4-out",
@@ -520,12 +546,25 @@ cat > /root/sbox/sbconfig_server.json << EOF
     }
   ],
   "route": {
-      "final": "direct",
       "rules": [
         {
           "rule_set": ["geosite-openai","geosite-netflix"],
           "outbound": "warp-IPv6-out"
         },
+	      {
+        "protocol": "dns",
+        "outbound": "dns-out"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      },
+      {
+        "rule_set": [
+          "geosite-category-ads-all"
+        ],
+        "outbound": "block"
+      },
         {
           "rule_set": "geosite-bing",
           "outbound": "warp-IPv6-out" 
@@ -558,9 +597,26 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "format": "binary",
           "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/bing.srs",
           "download_detour": "direct"
-        }
-      ]
-    } 
+        },
+	{
+        "tag": "geosite-category-ads-all",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
+        "download_detour": "direct"
+      }
+      ],
+          "auto_detect_interface": true,
+    "final": "direct"
+    },
+    "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "path": "cache.db",
+      "cache_id": "mycacheid",
+      "store_fakeip": true
+    }
+  }
 }
 
 EOF
