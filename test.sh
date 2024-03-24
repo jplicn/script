@@ -527,7 +527,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "outbound": "warp-IPv6-out"
         },
         {
-          "rule_set": "geosite-copilot",
+          "rule_set": "geosite-bing",
           "outbound": "warp-IPv6-out" 
         },
         {
@@ -556,7 +556,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "tag": "geosite-copilot",
           "type": "remote",
           "format": "binary",
-          "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/bm7/Copilot.srs",
+          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/bing.srs",
           "download_detour": "direct"
         }
       ]
