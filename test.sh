@@ -104,7 +104,6 @@ show_client_configuration() {
 
   # 获取当前ip
   server_ip=$(grep -o "SERVER_IP='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  
 
   # hy port
   hy_port=$(grep -o "HY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
@@ -114,7 +113,7 @@ show_client_configuration() {
   hy_password=$(grep -o "HY_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the hy link
-  hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=0&alpn=h3&sni=$(cat /root/domain.txt)#hy2"
+  hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=0&alpn=h3&obfs=none&obfs-password=$hy_password&sni=$(cat /root/domain.txt)#hy2"
 
   echo ""
   echo "" 
@@ -351,7 +350,6 @@ mkdir -p "/root/sbox/"
 
 download_singbox
 
-
 # hysteria2
 green "开始配置hysteria2"
 echo ""
@@ -433,14 +431,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "level": "info",
     "timestamp": true
   },
-  "dns": {
-    "servers": [
-      {
-        "tag": "google",
-        "address": "udp://8.8.8.8" 
-      }
-    ]
-  },
   "inbounds": [
     {
         "type": "hysteria2",
@@ -488,32 +478,35 @@ cat > /root/sbox/sbconfig_server.json << EOF
             }
     }
   ],
- "outbounds": [
-    {
+"outbounds": [
+	{
       "type": "direct",
-      "tag": "direct" // 双栈自动直接出站
-    },
-    {
-      "type": "direct",
-      "tag": "direct-ipv4-prefer-out", // IPV4优先直接出站
-      "domain_strategy": "prefer_ipv4"
-    },
-    {
-      "type": "direct",
-      "tag": "direct-ipv4-only-out", // 仅IPV4直接出站
-      "domain_strategy": "ipv4_only"
-    },
-    {
-      "type": "direct",
-      "tag": "direct-ipv6-prefer-out", // IPV6优先直接出站
-      "domain_strategy": "prefer_ipv6"
-    },
-    {
-      "type": "direct",
-      "tag": "direct-ipv6-only-out", // 仅IPV6直接出站
-      "domain_strategy": "ipv6_only"
-    },
-    // 附赠 WARP-free，如想更改，具体请参考Sing-Box官方文档
+      "tag": "direct"
+    	},
+      {
+        "type": "direct",
+        "tag": "warp-IPv4-out",
+        "detour": "wireguard-out",
+        "domain_strategy": "ipv4_only"
+      },
+      {
+        "type": "direct",
+        "tag": "warp-IPv6-out",
+        "detour": "wireguard-out",
+        "domain_strategy": "ipv6_only"
+      },
+      {
+        "type": "direct",
+        "tag": "warp-IPv6-prefer-out",
+        "detour": "wireguard-out",
+        "domain_strategy": "prefer_ipv6"
+      },
+      {
+        "type": "direct",
+        "tag": "warp-IPv4-prefer-out",
+        "detour": "wireguard-out",
+        "domain_strategy": "prefer_ipv4"
+      },
     {
       "type": "wireguard",
       "tag": "wireguard-out",
@@ -525,101 +518,51 @@ cat > /root/sbox/sbconfig_server.json << EOF
       ],
       "private_key": "gBthRjevHDGyV0KvYwYE52NIPy29sSrVr6rcQtYNcXA=",
       "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-      "reserved": [
-        6,
-        146,
-        6
-      ]
-    },
-    {
-      "type": "direct",
-      "tag": "wireguard-ipv4-prefer-out", // 优先IPV4-WireGuard出站
-      "detour": "wireguard-out",
-      "domain_strategy": "prefer_ipv4"
-    },
-    {
-      "type": "direct",
-      "tag": "wireguard-ipv4-only-out", // 仅IPV4-WireGuard出站
-      "detour": "wireguard-out",
-      "domain_strategy": "ipv4_only"
-    },
-    {
-      "type": "direct",
-      "tag": "wireguard-ipv6-prefer-out", // 优先IPV6-WireGuard出站
-      "detour": "wireguard-out",
-      "domain_strategy": "prefer_ipv6"
-    },
-    {
-      "type": "direct",
-      "tag": "wireguard-ipv6-only-out", // 仅IPV6-WireGuard出站
-      "detour": "wireguard-out",
-      "domain_strategy": "ipv6_only"
+      "reserved":[6,146,6]
     }
   ],
   "route": {
-    "rule_set": [
-      {
-        "tag": "geosite-netflix",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/netflix.srs", // 可自选来源
-        "download_detour": "direct-ipv4-only-out",
-        "update_interval": "1d"
-      },
-      {
-        "tag": "geosite-openai",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/openai.srs",
-        "download_detour": "direct-ipv4-only-out",
-        "update_interval": "1d"
-      },
-      {
-        "tag": "geosite-copilot",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/bm7/Copilot.srs",
-        "download_detour": "direct-ipv4-only-out",
-        "update_interval": "1d"
-      },
-      {
-        "tag": "geosite-cn",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/cn.srs",
-        "download_detour": "direct-ipv4-only-out",
-        "update_interval": "1d"
-      },
-      {
-        "tag": "geoip-cn",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geoip/cn.srs",
-        "download_detour": "direct-ipv4-only-out",
-        "update_interval": "1d"
-      }
-    ],
-    "rules": [
-      {
-        // 使用 WARP解锁Netflix和OpenAI，还需解锁什么，请参考V2ray官方域名库，自行按照格式添加（https://github.com/v2fly/domain-list-community/tree/master/data）
-        "geosite": [
-          "geosite-netflix",
-          "geosite-openai",
-          "geosite-copilot"
-        ],
-        "outbound": "wireguard-ipv6-only-out" // 使用warp节点通讯
-      },
-      {
-        "rule_set": [
-          "geosite-cn",
-          "geoip-cn"
-        ], // 中国大陆的域名
-        "outbound": "wireguard-out" // 使用warp节点通讯
-      }
-    ],
-    // "auto_detect_interface": true,  //仅支持 Linux、Windows 和 macOS。如果您是这三者其一，并在使用中发现异常或错误，可尝试取消此行注释
-    "final": "direct"
-  }
+      "final": "direct",
+      "rules": [
+        {
+          "rule_set": ["geosite-openai","geosite-netflix"],
+          "outbound": "warp-IPv6-out"
+        },
+        {
+          "rule_set": "geosite-tiktok",
+          "outbound": "warp-IPv6-out" 
+        },
+        {
+          "domain_keyword": [
+            "ipaddress"
+          ],
+          "outbound": "warp-IPv6-out" 
+        }
+      ],
+      "rule_set": [
+        { 
+          "tag": "geosite-openai",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/openai.srs",
+          "download_detour": "direct"
+        },
+        {
+          "tag": "geosite-netflix",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/netflix.srs",
+          "download_detour": "direct"
+        },
+        {
+          "tag": "geosite-tiktok",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/tiktok.srs",
+          "download_detour": "direct"
+        }
+      ]
+    } 
 }
 EOF
 
