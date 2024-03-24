@@ -415,42 +415,6 @@ mkdir -p "/root/sbox/"
 
 download_singbox
 
-# reality
-red "开始配置Reality"
-echo ""
-# Generate key pair
-echo "自动生成基本参数"
-echo ""
-key_pair=$(/root/sbox/sing-box generate reality-keypair)
-echo "Key pair生成完成"
-echo ""
-
-# Extract private key and public key
-private_key=$(echo "$key_pair" | awk '/PrivateKey/ {print $2}' | tr -d '"')
-public_key=$(echo "$key_pair" | awk '/PublicKey/ {print $2}' | tr -d '"')
-
-# Generate necessary values
-reality_uuid=$(/root/sbox/sing-box generate uuid)
-short_id=$(/root/sbox/sing-box generate rand --hex 8)
-echo "uuid和短id 生成完成"
-echo ""
-# Ask for listen port
-while true; do
-    read -p "请输入Reality端口号 (default: 4430): " reality_port
-    reality_port=${reality_port:-4430}
-
-    # 检测端口是否被占用
-    if ss -tuln | grep -q ":$reality_port\b"; then
-        echo "端口 $reality_port 已经被占用，请重新输入。"
-    else
-        break
-    fi
-done
-echo ""
-# Ask for server name (sni)
-read -p "请输入想要偷取的域名,需要支持tls1.3 (default: itunes.apple.com): " reality_server_name
-reality_server_name=${reality_server_name:-itunes.apple.com}
-echo ""
 
 # hysteria2
 green "开始配置hysteria2"
@@ -467,27 +431,6 @@ while true; do
     # 检测端口是否被占用
     if ss -tuln | grep -q ":$hy_port\b"; then
         echo "端口 $hy_port 已经被占用，请选择其他端口。"
-    else
-        break
-    fi
-done
-echo ""
-
-# tuic
-green "开始配置tuic"
-echo ""
-# Generate hysteria necessary values
-tuic_uuid=$(/root/sbox/sing-box generate uuid)
-echo "自动生成了UUID"
-echo ""
-# Ask for listen port
-while true; do
-    read -p "请输入TUIC监听端口 (default: 28443): " tuic_port
-    tuic_port=${tuic_port:-28443}
-
-    # 检测端口是否被占用
-    if ss -tuln | grep -q ":$tuic_port\b"; then
-        echo "端口 $tuic_port 已经被占用，请选择其他端口。"
     else
         break
     fi
@@ -554,32 +497,33 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "level": "info",
     "timestamp": true
   },
-  "inbounds": [
-    {
-      "type": "vless",
-      "tag": "vless-in",
-      "listen": "::",
-      "listen_port": $reality_port,
-      "users": [
-        {
-          "uuid": "$reality_uuid",
-          "flow": "xtls-rprx-vision"
-        }
-      ],
-      "tls": {
-        "enabled": true,
-        "server_name": "$reality_server_name",
-        "reality": {
-          "enabled": true,
-          "handshake": {
-            "server": "$reality_server_name",
-            "server_port": 443
-          },
-          "private_key": "$private_key",
-          "short_id": ["$short_id"]
-        }
+      "dns": {
+    "servers": [
+      {
+        "tag": "cloudflare",
+        "address": "https://1.1.1.1/dns-query",
+        "strategy": "ipv4_only",
+        "detour": "direct"
+      },
+      {
+        "tag": "block",
+        "address": "rcode://success"
       }
-    },
+    ],
+    "rules": [
+      {
+        "rule_set": [
+          "geosite-category-ads-all"
+        ],
+        "server": "block"
+      }
+    ],
+    "final": "cloudflare",
+    "strategy": "",
+    "disable_cache": false,
+    "disable_expire": false
+  },
+  "inbounds": [
     {
         "type": "hysteria2",
         "tag": "hy2-in",
@@ -598,27 +542,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
             "certificate_path": "/root/cert.crt",
             "key_path": "/root/private.key"
         }
-    },
-    {
-      "type": "tuic",
-      "tag": "tuic-in", 
-      "listen": "::", 
-      "listen_port": $tuic_port,
-      "sniff": true,  
-      "sniff_override_destination": false,  
-      "users": [
-        {
-          "uuid": "$tuic_uuid", 
-          "password": "$tuic_uuid" 
-        }
-      ],
-      "congestion_control": "bbr", 
-      "tls": {
-        "enabled": true,
-        "alpn": [ "h3" ], 
-        "certificate_path": "/root/cert.crt",
-        "key_path": "/root/private.key" 
-      }
     },
     {
         "type": "vmess",
@@ -694,7 +617,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "final": "direct",
       "rules": [
         {
-          "rule_set": ["geosite-openai","geosite-netflix"],
+          "rule_set": ["geosite-openai","geosite-netflix","geosite-copilot"],
           "outbound": "warp-IPv6-out"
         },
         {
@@ -724,14 +647,22 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "download_detour": "direct"
         },
         {
-          "tag": "geosite-tiktok",
+          "tag": "geosite-copilot",
           "type": "remote",
           "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/tiktok.srs",
+          "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/bm7/Copilot.srs",
           "download_detour": "direct"
         }
       ]
     } 
+    "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "path": "cache.db",
+      "cache_id": "mycacheid",
+      "store_fakeip": true
+      }
+   }
 }
 EOF
 
