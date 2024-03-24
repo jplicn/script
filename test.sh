@@ -576,7 +576,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
       }
     ],
     "final": "cloudflare",
-    "strategy": "",
     "disable_cache": false,
     "disable_expire": false
   },
