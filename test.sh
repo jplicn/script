@@ -477,42 +477,30 @@ cat > /root/sbox/sbconfig_server.json << EOF
     }
   ],
 "outbounds": [
-	{
+    {
       "type": "direct",
       "tag": "direct"
-    	},
-         {
-      "type": "block",
-      "tag": "block"
     },
     {
-      "type": "dns",
-      "tag": "dns-out"
+      "type": "direct",
+      "tag": "direct-ipv4-prefer-out",
+      "domain_strategy": "prefer_ipv4"
     },
-      {
-        "type": "direct",
-        "tag": "warp-IPv4-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "ipv4_only"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv6-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "ipv6_only"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv6-prefer-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "prefer_ipv6"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv4-prefer-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "prefer_ipv4"
-      },
+    {
+      "type": "direct",
+      "tag": "direct-ipv4-only-out", 
+      "domain_strategy": "ipv4_only"
+    },
+    {
+      "type": "direct",
+      "tag": "direct-ipv6-prefer-out",
+      "domain_strategy": "prefer_ipv6"
+    },
+    {
+      "type": "direct",
+      "tag": "direct-ipv6-only-out",
+      "domain_strategy": "ipv6_only"
+    },
     {
       "type": "wireguard",
       "tag": "wireguard-out",
@@ -524,51 +512,100 @@ cat > /root/sbox/sbconfig_server.json << EOF
       ],
       "private_key": "gBthRjevHDGyV0KvYwYE52NIPy29sSrVr6rcQtYNcXA=",
       "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-      "reserved":[6,146,6]
+      "reserved": [
+        6,
+        146,
+        6
+      ]
+    },
+    {
+      "type": "direct",
+      "tag": "wireguard-ipv4-prefer-out",
+      "detour": "wireguard-out",
+      "domain_strategy": "prefer_ipv4"
+    },
+    {
+      "type": "direct",
+      "tag": "wireguard-ipv4-only-out",
+      "detour": "wireguard-out",
+      "domain_strategy": "ipv4_only"
+    },
+    {
+      "type": "direct",
+      "tag": "wireguard-ipv6-prefer-out",
+      "detour": "wireguard-out",
+      "domain_strategy": "prefer_ipv6"
+    },
+    {
+      "type": "direct",
+      "tag": "wireguard-ipv6-only-out",
+      "detour": "wireguard-out",
+      "domain_strategy": "ipv6_only"
     }
   ],
   "route": {
-      "final": "direct",
-      "rules": [
-        {
-          "rule_set": ["geosite-openai","geosite-netflix"],
-          "outbound": "warp-IPv6-out"
-        },
-        {
-          "rule_set": "geosite-tiktok",
-          "outbound": "warp-IPv6-out" 
-        },
-        {
-          "domain_keyword": [
-            "ipaddress"
-          ],
-          "outbound": "warp-IPv6-out" 
-        }
-      ],
-      "rule_set": [
-        { 
-          "tag": "geosite-openai",
-          "type": "remote",
-          "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/openai.srs",
-          "download_detour": "direct"
-        },
-        {
-          "tag": "geosite-netflix",
-          "type": "remote",
-          "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/netflix.srs",
-          "download_detour": "direct"
-        },
-        {
-          "tag": "geosite-tiktok",
-          "type": "remote",
-          "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/tiktok.srs",
-          "download_detour": "direct"
-        }
-      ]
-    } 
+    "rule_set": [
+      {
+        "tag": "geosite-netflix",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/netflix.srs",
+        "download_detour": "direct-ipv4-only-out",
+        "update_interval": "1d"
+      },
+      {
+        "tag": "geosite-openai",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/openai.srs",
+        "download_detour": "direct-ipv4-only-out",
+        "update_interval": "1d"
+      },
+      {
+        "tag": "geosite-copilot",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/bm7/Copilot.srs",
+        "download_detour": "direct-ipv4-only-out",
+        "update_interval": "1d"
+      },
+      {
+        "tag": "geosite-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/cn.srs",
+        "download_detour": "direct-ipv4-only-out",
+        "update_interval": "1d"
+      },
+      {
+        "tag": "geoip-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geoip/cn.srs",
+        "download_detour": "direct-ipv4-only-out",
+        "update_interval": "1d"
+      }
+    ],
+    "rules": [
+      {
+        "geosite": [
+          "geosite-netflix",
+          "geosite-openai",
+          "geosite-copilot"
+        ],
+        "outbound": "wireguard-ipv6-only-out"
+      },
+      {
+        "rule_set": [
+          "geosite-cn",
+          "geoip-cn"
+        ], 
+        "outbound": "wireguard-out"
+      }
+    ],
+    "auto_detect_interface": true, 
+    "final": "direct"
+  }
 }
 
 EOF
