@@ -527,7 +527,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "outbound": "warp-IPv6-out"
         },
         {
-          "rule_set": "geosite-tiktok",
+          "rule_set": "geosite-copilot",
           "outbound": "warp-IPv6-out" 
         },
         {
@@ -553,10 +553,10 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "download_detour": "direct"
         },
         {
-          "tag": "geosite-tiktok",
+          "tag": "geosite-copilot",
           "type": "remote",
           "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/tiktok.srs",
+          "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/bm7/Copilot.srs",
           "download_detour": "direct"
         }
       ]
