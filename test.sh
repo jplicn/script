@@ -114,7 +114,7 @@ show_client_configuration() {
   hy_password=$(grep -o "HY_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the hy link
-  hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=0&alpn=h3&obfs=none&obfs-password=$hy_password&sni=$(cat /root/domain.txt)#hy2"
+  hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=0&alpn=h3&sni=$(cat /root/domain.txt)#hy2"
 
   echo ""
   echo "" 
