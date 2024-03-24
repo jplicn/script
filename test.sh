@@ -785,6 +785,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "download_detour": "direct"
       }
       ],
+      "auto_detect_interface": true,
        "final": "direct"
     }, 
   "experimental": {
