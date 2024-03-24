@@ -414,39 +414,39 @@ EOF
 
 # sbox配置文件
 cat > /root/sbox/sbconfig_server.json << EOF
+
 {
   "log": {
     "disabled": false,
     "level": "info",
     "timestamp": true
   },
-      "dns": {
-    "servers": [
-      {
-        "tag": "cloudflare",
-        "address": "https://1.1.1.1/dns-query",
-        "strategy": "ipv4_only",
-        "detour": "direct"
-      },
-      {
-        "tag": "block",
-        "address": "rcode://success"
-      }
-    ],
-    "rules": [
-      {
-        "rule_set": [
-          "geosite-category-ads-all"
-        ],
-        "server": "block"
-      }
-    ],
-    "final": "cloudflare",
-    "strategy": "",
-    "disable_cache": false,
-    "disable_expire": false
-  },
   "inbounds": [
+    {
+      "type": "vless",
+      "tag": "vless-in",
+      "listen": "::",
+      "listen_port": $reality_port,
+      "users": [
+        {
+          "uuid": "$reality_uuid",
+          "flow": "xtls-rprx-vision"
+        }
+      ],
+      "tls": {
+        "enabled": true,
+        "server_name": "$reality_server_name",
+        "reality": {
+          "enabled": true,
+          "handshake": {
+            "server": "$reality_server_name",
+            "server_port": 443
+          },
+          "private_key": "$private_key",
+          "short_id": ["$short_id"]
+        }
+      }
+    },
     {
         "type": "hysteria2",
         "tag": "hy2-in",
@@ -465,6 +465,27 @@ cat > /root/sbox/sbconfig_server.json << EOF
             "certificate_path": "/root/cert.crt",
             "key_path": "/root/private.key"
         }
+    },
+    {
+      "type": "tuic",
+      "tag": "tuic-in", 
+      "listen": "::", 
+      "listen_port": $tuic_port,
+      "sniff": true,  
+      "sniff_override_destination": false,  
+      "users": [
+        {
+          "uuid": "$tuic_uuid", 
+          "password": "$tuic_uuid" 
+        }
+      ],
+      "congestion_control": "bbr", 
+      "tls": {
+        "enabled": true,
+        "alpn": [ "h3" ], 
+        "certificate_path": "/root/cert.crt",
+        "key_path": "/root/private.key" 
+      }
     },
     {
         "type": "vmess",
@@ -577,8 +598,10 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "download_detour": "direct"
         }
       ]
-    }
+    } 
 }
+
+
 EOF
 
 # Create sing-box.service
