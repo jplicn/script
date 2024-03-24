@@ -585,7 +585,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
   "cache_id": "",
   "store_fakeip": false,
   "store_rdrc": false,
-  "rdrc_timeout": ""
+  "rdrc_timeout": 7d
 }
   }
 }
