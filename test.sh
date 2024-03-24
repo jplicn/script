@@ -401,21 +401,10 @@ cat > /root/sbox/config <<EOF
 # VPS ip
 SERVER_IP='$server_ip'
 # Singbox
-# Reality
-PRIVATE_KEY='$private_key'
-PUBLIC_KEY='$public_key'
-SHORT_ID='$short_id'
-REALITY_UUID='$reality_uuid'
-REALITY_PORT='$reality_port'
-REALITY_SERVER_NAME='$reality_server_name'
 # Hy2
 HY_PORT='$hy_port'
 HY_SERVER_NAME='$hy_server_name'
 HY_PASSWORD='$hy_password'
-# Tuic
-TUIC_PORT='$tuic_port'
-TUIC_UUID='$tuic_uuid'
-TUIC_PASSWORD='$tuic_uuid'
 # Vmess
 VMESS_PORT=$vmess_port
 VMESS_UUID='$vmess_uuid'
