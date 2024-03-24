@@ -105,40 +105,6 @@ show_client_configuration() {
   # 获取当前ip
   server_ip=$(grep -o "SERVER_IP='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
-  # reality
-  # reality当前端口
-  reality_port=$(grep -o "REALITY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  # 当前偷取的网站
-  reality_server_name=$(grep -o "REALITY_SERVER_NAME='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  # 当前reality uuid
-  reality_uuid=$(grep -o "REALITY_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  # 获取公钥
-  public_key=$(grep -o "PUBLIC_KEY='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  # 获取short_id
-  short_id=$(grep -o "SHORT_ID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  #聚合reality
-  reality_link="vless://$reality_uuid@$server_ip:$reality_port?encryption=none&flow=xtls-rprx-vision&security=reality&sni=$reality_server_name&fp=chrome&pbk=$public_key&sid=$short_id&type=tcp&headerType=none#SING-BOX-REALITY"
-  echo ""
-  echo ""
-  show_notice "$(red "Reality 通用链接和二维码和通用参数")" 
-  echo ""
-  echo ""
-  red "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━Reality 通用链接如下━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo "$reality_link"
-  echo ""
-  red "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo "" 
-  red "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━Reality 二维码如下━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  qrencode -t UTF8 $reality_link
-  echo ""
-  red "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-  echo ""
-  echo ""
-  echo ""
 
   # hy port
   hy_port=$(grep -o "HY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
@@ -168,36 +134,6 @@ show_client_configuration() {
   echo ""
   green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""  
-
-
-  # tuic port
-  tuic_port=$(grep -o "TUIC_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  # tuic sni
-  hy_server_name=$(grep -o "HY_SERVER_NAME='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  # tuic UUID
-  tuic_UUID=$(grep -o "TUIC_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
-  
-  # Generate the tuic link
-  tuic_link="tuic://${tuic_UUID}:${tuic_UUID}@${server_ip}:${tuic_port}?congestion_control=bbr&alpn=h3&udp_relay_mode=quic&allow_insecure=0&sni=$(cat /root/domain.txt)#tuic"
-
-  echo ""
-  echo "" 
-  show_notice "$(green "TUIC 通用链接和二维码和通用参数")"
-  echo ""
-  echo "" 
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━tuic 通用链接格式━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo "$tuic_link"
-  echo ""
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "" 
-  echo ""
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━tuic 二维码━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  qrencode -t UTF8 $tuic_link
-  echo ""
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
 
   vmess_uuid=$(grep -o "VMESS_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   ws_path=$(grep -o "WS_PATH='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
@@ -415,42 +351,6 @@ mkdir -p "/root/sbox/"
 
 download_singbox
 
-# reality
-red "开始配置Reality"
-echo ""
-# Generate key pair
-echo "自动生成基本参数"
-echo ""
-key_pair=$(/root/sbox/sing-box generate reality-keypair)
-echo "Key pair生成完成"
-echo ""
-
-# Extract private key and public key
-private_key=$(echo "$key_pair" | awk '/PrivateKey/ {print $2}' | tr -d '"')
-public_key=$(echo "$key_pair" | awk '/PublicKey/ {print $2}' | tr -d '"')
-
-# Generate necessary values
-reality_uuid=$(/root/sbox/sing-box generate uuid)
-short_id=$(/root/sbox/sing-box generate rand --hex 8)
-echo "uuid和短id 生成完成"
-echo ""
-# Ask for listen port
-while true; do
-    read -p "请输入Reality端口号 (default: 4430): " reality_port
-    reality_port=${reality_port:-4430}
-
-    # 检测端口是否被占用
-    if ss -tuln | grep -q ":$reality_port\b"; then
-        echo "端口 $reality_port 已经被占用，请重新输入。"
-    else
-        break
-    fi
-done
-echo ""
-# Ask for server name (sni)
-read -p "请输入想要偷取的域名,需要支持tls1.3 (default: itunes.apple.com): " reality_server_name
-reality_server_name=${reality_server_name:-itunes.apple.com}
-echo ""
 
 # hysteria2
 green "开始配置hysteria2"
@@ -467,27 +367,6 @@ while true; do
     # 检测端口是否被占用
     if ss -tuln | grep -q ":$hy_port\b"; then
         echo "端口 $hy_port 已经被占用，请选择其他端口。"
-    else
-        break
-    fi
-done
-echo ""
-
-# tuic
-green "开始配置tuic"
-echo ""
-# Generate hysteria necessary values
-tuic_uuid=$(/root/sbox/sing-box generate uuid)
-echo "自动生成了UUID"
-echo ""
-# Ask for listen port
-while true; do
-    read -p "请输入TUIC监听端口 (default: 28443): " tuic_port
-    tuic_port=${tuic_port:-28443}
-
-    # 检测端口是否被占用
-    if ss -tuln | grep -q ":$tuic_port\b"; then
-        echo "端口 $tuic_port 已经被占用，请选择其他端口。"
     else
         break
     fi
@@ -582,31 +461,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
   },
   "inbounds": [
     {
-      "type": "vless",
-      "tag": "vless-in",
-      "listen": "::",
-      "listen_port": $reality_port,
-      "users": [
-        {
-          "uuid": "$reality_uuid",
-          "flow": "xtls-rprx-vision"
-        }
-      ],
-      "tls": {
-        "enabled": true,
-        "server_name": "$reality_server_name",
-        "reality": {
-          "enabled": true,
-          "handshake": {
-            "server": "$reality_server_name",
-            "server_port": 443
-          },
-          "private_key": "$private_key",
-          "short_id": ["$short_id"]
-        }
-      }
-    },
-    {
         "type": "hysteria2",
         "tag": "hy2-in",
         "listen": "::",
@@ -624,27 +478,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
             "certificate_path": "/root/cert.crt",
             "key_path": "/root/private.key"
         }
-    },
-    {
-      "type": "tuic",
-      "tag": "tuic-in", 
-      "listen": "::", 
-      "listen_port": $tuic_port,
-      "sniff": true,  
-      "sniff_override_destination": false,  
-      "users": [
-        {
-          "uuid": "$tuic_uuid", 
-          "password": "$tuic_uuid" 
-        }
-      ],
-      "congestion_control": "bbr", 
-      "tls": {
-        "enabled": true,
-        "alpn": [ "h3" ], 
-        "certificate_path": "/root/cert.crt",
-        "key_path": "/root/private.key" 
-      }
     },
     {
         "type": "vmess",
