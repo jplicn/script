@@ -603,7 +603,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "outbound": "wireguard-out"
       }
     ],
-    "auto_detect_interface": true, 
     "final": "direct"
   }
 }
