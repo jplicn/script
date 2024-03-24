@@ -423,31 +423,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
   },
   "inbounds": [
     {
-      "type": "vless",
-      "tag": "vless-in",
-      "listen": "::",
-      "listen_port": $reality_port,
-      "users": [
-        {
-          "uuid": "$reality_uuid",
-          "flow": "xtls-rprx-vision"
-        }
-      ],
-      "tls": {
-        "enabled": true,
-        "server_name": "$reality_server_name",
-        "reality": {
-          "enabled": true,
-          "handshake": {
-            "server": "$reality_server_name",
-            "server_port": 443
-          },
-          "private_key": "$private_key",
-          "short_id": ["$short_id"]
-        }
-      }
-    },
-    {
         "type": "hysteria2",
         "tag": "hy2-in",
         "listen": "::",
@@ -465,27 +440,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
             "certificate_path": "/root/cert.crt",
             "key_path": "/root/private.key"
         }
-    },
-    {
-      "type": "tuic",
-      "tag": "tuic-in", 
-      "listen": "::", 
-      "listen_port": $tuic_port,
-      "sniff": true,  
-      "sniff_override_destination": false,  
-      "users": [
-        {
-          "uuid": "$tuic_uuid", 
-          "password": "$tuic_uuid" 
-        }
-      ],
-      "congestion_control": "bbr", 
-      "tls": {
-        "enabled": true,
-        "alpn": [ "h3" ], 
-        "certificate_path": "/root/cert.crt",
-        "key_path": "/root/private.key" 
-      }
     },
     {
         "type": "vmess",
