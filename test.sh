@@ -580,11 +580,13 @@ cat > /root/sbox/sbconfig_server.json << EOF
     }, 
     "experimental": {
     "cache_file": {
-      "enabled": true,
-      "path": "cache.db",
-      "cache_id": "mycacheid",
-      "store_fakeip": true
-    }
+  "enabled": true,
+  "path": "",
+  "cache_id": "",
+  "store_fakeip": false,
+  "store_rdrc": false,
+  "rdrc_timeout": ""
+}
   }
 }
 EOF
