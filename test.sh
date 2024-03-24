@@ -425,7 +425,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "servers": [
       {
         "tag": "google",
-        "address": "udp://8.8.8.8" // 可改，支持 TCP UDP DOT DOH DOQ H3等，具体请看Sing-Box官方文档
+        "address": "udp://8.8.8.8"
       }
     ]
   },
@@ -480,29 +480,28 @@ cat > /root/sbox/sbconfig_server.json << EOF
 "outbounds": [
     {
       "type": "direct",
-      "tag": "direct" // 双栈自动直接出站
+      "tag": "direct"
     },
     {
       "type": "direct",
-      "tag": "direct-ipv4-prefer-out", // IPV4优先直接出站
+      "tag": "direct-ipv4-prefer-out",
       "domain_strategy": "prefer_ipv4"
     },
     {
       "type": "direct",
-      "tag": "direct-ipv4-only-out", // 仅IPV4直接出站
+      "tag": "direct-ipv4-only-out", 
       "domain_strategy": "ipv4_only"
     },
     {
       "type": "direct",
-      "tag": "direct-ipv6-prefer-out", // IPV6优先直接出站
+      "tag": "direct-ipv6-prefer-out", 
       "domain_strategy": "prefer_ipv6"
     },
     {
       "type": "direct",
-      "tag": "direct-ipv6-only-out", // 仅IPV6直接出站
+      "tag": "direct-ipv6-only-out", 
       "domain_strategy": "ipv6_only"
     },
-    // 附赠 WARP-free，如想更改，具体请参考Sing-Box官方文档
     {
       "type": "wireguard",
       "tag": "wireguard-out",
@@ -522,25 +521,25 @@ cat > /root/sbox/sbconfig_server.json << EOF
     },
     {
       "type": "direct",
-      "tag": "wireguard-ipv4-prefer-out", // 优先IPV4-WireGuard出站
+      "tag": "wireguard-ipv4-prefer-out", 
       "detour": "wireguard-out",
       "domain_strategy": "prefer_ipv4"
     },
     {
       "type": "direct",
-      "tag": "wireguard-ipv4-only-out", // 仅IPV4-WireGuard出站
+      "tag": "wireguard-ipv4-only-out", 
       "detour": "wireguard-out",
       "domain_strategy": "ipv4_only"
     },
     {
       "type": "direct",
-      "tag": "wireguard-ipv6-prefer-out", // 优先IPV6-WireGuard出站
+      "tag": "wireguard-ipv6-prefer-out", 
       "detour": "wireguard-out",
       "domain_strategy": "prefer_ipv6"
     },
     {
       "type": "direct",
-      "tag": "wireguard-ipv6-only-out", // 仅IPV6-WireGuard出站
+      "tag": "wireguard-ipv6-only-out",
       "detour": "wireguard-out",
       "domain_strategy": "ipv6_only"
     }
@@ -551,7 +550,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "tag": "geosite-netflix",
         "type": "remote",
         "format": "binary",
-        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/netflix.srs", // 可自选来源
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/netflix.srs", 
         "download_detour": "direct-ipv4-only-out",
         "update_interval": "1d"
       },
@@ -590,23 +589,22 @@ cat > /root/sbox/sbconfig_server.json << EOF
     ],
     "rules": [
       {
-        // 使用 WARP解锁Netflix和OpenAI，还需解锁什么，请参考V2ray官方域名库，自行按照格式添加（https://github.com/v2fly/domain-list-community/tree/master/data）
         "geosite": [
           "geosite-netflix",
           "geosite-openai",
           "geosite-copilot"
         ],
-        "outbound": "wireguard-ipv6-only-out" // 使用warp节点通讯
+        "outbound": "wireguard-ipv6-only-out" 
       },
       {
         "rule_set": [
           "geosite-cn",
           "geoip-cn"
-        ], // 中国大陆的域名
-        "outbound": "wireguard-out" // 使用warp节点通讯
+        ], 
+        "outbound": "wireguard-out"
       }
     ],
-    // "auto_detect_interface": true,  //仅支持 Linux、Windows 和 macOS。如果您是这三者其一，并在使用中发现异常或错误，可尝试取消此行注释
+    "auto_detect_interface": true, 
     "final": "direct"
   }
 }
