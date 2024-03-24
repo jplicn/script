@@ -553,7 +553,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "download_detour": "direct"
         },
         {
-          "tag": "geosite-copilot",
+          "tag": "geosite-bing",
           "type": "remote",
           "format": "binary",
           "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/bing.srs",
