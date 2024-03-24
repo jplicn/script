@@ -429,7 +429,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
       }
     ]
   },
-
   "inbounds": [
     {
         "type": "hysteria2",
@@ -482,6 +481,14 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "type": "direct",
       "tag": "direct"
     	},
+         {
+      "type": "block",
+      "tag": "block"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    },
       {
         "type": "direct",
         "tag": "warp-IPv4-out",
