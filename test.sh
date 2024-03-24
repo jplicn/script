@@ -433,31 +433,13 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "level": "info",
     "timestamp": true
   },
-    "dns": {
+  "dns": {
     "servers": [
       {
-        "tag": "cloudflare",
-        "address": "https://1.1.1.1/dns-query",
-        "strategy": "ipv4_only",
-        "detour": "direct"
-      },
-      {
-        "tag": "block",
-        "address": "rcode://success"
+        "tag": "google",
+        "address": "udp://8.8.8.8" 
       }
-    ],
-    "rules": [
-      {
-        "rule_set": [
-          "geosite-category-ads-all"
-        ],
-        "server": "block"
-      }
-    ],
-    "final": "cloudflare",
-    "strategy": "",
-    "disable_cache": false,
-    "disable_expire": false
+    ]
   },
   "inbounds": [
     {
