@@ -498,10 +498,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "type": "direct",
       "tag": "direct"
     	},
-    {
-      "type": "block",
-      "tag": "block"
-    },
       {
         "type": "direct",
         "tag": "warp-IPv4-out",
