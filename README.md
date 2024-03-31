@@ -18,7 +18,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/hy2.sh)
 
 ### 申请证书：
 ````
-bash <(wget -qO- https://raw.githubusercontent.com/jplicn/script/master/ac.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/ac.sh)
 ````
 
 
