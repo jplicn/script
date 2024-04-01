@@ -6,6 +6,12 @@
 ````
 sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/docker_install.sh)"
 ````
+````
+curl -sSL https://get.docker.com/ | sh
+systemctl start docker
+systemctl enable docker
+````
+
 ### Singbox脚本
 ````
 bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/sing.sh)
