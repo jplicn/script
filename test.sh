@@ -429,6 +429,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       },
     "disable_cache": false,
     "disable_expire": false
+    ]
   },
   "inbounds": [
     {
