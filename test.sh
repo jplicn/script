@@ -425,7 +425,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "servers": [
       {
         "tag": "google",
-        "address": "udp://8.8.8.8",
+        "address": "udp://8.8.8.8"
       },
     "disable_cache": false,
     "disable_expire": false
