@@ -426,9 +426,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "servers": [
       {
         "tag": "cloudflare",
-        "address": "https://1.1.1.1/dns-query",
-        "strategy": "ipv4_only",
-        "detour": "direct"
+        "address": "https://1.1.1.1/dns-query"
       },
       {
         "tag": "block",
