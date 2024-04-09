@@ -419,18 +419,29 @@ cat > /root/sbox/sbconfig_server.json << EOF
   "log": {
     "disabled": false,
     "level": "info",
+    "output": "/var/log/sing-box.log",
     "timestamp": true
   },
-"dns": {
+  "dns": {
     "servers": [
       {
-        "tag": "google",
-        "address": "udp://8.8.8.8"
+        "tag": "cloudflare",
+        "address": "https://1.1.1.1/dns-query",
+        "strategy": "ipv4_only",
+        "detour": "direct"
+      },
+      {
+        "tag": "block",
+        "address": "rcode://success"
       }
-    ]
+    ],
+    "final": "cloudflare",
+    "strategy": "",
+    "disable_cache": false,
+    "disable_expire": false
   },
   "inbounds": [
-    {
+{
         "type": "hysteria2",
         "tag": "hy2-in",
         "listen": "::",
@@ -479,63 +490,32 @@ cat > /root/sbox/sbconfig_server.json << EOF
   "outbounds": [
     {
       "type": "direct",
-      "tag": "direct" // 双栈自动直接出站
+      "tag": "direct"
     },
     {
-      "type": "direct",
-      "tag": "direct-ipv4-prefer-out", // IPV4优先直接出站
-      "domain_strategy": "prefer_ipv4"
+      "type": "block",
+      "tag": "block"
     },
     {
-      "type": "direct",
-      "tag": "direct-ipv4-only-out", // 仅IPV4直接出站
-      "domain_strategy": "ipv4_only"
+      "type": "dns",
+      "tag": "dns-out"
     },
-    {
-      "type": "direct",
-      "tag": "direct-ipv6-prefer-out", // IPV6优先直接出站
-      "domain_strategy": "prefer_ipv6"
-    },
-    {
-      "type": "direct",
-      "tag": "direct-ipv6-only-out", // 仅IPV6直接出站
-      "domain_strategy": "ipv6_only"
-    },
-    // 附赠 WARP-free，如想更改，具体请参考Sing-Box官方文档
     {
       "type": "wireguard",
       "tag": "wireguard-out",
-      "server": "engage.cloudflareclient.com",
+      "server": "162.159.193.10",
       "server_port": 2408,
       "local_address": [
         "172.16.0.2/32",
-        "2606:4700:110:812a:4929:7d2a:af62:351c/128"
+        "2606:4700:110:8d40:2ead:2fdf:21e2:178/128"
       ],
-      "private_key": "gBthRjevHDGyV0KvYwYE52NIPy29sSrVr6rcQtYNcXA=",
+      "private_key": "WNw22F6+zfv17U7bmqavzkun7FlpcNfkiCq/Bf3DX2M=",
       "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
       "reserved": [
-        6,
-        146,
-        6
+        197,
+        211,
+        197
       ]
-    },
-    {
-      "type": "direct",
-      "tag": "wireguard-ipv4-prefer-out", // 优先IPV4-WireGuard出站
-      "detour": "wireguard-out",
-      "domain_strategy": "prefer_ipv4"
-    },
-    {
-      "type": "direct",
-      "tag": "wireguard-ipv4-only-out", // 仅IPV4-WireGuard出站
-      "detour": "wireguard-out",
-      "domain_strategy": "ipv4_only"
-    },
-    {
-      "type": "direct",
-      "tag": "wireguard-ipv6-prefer-out", // 优先IPV6-WireGuard出站
-      "detour": "wireguard-out",
-      "domain_strategy": "prefer_ipv6"
     },
     {
       "type": "direct",
@@ -545,12 +525,12 @@ cat > /root/sbox/sbconfig_server.json << EOF
     }
   ],
   "route": {
-    "rule_set": [
+       "rule_set": [
       {
         "tag": "geosite-netflix",
         "type": "remote",
         "format": "binary",
-        "url": "https://raw.githubusercontent.com/jklolixxs/meta-rules-dat/sing/geo/geosite/netflix.srs", // 可自选来源
+        "url": "https://raw.githubusercontent.com/jklolixxs/meta-rules-dat/sing/geo/geosite/netflix.srs",
         "download_detour": "direct-ipv4-only-out",
         "update_interval": "1d"
       },
@@ -577,56 +557,31 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "url": "https://raw.githubusercontent.com/jklolixxs/meta-rules-dat/sing/bm7/Gemini.srs",
         "download_detour": "direct-ipv4-only-out",
         "update_interval": "1d"
-      },
-      {
-        "tag": "geosite-geolocation-cn",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/jklolixxs/meta-rules-dat/sing/geo/geosite/geolocation-cn.srs",
-        "download_detour": "direct-ipv4-only-out",
-        "update_interval": "1d"
-      },
-      {
-        "tag": "geosite-tld-cn",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/jklolixxs/meta-rules-dat/sing/geo/geosite/tld-cn.srs",
-        "download_detour": "direct-ipv4-only-out",
-        "update_interval": "1d"
-      },
-      {
-        "tag": "geoip-cn",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/jklolixxs/meta-rules-dat/sing/geo/geoip/cn.srs",
-        "download_detour": "direct-ipv4-only-out",
-        "update_interval": "1d"
       }
-    ],
-    "rules": [
+],
+   "rules": [
       {
-        // 使用 WARP解锁Netflix和OpenAI，还需解锁什么，请参考V2ray官方域名库，自行按照格式添加（https://github.com/v2fly/domain-list-community/tree/master/data）
+        "protocol": "dns",
+        "outbound": "dns-out"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      },
+     {
         "geosite": [
           "geosite-netflix",
           "geosite-openai",
           "geosite-copilot",
           "geosite-gemini"
         ],
-        "outbound": "wireguard-ipv6-only-out" // 使用warp节点通讯
-      },
-      {
-        "rule_set": [
-          "geosite-geolocation-cn",
-          "geosite-tld-cn",
-          "geoip-cn"
-        ], // 中国大陆的域名
-        "outbound": "wireguard-out" // 使用warp节点通讯
+        "outbound": "wireguard-ipv6-only-out"
       }
     ],
     "auto_detect_interface": true,
     "final": "direct"
-    },
-    "experimental": {
+  },
+  "experimental": {
     "cache_file": {
       "enabled": true,
       "path": "cache.db",
