@@ -493,7 +493,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "password": "$hy_password", 
       "multiplex": {
         "enabled": true,
-        "padding": true,
+        "padding": true
         }
       }
     },
