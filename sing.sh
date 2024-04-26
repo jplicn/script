@@ -114,7 +114,7 @@ show_client_configuration() {
   hy_password=$(grep -o "HY_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the hy link
-  hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=0&alpn=h3&obfs=none&sni=$(cat /root/domain.txt)#hy2"
+  hy2_link="hysteria2://$hy_password@$(cat /root/domain.txt):$hy_port?insecure=0&alpn=h3&obfs=none&sni=$(cat /root/domain.txt)#hy2"
 
   echo ""
   echo "" 
@@ -135,10 +135,39 @@ show_client_configuration() {
   green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""  
 
+  # tls port
+  tls_port=$(grep -o "TLS_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
+  # tls password
+  tls_password=$(grep -o "TLS_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
+  
+  # Generate the hy link
+  tls_link="ss://$(echo -n "2022-blake3-aes-128-gcm:$tls_password@$(cat /root/domain.txt):$tls_port" | base64 -w0)?shadow-tls=$(echo -n "{\"version\":\"3\",\"host\":\"addons.mozilla.org\",\"password\":\"$tls_password\"}" | base64 -w0)#ShadowTLS"
+
+  echo ""
+  echo "" 
+  show_notice "$(green "Shadowtls 通用链接和二维码和通用参数")"
+  echo ""
+  echo "" 
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━tls 通用链接格式━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "$tls_link"
+  echo ""
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "" 
+  echo ""
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━tls 二维码━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  qrencode -t UTF8 $tls_link  
+  echo ""
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "" 
+
+
+
   vmess_uuid=$(grep -o "VMESS_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   ws_path=$(grep -o "WS_PATH='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
-  vmesswss_link='vmess://'$(echo '{"add":"'$(cat /root/domain.txt)'","aid":"0","host":"'$(cat /root/domain.txt)'","id":"'$vmess_uuid'","net":"ws","path":"'${ws_path}'","port":"'$vmess_port'","ps":"sing-box-vmess-tls","tls":"tls","type":"none","v":"2"}' | base64 -w 0)
+  vmesswss_link='vmess://'$(echo '{"add":"'$(cat /root/domain.txt)'","aid":"0","host":"'$(cat /root/domain.txt)'","id":"'$vmess_uuid'","net":"ws","path":"'${ws_path}'","port":"'$vmess_port'","ps":"Vmess-tls","tls":"tls","type":"none","v":"2"}' | base64 -w 0)
   
   echo ""
   echo ""
@@ -371,6 +400,25 @@ while true; do
     fi
 done
 echo ""
+echo ""
+# Generate tls necessary values
+tls_password=$(/root/sbox/sing-box generate rand --base64 16)
+echo "自动生成了16位随机密码"
+echo ""
+# Ask for listen port
+while true; do
+    read -p "请输入tls监听端口 (default: 9433): " tls_port
+    tls_port=${tls_port:-9433}
+
+    # 检测端口是否被占用
+    if ss -tuln | grep -q ":$tls_port\b"; then
+        echo "端口 $tls_port 已经被占用，请选择其他端口。"
+    else
+        break
+    fi
+done
+echo ""
+
 
 # vmess ws
 yellow "开始配置vmess"
@@ -378,8 +426,8 @@ echo ""
 # Generate hysteria necessary values
 vmess_uuid=$(/root/sbox/sing-box generate uuid)
 while true; do
-    read -p "请输入vmess端口，默认为443: " vmess_port
-    vmess_port=${vmess_port:-443}
+    read -p "请输入vmess端口，默认为2053: " vmess_port
+    vmess_port=${vmess_port:-2053}
 
     # 检测端口是否被占用
     if ss -tuln | grep -q ":$vmess_port\b"; then
@@ -407,9 +455,12 @@ HY_PORT='$hy_port'
 HY_SERVER_NAME='$hy_server_name'
 HY_PASSWORD='$hy_password'
 # Vmess
-VMESS_PORT=$vmess_port
+VMESS_PORT='$vmess_port'
 VMESS_UUID='$vmess_uuid'
 WS_PATH='$ws_path'
+# Tls
+TLS_PORT='$tls_port'
+TLS_PASSWORD='$tls_password'
 
 EOF
 
@@ -466,6 +517,37 @@ cat > /root/sbox/sbconfig_server.json << EOF
             ],
             "certificate_path": "/root/cert.crt",
             "key_path": "/root/private.key"
+        }
+    },
+        {
+      "type": "shadowtls",
+      "tag": "ShadowTLS",
+      "listen": "::",
+      "listen_port": $tls_port, 
+      "version": 3,
+      "users": [
+        {
+          "password": "$tls_password" 
+        }
+      ],
+      "handshake": {
+        "server": "addons.mozilla.org",
+        "server_port": 443
+      },
+      "strict_mode": true, 
+      "detour": "shadowsocks-shadowtls-in"
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "shadowsocks-shadowtls-in", 
+      "listen": "127.0.0.1",
+      "sniff": true,
+      "sniff_override_destination": false,
+      "method": "2022-blake3-aes-128-gcm",
+      "password": "$tls_password", 
+      "multiplex": {
+        "enabled": true,
+        "padding": true
         }
     },
     {
