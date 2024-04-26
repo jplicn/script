@@ -371,6 +371,11 @@ while true; do
     fi
 done
 echo ""
+echo ""
+# Generate hysteria necessary values
+tls_password=$(/root/sbox/sing-box sing-box generate rand --base64 16)
+echo "自动生成了16位随机密码"
+echo ""
 # Ask for listen port
 while true; do
     read -p "请输入tls监听端口 (default: 9433): " tls_port
@@ -473,7 +478,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "version": 3,
       "users": [
         {
-          "password": "$vmess_uuid" 
+          "password": "$tls_password" 
         }
       ],
       "handshake": {
@@ -490,7 +495,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "sniff": true,
       "sniff_override_destination": false,
       "method": "2022-blake3-aes-128-gcm",
-      "password": "$vmess_uuid", 
+      "password": "$tls_password", 
       "multiplex": {
         "enabled": true,
         "padding": true
