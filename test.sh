@@ -473,7 +473,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "version": 3,
       "users": [
         {
-          "password": "$hy_password" 
+          "password": "$vmess_uuid" 
         }
       ],
       "handshake": {
@@ -490,7 +490,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "sniff": true,
       "sniff_override_destination": false,
       "method": "2022-blake3-aes-128-gcm",
-      "password": "$hy_password", 
+      "password": "$vmess_uuid", 
       "multiplex": {
         "enabled": true,
         "padding": true
