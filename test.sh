@@ -135,6 +135,35 @@ show_client_configuration() {
   green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""  
 
+  # tls port
+  tls_port=$(grep -o "TLS_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
+  # tls password
+  tls_password=$(grep -o "TLS_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
+  
+  # Generate the hy link
+  hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=0&alpn=h3&obfs=none&sni=$(cat /root/domain.txt)#hy2"
+
+  echo ""
+  echo "" 
+  show_notice "$(green "Hysteria2 通用链接和二维码和通用参数")"
+  echo ""
+  echo "" 
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━hysteria2 通用链接格式━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "$hy2_link"
+  echo ""
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "" 
+  echo ""
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━hysteria2 二维码━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  qrencode -t UTF8 $hy2_link  
+  echo ""
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "" 
+
+
+
   vmess_uuid=$(grep -o "VMESS_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   ws_path=$(grep -o "WS_PATH='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
@@ -429,6 +458,9 @@ HY_PASSWORD='$hy_password'
 VMESS_PORT=$vmess_port
 VMESS_UUID='$vmess_uuid'
 WS_PATH='$ws_path'
+# Tls
+TLS_PORT=$tls_port
+TLS_PASSWORD='$tls_password'
 
 EOF
 
