@@ -468,6 +468,42 @@ cat > /root/sbox/sbconfig_server.json << EOF
             "key_path": "/root/private.key"
         }
     },
+        {
+      "type": "shadowtls",
+      "tag": "ShadowTLS",
+      "listen": "::",
+      "listen_port": 123, 
+      "version": 3,
+      "users": [
+        {
+          "password": "$hy_password" 
+        }
+      ],
+      "handshake": {
+        "server": "www.bing.com",
+        "server_port": 443
+      },
+      "strict_mode": true, 
+      "detour": "shadowsocks-shadowtls-in"
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "shadowsocks-shadowtls-in", 
+      "listen": "127.0.0.1",
+      "sniff": true,
+      "sniff_override_destination": false,
+      "method": "2022-blake3-aes-128-gcm",
+      "password": "$hy_password", 
+      "multiplex": {
+        "enabled": true,
+        "padding": true,
+	"brutal":{
+            "enabled":true,
+            "up_mbps":1000,
+            "down_mbps":1000
+        }
+      }
+    },
     {
         "type": "vmess",
         "sniff": true,
