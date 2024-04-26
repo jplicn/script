@@ -372,7 +372,7 @@ while true; do
 done
 echo ""
 echo ""
-# Generate hysteria necessary values
+# Generate tls necessary values
 tls_password=$(/root/sbox/sing-box generate rand --base64 16)
 echo "自动生成了16位随机密码"
 echo ""
