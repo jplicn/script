@@ -392,8 +392,8 @@ echo ""
 # Generate hysteria necessary values
 vmess_uuid=$(/root/sbox/sing-box generate uuid)
 while true; do
-    read -p "请输入vmess端口，默认为443: " vmess_port
-    vmess_port=${vmess_port:-443}
+    read -p "请输入vmess端口，默认为2053: " vmess_port
+    vmess_port=${vmess_port:-2053}
 
     # 检测端口是否被占用
     if ss -tuln | grep -q ":$vmess_port\b"; then
