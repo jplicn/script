@@ -141,7 +141,7 @@ show_client_configuration() {
   tls_password=$(grep -o "TLS_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the hy link
-  tls_link="ss://$(echo -n "2022-blake3-aes-128-gcm:$tls_password@$server_ip:9433" | base64 -w0)?shadow-tls=$(echo -n "{\"version\":\"3\",\"host\":\"addons.mozilla.org\",\"password\":\"$tls_password\"}" | base64 -w0)#ShadowTLS"
+  tls_link="ss://$(echo -n "2022-blake3-aes-128-gcm:$tls_password@$server_ip:$tls_port" | base64 -w0)?shadow-tls=$(echo -n "{\"version\":\"3\",\"host\":\"addons.mozilla.org\",\"password\":\"$tls_password\"}" | base64 -w0)#ShadowTLS"
 
   echo ""
   echo "" 
@@ -455,11 +455,11 @@ HY_PORT='$hy_port'
 HY_SERVER_NAME='$hy_server_name'
 HY_PASSWORD='$hy_password'
 # Vmess
-VMESS_PORT=$vmess_port
+VMESS_PORT='$vmess_port'
 VMESS_UUID='$vmess_uuid'
 WS_PATH='$ws_path'
 # Tls
-TLS_PORT=$tls_port
+TLS_PORT='$tls_port'
 TLS_PASSWORD='$tls_password'
 
 EOF
