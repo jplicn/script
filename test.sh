@@ -495,7 +495,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "enabled": true,
         "padding": true
         }
-      }
     },
     {
         "type": "vmess",
