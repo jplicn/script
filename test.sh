@@ -114,7 +114,7 @@ show_client_configuration() {
   hy_password=$(grep -o "HY_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the hy link
-  hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=0&alpn=h3&obfs=none&sni=$(cat /root/domain.txt)#hy2"
+  hy2_link="hysteria2://$hy_password@$(cat /root/domain.txt):$hy_port?insecure=0&alpn=h3&obfs=none&sni=$(cat /root/domain.txt)#hy2"
 
   echo ""
   echo "" 
@@ -141,7 +141,7 @@ show_client_configuration() {
   tls_password=$(grep -o "TLS_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the hy link
-  tls_link="ss://$(echo -n "2022-blake3-aes-128-gcm:$tls_password@$server_ip:$tls_port" | base64 -w0)?shadow-tls=$(echo -n "{\"version\":\"3\",\"host\":\"addons.mozilla.org\",\"password\":\"$tls_password\"}" | base64 -w0)#ShadowTLS"
+  tls_link="ss://$(echo -n "2022-blake3-aes-128-gcm:$tls_password@$(cat /root/domain.txt):$tls_port" | base64 -w0)?shadow-tls=$(echo -n "{\"version\":\"3\",\"host\":\"addons.mozilla.org\",\"password\":\"$tls_password\"}" | base64 -w0)#ShadowTLS"
 
   echo ""
   echo "" 
