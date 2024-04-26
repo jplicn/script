@@ -410,23 +410,6 @@ ws_path=${ws_path:-$(/root/sbox/sing-box generate rand --hex 6)}
 #ip地址
 server_ip=$(curl -s4m8 ip.sb -k) || server_ip=$(curl -s6m8 ip.sb -k)
 
-#config配置文件
-cat > /root/sbox/config <<EOF
-
-# VPS ip
-SERVER_IP='$server_ip'
-# Singbox
-# Hy2
-HY_PORT='$hy_port'
-HY_SERVER_NAME='$hy_server_name'
-HY_PASSWORD='$hy_password'
-# Vmess
-VMESS_PORT=$vmess_port
-VMESS_UUID='$vmess_uuid'
-WS_PATH='$ws_path'
-
-EOF
-
 # sbox配置文件
 cat > /root/sbox/sbconfig_server.json << EOF
 
@@ -494,7 +477,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
         }
       ],
       "handshake": {
-        "server": "www.bing.com",
+        "server": "addons.mozilla.org",
         "server_port": 443
       },
       "strict_mode": true, 
@@ -511,10 +494,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "multiplex": {
         "enabled": true,
         "padding": true,
-	"brutal":{
-            "enabled":true,
-            "up_mbps":1000,
-            "down_mbps":1000
         }
       }
     },
