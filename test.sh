@@ -142,22 +142,23 @@ show_client_configuration() {
   
   # Generate the hy link
   hy2_link="hysteria2://$hy_password@$server_ip:$hy_port?insecure=0&alpn=h3&obfs=none&sni=$(cat /root/domain.txt)#hy2"
+  tls_link="ss://$(echo -n "2022-blake3-aes-128-gcm:$tls_password@$server_ip:$tls_port" | base64 -w0)?shadow-tls=$(echo -n "{\"version\":\"3\",\"host\":\"addons.mozilla.org\",\"password\":\"$tls_password\"}" | base64 -w0)#ShadowTLS"
 
   echo ""
   echo "" 
-  show_notice "$(green "Hysteria2 通用链接和二维码和通用参数")"
+  show_notice "$(green "Shadowtls 通用链接和二维码和通用参数")"
   echo ""
   echo "" 
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━hysteria2 通用链接格式━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━tls 通用链接格式━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
-  echo "$hy2_link"
+  echo "$tls_link"
   echo ""
   green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "" 
   echo ""
-  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━hysteria2 二维码━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━tls 二维码━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
-  qrencode -t UTF8 $hy2_link  
+  qrencode -t UTF8 $tls_link  
   echo ""
   green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "" 
