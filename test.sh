@@ -371,6 +371,20 @@ while true; do
     fi
 done
 echo ""
+# Ask for listen port
+while true; do
+    read -p "请输入tls监听端口 (default: 9433): " tls_port
+    tls_port=${tls_port:-9433}
+
+    # 检测端口是否被占用
+    if ss -tuln | grep -q ":$tls_port\b"; then
+        echo "端口 $tls_port 已经被占用，请选择其他端口。"
+    else
+        break
+    fi
+done
+echo ""
+
 
 # vmess ws
 yellow "开始配置vmess"
@@ -472,7 +486,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "type": "shadowtls",
       "tag": "ShadowTLS",
       "listen": "::",
-      "listen_port": 123, 
+      "listen_port": $tls_port, 
       "version": 3,
       "users": [
         {
