@@ -575,6 +575,29 @@ cat > /root/sbox/sbconfig_server.json << EOF
                 "certificate_path": "/root/cert.crt",
                 "key_path": "/root/private.key"
             }
+    },
+    {
+      "type": "tuic",
+      "tag": "Tuic",
+      "listen": "::", 
+      "listen_port": 7680, 
+      "sniff": true, 
+      "sniff_override_destination": false,
+      "users": [
+        {
+          "uuid": "$vmess_uuid",
+          "password": "$vmess_uuid" 
+        }
+      ],
+      "congestion_control": "bbr", 
+      "tls": {
+        "enabled": true,
+        "alpn": [
+          "h3"
+        ], 
+        "certificate_path": "/root/cert.crt", 
+        "key_path": "/root/private.key" 
+      }
     }
   ],
 "outbounds": [
