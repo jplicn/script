@@ -473,31 +473,13 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "level": "info",
     "timestamp": true
   },
-"dns": {
+  "dns": {
     "servers": [
       {
-        "tag": "cloudflare",
-        "address": "https://1.1.1.1/dns-query",
-        "strategy": "ipv4_only",
-        "detour": "direct"
-      },
-      {
-        "tag": "block",
-        "address": "rcode://success"
+        "tag": "google",
+        "address": "udp://8.8.8.8"
       }
-    ],
-    "rules": [
-      {
-        "rule_set": [
-          "geosite-category-ads-all"
-        ],
-        "server": "block"
-      }
-    ],
-    "final": "cloudflare",
-    "strategy": "",
-    "disable_cache": false,
-    "disable_expire": false
+    ]
   },
   "inbounds": [
     {
@@ -519,28 +501,11 @@ cat > /root/sbox/sbconfig_server.json << EOF
             "key_path": "/root/private.key"
         }
     },
-        {
-      "type": "shadowtls",
-      "tag": "ShadowTLS",
-      "listen": "::",
-      "listen_port": $tls_port, 
-      "version": 3,
-      "users": [
-        {
-          "password": "$tls_password" 
-        }
-      ],
-      "handshake": {
-        "server": "www.samsung.com",
-        "server_port": 443
-      },
-      "strict_mode": true, 
-      "detour": "shadowsocks-shadowtls-in"
-    },
     {
       "type": "shadowsocks",
       "tag": "shadowsocks-shadowtls-in", 
       "listen": "::",
+      "listen_port": $tls_port,
       "sniff": true,
       "sniff_override_destination": false,
       "method": "2022-blake3-aes-128-gcm",
@@ -601,42 +566,30 @@ cat > /root/sbox/sbconfig_server.json << EOF
     }
   ],
 "outbounds": [
-	{
+    {
       "type": "direct",
       "tag": "direct"
-    	},
-     {
-      "type": "block",
-      "tag": "block"
     },
     {
-      "type": "dns",
-      "tag": "dns-out"
+      "type": "direct",
+      "tag": "direct-ipv4-prefer-out",
+      "domain_strategy": "prefer_ipv4"
     },
-      {
-        "type": "direct",
-        "tag": "warp-IPv4-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "ipv4_only"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv6-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "ipv6_only"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv6-prefer-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "prefer_ipv6"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv4-prefer-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "prefer_ipv4"
-      },
+    {
+      "type": "direct",
+      "tag": "direct-ipv4-only-out",
+      "domain_strategy": "ipv4_only"
+    },
+    {
+      "type": "direct",
+      "tag": "direct-ipv6-prefer-out",
+      "domain_strategy": "prefer_ipv6"
+    },
+    {
+      "type": "direct",
+      "tag": "direct-ipv6-only-out",
+      "domain_strategy": "ipv6_only"
+    },
     {
       "type": "wireguard",
       "tag": "wireguard-out",
@@ -648,80 +601,185 @@ cat > /root/sbox/sbconfig_server.json << EOF
       ],
       "private_key": "gBthRjevHDGyV0KvYwYE52NIPy29sSrVr6rcQtYNcXA=",
       "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-      "reserved":[6,146,6]
+      "reserved": [
+        6,
+        146,
+        6
+      ]
+    },
+    {
+      "type": "direct",
+      "tag": "wireguard-ipv4-prefer-out",
+      "detour": "wireguard-out",
+      "domain_strategy": "prefer_ipv4"
+    },
+    {
+      "type": "direct",
+      "tag": "wireguard-ipv4-only-out",
+      "detour": "wireguard-out",
+      "domain_strategy": "ipv4_only"
+    },
+    {
+      "type": "direct",
+      "tag": "wireguard-ipv6-prefer-out",
+      "detour": "wireguard-out",
+      "domain_strategy": "prefer_ipv6"
+    },
+    {
+      "type": "direct",
+      "tag": "wireguard-ipv6-only-out",
+      "detour": "wireguard-out",
+      "domain_strategy": "ipv6_only"
     }
   ],
   "route": {
-      "rules": [
-        {
-          "rule_set": ["geosite-openai","geosite-netflix"],
-          "outbound": "warp-IPv6-out"
-        },
-	      {
-        "protocol": "dns",
-        "outbound": "dns-out"
+    "rule_set": [
+      {
+        "tag": "geosite-netflix",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-netflix.srs",
+        "download_detour": "direct-ipv4-only-out",
+        "update_interval": "1d"
       },
       {
-        "ip_is_private": true,
-        "outbound": "direct"
+        "tag": "geosite-geolocation-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-cn.srs",
+        "download_detour": "direct-ipv4-only-out",
+        "update_interval": "1d"
+      },
+      {
+        "tag": "geosite-tld-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-tld-cn.srs",
+        "download_detour": "direct-ipv4-only-out",
+        "update_interval": "1d"
+      },
+      {
+        "tag": "geoip-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs",
+        "download_detour": "direct-ipv4-only-out",
+        "update_interval": "1d"
+      }
+    ],
+    "rules": [
+      {
+        "rule_set": [
+          "geosite-netflix"
+        ],
+        "outbound": "wireguard-ipv6-only-out"
+      },
+      {
+        "domain": [
+          "api.statsig.com",
+          "browser-intake-datadoghq.com",
+          "cdn.openai.com",
+          "chat.openai.com",
+          "chat.openai.com.cdn.cloudflare.net",
+          "ios.chat.openai.com",
+          "o33249.ingest.sentry.io",
+          "openai-api.arkoselabs.com",
+          "openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net",
+          "openaicomproductionae4b.blob.core.windows.net",
+          "production-openaicom-storage.azureedge.net",
+          "static.cloudflareinsights.com"
+        ],
+        "domain_suffix": [
+          ".algolia.net",
+          ".auth0.com",
+          ".chatgpt.com",
+          ".challenges.cloudflare.com",
+          ".client-api.arkoselabs.com",
+          ".events.statsigapi.net",
+          ".featuregates.org",
+          ".identrust.com",
+          ".intercom.io",
+          ".intercomcdn.com",
+          ".launchdarkly.com",
+          ".oaistatic.com",
+          ".oaiusercontent.com",
+          ".observeit.net",
+          ".openai.com",
+          ".openaiapi-site.azureedge.net",
+          ".openaicom.imgix.net",
+          ".segment.io",
+          ".sentry.io",
+          ".stripe.com"
+        ],
+        "domain_keyword": [
+          "openaicom-api"
+        ],
+        "outbound": "wireguard-ipv6-prefer-out"
+      },
+      {
+        "domain": [
+          "api.githubcopilot.com",
+          "bat.bing.com",
+          "browser.events.data.microsoft.com",
+          "config.edge.skype.com",
+          "content.lifecycle.office.net",
+          "copilot-proxy.githubusercontent.com",
+          "copilot.microsoft.com",
+          "edge.microsoft.com",
+          "edgeservices.bing.com",
+          "functional.events.data.microsoft.com",
+          "login.live.com",
+          "services.bingapis.com",
+          "storage.live.com",
+          "strict.bing.com",
+          "sydney.bing.com",
+          "www.bing.com",
+          "www.bingapis.com"
+        ],
+        "domain_suffix": [
+          ".bing.com"
+        ],
+        "outbound": "wireguard-ipv6-prefer-out"
+      },
+      {
+        "domain_suffix": [
+          ".bing.com",
+          ".bing.com.cn",
+          ".bing.net",
+          ".bingagencyawards.com",
+          ".bingapistatistics.com",
+          ".bingsandbox.com",
+          ".bingvisualsearch.com",
+          ".bingworld.com"
+        ],
+        "outbound": "wireguard-ipv6-prefer-out"
+      },
+      {
+        "domain": [
+          "aistudio.google.com",
+          "bard.google.com",
+          "gemini.google.com",
+          "generativelanguage.googleapis.com"
+        ],
+        "outbound": "wireguard-ipv6-prefer-out"
+      },
+      {
+        "domain_suffix": [
+          ".anthropic.com",
+          ".claude.ai"
+        ],
+        "outbound": "wireguard-ipv6-prefer-out"
       },
       {
         "rule_set": [
-          "geosite-category-ads-all"
+          "geosite-geolocation-cn",
+          "geosite-tld-cn",
+          "geoip-cn"
         ],
-        "outbound": "block"
-      },
-        {
-          "rule_set": "geosite-bing",
-          "outbound": "warp-IPv6-out" 
-        },
-        {
-          "domain_keyword": [
-            "ipaddress"
-          ],
-          "outbound": "warp-IPv6-out" 
-        }
-      ],
-      "rule_set": [
-        { 
-          "tag": "geosite-openai",
-          "type": "remote",
-          "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/openai.srs",
-          "download_detour": "direct"
-        },
-        {
-          "tag": "geosite-netflix",
-          "type": "remote",
-          "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/netflix.srs",
-          "download_detour": "direct"
-        },
-        {
-          "tag": "geosite-bing",
-          "type": "remote",
-          "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/bing.srs",
-          "download_detour": "direct"
-        },
-	{
-        "tag": "geosite-category-ads-all",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
-        "download_detour": "direct"
+        "outbound": "wireguard-out"
       }
-      ],
-          "auto_detect_interface": true,
+    ],
     "final": "direct"
-    },
-    "experimental": {
-    "cache_file": {
-      "enabled": true,
-      "path": "cache.db",
-      "cache_id": "mycacheid",
-      "store_fakeip": true
-    }
   }
 }
 
