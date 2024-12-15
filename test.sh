@@ -617,15 +617,15 @@ cat > /root/sbox/sbconfig_server.json << EOF
     {
       "type": "wireguard",
       "tag": "wireguard-out",
-      "server": "engage.cloudflareclient.com",
+      "server": "162.159.192.1",
       "server_port": 2408,
       "local_address": [
         "172.16.0.2/32",
-        "2606:4700:110:812a:4929:7d2a:af62:351c/128"
+        "2606:4700:110:8f06:9f62:835:ad93:568d/128"
       ],
-      "private_key": "gBthRjevHDGyV0KvYwYE52NIPy29sSrVr6rcQtYNcXA=",
+      "private_key": "WBAtGiuRqSPv+c9hYm3aYd/tWONpYPBnFmkkSBvOH1c=",
       "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-      "reserved":[6,146,6]
+      "reserved":[122,153,243]
     }
   ],
   "route": {
