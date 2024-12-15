@@ -578,130 +578,140 @@ cat > /root/sbox/sbconfig_server.json << EOF
     }
   ],
 "outbounds": [
-	{
-      "type": "direct",
-      "tag": "direct"
-    	},
-     {
-      "type": "block",
-      "tag": "block"
-    },
-    {
-      "type": "dns",
-      "tag": "dns-out"
-    },
-      {
-        "type": "direct",
-        "tag": "warp-IPv4-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "ipv4_only"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv6-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "ipv6_only"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv6-prefer-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "prefer_ipv6"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv4-prefer-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "prefer_ipv4"
-      },
-    {
-      "type": "wireguard",
-      "tag": "wireguard-out",
-      "server": "162.159.192.1",
-      "server_port": 2408,
-      "local_address": [
-        "172.16.0.2/32",
-        "2606:4700:110:8f06:9f62:835:ad93:568d/128"
-      ],
-      "private_key": "WBAtGiuRqSPv+c9hYm3aYd/tWONpYPBnFmkkSBvOH1c=",
-      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-      "reserved":[122,153,243]
-    }
-  ],
-  "route": {
-      "rules": [
-        {
-          "rule_set": ["geosite-openai","geosite-netflix"],
-          "outbound": "warp-IPv6-out"
-        },
-	      {
-        "protocol": "dns",
-        "outbound": "dns-out"
-      },
-      {
-        "ip_is_private": true,
-        "outbound": "direct"
-      },
-      {
-        "rule_set": [
-          "geosite-category-ads-all"
-        ],
-        "outbound": "block"
-      },
-        {
-          "rule_set": "geosite-bing",
-          "outbound": "warp-IPv6-out" 
-        },
-        {
-          "domain_keyword": [
-            "ipaddress"
-          ],
-          "outbound": "warp-IPv6-out" 
-        }
-      ],
-      "rule_set": [
-        { 
-          "tag": "geosite-openai",
-          "type": "remote",
-          "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/openai.srs",
-          "download_detour": "direct"
-        },
-        {
-          "tag": "geosite-netflix",
-          "type": "remote",
-          "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/netflix.srs",
-          "download_detour": "direct"
-        },
-        {
-          "tag": "geosite-bing",
-          "type": "remote",
-          "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/bing.srs",
-          "download_detour": "direct"
-        },
-	{
-        "tag": "geosite-category-ads-all",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
-        "download_detour": "direct"
-      }
-      ],
-          "auto_detect_interface": true,
-    "final": "direct"
-    },
-    "experimental": {
-    "cache_file": {
-      "enabled": true,
-      "path": "cache.db",
-      "cache_id": "mycacheid",
-      "store_fakeip": true
-    }
-  }
+{
+"type":"direct",
+"tag":"direct",
+"domain_strategy": "prefer_ipv4"
+},
+{
+"type":"direct",
+"tag": "vps-outbound-v4", 
+"domain_strategy":"ipv4_only"
+},
+{
+"type":"direct",
+"tag": "vps-outbound-v6",
+"domain_strategy":"ipv6_only"
+},
+{
+"type": "socks",
+"tag": "socks-out",
+"server": "127.0.0.1",
+"server_port": 40000,
+"version": "5"
+},
+{
+"type":"direct",
+"tag":"socks-IPv4-out",
+"detour":"socks-out",
+"domain_strategy":"ipv4_only"
+},
+{
+"type":"direct",
+"tag":"socks-IPv6-out",
+"detour":"socks-out",
+"domain_strategy":"ipv6_only"
+},
+{
+"type":"direct",
+"tag":"warp-IPv4-out",
+"detour":"wireguard-out",
+"domain_strategy":"ipv4_only"
+},
+{
+"type":"direct",
+"tag":"warp-IPv6-out",
+"detour":"wireguard-out",
+"domain_strategy":"ipv6_only"
+},
+{
+"type":"wireguard",
+"tag":"wireguard-out",
+"server":"162.159.192.1",
+"server_port":2408,
+"local_address":[
+"172.16.0.2/32",
+"2606:4700:110:8f06:9f62:835:ad93:568d/128"
+],
+"private_key":"WBAtGiuRqSPv+c9hYm3aYd/tWONpYPBnFmkkSBvOH1c=",
+"peer_public_key":"bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+"reserved":[122,153,243]
+},
+{
+"type": "block",
+"tag": "block"
 }
-
+],
+"route":{
+"rules":[
+{
+"protocol": [
+"quic",
+"stun"
+],
+"outbound": "block"
+},
+{
+"outbound":"warp-IPv4-out",
+"domain": [
+"yg_kkk"
+]
+,"geosite": [
+"yg_kkk"
+]
+},
+{
+"outbound":"warp-IPv6-out",
+"domain": [
+"yg_kkk"
+]
+,"geosite": [
+"yg_kkk"
+]
+},
+{
+"outbound":"socks-IPv4-out",
+"domain": [
+"yg_kkk"
+]
+,"geosite": [
+"yg_kkk"
+]
+},
+{
+"outbound":"socks-IPv6-out",
+"domain": [
+"yg_kkk"
+]
+,"geosite": [
+"yg_kkk"
+]
+},
+{
+"outbound":"vps-outbound-v4",
+"domain": [
+"yg_kkk"
+]
+,"geosite": [
+"yg_kkk"
+]
+},
+{
+"outbound":"vps-outbound-v6",
+"domain": [
+"yg_kkk"
+]
+,"geosite": [
+"yg_kkk"
+]
+},
+{
+"outbound": "direct",
+"network": "udp,tcp"
+}
+]
+}
+}
 EOF
 
 # Create sing-box.service
