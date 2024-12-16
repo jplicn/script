@@ -473,32 +473,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "level": "info",
     "timestamp": true
   },
-"dns": {
-    "servers": [
-      {
-        "tag": "cloudflare",
-        "address": "https://1.1.1.1/dns-query",
-        "strategy": "ipv4_only",
-        "detour": "direct"
-      },
-      {
-        "tag": "block",
-        "address": "rcode://success"
-      }
-    ],
-    "rules": [
-      {
-        "rule_set": [
-          "geosite-category-ads-all"
-        ],
-        "server": "block"
-      }
-    ],
-    "final": "cloudflare",
-    "strategy": "",
-    "disable_cache": false,
-    "disable_expire": false
-  },
   "inbounds": [
     {
         "type": "hysteria2",
@@ -582,35 +556,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
 "type":"direct",
 "tag":"direct",
 "domain_strategy": "prefer_ipv4"
-},
-{
-"type":"direct",
-"tag": "vps-outbound-v4", 
-"domain_strategy":"ipv4_only"
-},
-{
-"type":"direct",
-"tag": "vps-outbound-v6",
-"domain_strategy":"ipv6_only"
-},
-{
-"type": "socks",
-"tag": "socks-out",
-"server": "127.0.0.1",
-"server_port": 40000,
-"version": "5"
-},
-{
-"type":"direct",
-"tag":"socks-IPv4-out",
-"detour":"socks-out",
-"domain_strategy":"ipv4_only"
-},
-{
-"type":"direct",
-"tag":"socks-IPv6-out",
-"detour":"socks-out",
-"domain_strategy":"ipv6_only"
 },
 {
 "type":"direct",
