@@ -558,18 +558,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
 "domain_strategy": "prefer_ipv4"
 },
 {
-"type":"direct",
-"tag":"warp-IPv4-out",
-"detour":"wireguard-out",
-"domain_strategy":"ipv4_only"
-},
-{
-"type":"direct",
-"tag":"warp-IPv6-out",
-"detour":"wireguard-out",
-"domain_strategy":"ipv6_only"
-},
-{
 "type":"wireguard",
 "tag":"wireguard-out",
 "server":"162.159.192.1",
@@ -581,6 +569,18 @@ cat > /root/sbox/sbconfig_server.json << EOF
 "private_key":"WBAtGiuRqSPv+c9hYm3aYd/tWONpYPBnFmkkSBvOH1c=",
 "peer_public_key":"bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
 "reserved":[122,153,243]
+},
+{
+"type":"direct",
+"tag":"warp-IPv4-out",
+"detour":"wireguard-out",
+"domain_strategy":"ipv4_only"
+},
+{
+"type":"direct",
+"tag":"warp-IPv6-out",
+"detour":"wireguard-out",
+"domain_strategy":"ipv6_only"
 },
 {
 "type": "block",
