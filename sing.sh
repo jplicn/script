@@ -524,24 +524,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
             "key_path": "/root/private.key"
         }
     },
-        {
-      "type": "shadowtls",
-      "tag": "ShadowTLS",
-      "listen": "::",
-      "listen_port": $tls_port, 
-      "version": 3,
-      "users": [
-        {
-          "password": "$tls_password" 
-        }
-      ],
-      "handshake": {
-        "server": "www.samsung.com",
-        "server_port": 443
-      },
-      "strict_mode": true, 
-      "detour": "shadowsocks-shadowtls-in"
-    },
     {
       "type": "shadowsocks",
       "tag": "shadowsocks-shadowtls-in", 
