@@ -528,7 +528,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "type": "shadowsocks",
       "tag": "shadowsocks-shadowtls-in", 
       "listen": "::",
-      "listen_port": 10443, 
+      "listen_port": $tls_port, 
       "sniff": true,
       "sniff_override_destination": false,
       "method": "2022-blake3-aes-128-gcm",
