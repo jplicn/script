@@ -146,7 +146,7 @@ show_client_configuration() {
   tls_password=$(grep -o "TLS_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the hy link
-  tls_link="ss://$(echo -n "2022-blake3-aes-128-gcm:$tls_password@$(cat /root/domain.txt):$tls_port" | base64 -w0)?shadow-tls=$(echo -n "{\"version\":\"3\",\"host\":\"www.samsung.com\",\"password\":\"$tls_password\"}" | base64 -w0)#ShadowTLS$(cat /root/domain.txt)"
+  tls_link="ss://$(echo -n "2022-blake3-aes-128-gcm:$tls_password@$(cat /root/domain.txt):$tls_port" | base64 -w0)#SS2022$(cat /root/domain.txt)"
 
   echo ""
   echo "" 
