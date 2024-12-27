@@ -1,11 +1,7 @@
 # script
 
-## 使用前从private变为public
-
 ### Docker安装
-````
-sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/docker_install.sh)"
-````
+
 ````
 curl -sSL https://get.docker.com/ | sh
 systemctl start docker
