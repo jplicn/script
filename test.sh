@@ -1,3 +1,5 @@
+
+
 #!/bin/bash
 
 # 延迟打字
@@ -16,7 +18,7 @@ red() { echo -e "\033[31m\033[01m$*\033[0m"; }  # 红色
 green() { echo -e "\033[32m\033[01m$*\033[0m"; }   # 绿色
 yellow() { echo -e "\033[33m\033[01m$*\033[0m"; }   # 黄色
 
-# 信息提示
+#信息提示
 show_notice() {
     local message="$1"
 
@@ -33,7 +35,7 @@ show_notice() {
 
 # 安装依赖
 install_base(){
-  # 安装 qrencode jq
+  # 安装qrencode jq
   local packages=("qrencode" "jq" "iptables")
   for package in "${packages[@]}"; do
     if ! command -v "$package" &> /dev/null; then
@@ -56,7 +58,7 @@ install_base(){
   done
 }
 
-# 下载 sing-box
+# 下载sb
 download_singbox(){
   arch=$(uname -m)
   echo "Architecture: $arch"
@@ -74,8 +76,13 @@ download_singbox(){
   esac
   # Fetch the latest (including pre-releases) release version number from GitHub API
   # 正式版
-  latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" | grep -Po '"tag_name": "\K.*?(?=")' | head -n 1)
-  # beta 版本
+  #latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" | grep -Po '"tag_name": "\K.*?(?=")' | head -n 1)
+  #beta版本
+  latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" \
+  | awk '/"tag_name":/ {tag=$2} /"prerelease": false/ {print tag}' \
+  | tr -d '",' \
+  | sort -V \
+  | tail -n 1)
   latest_version=${latest_version_tag#v}  # Remove 'v' prefix from version number
   echo "Latest version: $latest_version"
   # Detect server architecture
@@ -98,18 +105,20 @@ download_singbox(){
   chmod +x /root/sbox/sing-box
 }
 
-# 显示客户端配置
+# client configuration
 show_client_configuration() {
 
-  # 获取当前 IP
+  # 获取当前ip
   server_ip=$(grep -o "SERVER_IP='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
 
-  # Hysteria2 配置
+  # hy port
   hy_port=$(grep -o "HY_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
+  # hy sni
   hy_server_name=$(grep -o "HY_SERVER_NAME='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
+  # hy password
   hy_password=$(grep -o "HY_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
-  # 生成 Hysteria2 链接
+  # Generate the hy link
   hy2_link="hysteria2://$hy_password@$(cat /root/domain.txt):$hy_port?insecure=0&alpn=h3&obfs=none&sni=$(cat /root/domain.txt)#hy2$(cat /root/domain.txt)"
 
   echo ""
@@ -131,16 +140,17 @@ show_client_configuration() {
   green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""  
 
-  # ShadowTLS 配置
+  # tls port
   tls_port=$(grep -o "TLS_PORT='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
+  # tls password
   tls_password=$(grep -o "TLS_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
-  # 生成 ShadowTLS 链接
+  # Generate the hy link
   tls_link="ss://$(echo -n "2022-blake3-aes-128-gcm:$tls_password@$(cat /root/domain.txt):$tls_port" | base64 -w0)#SS2022$(cat /root/domain.txt)"
 
   echo ""
   echo "" 
-  show_notice "$(green "ShadowTLS 通用链接和二维码和通用参数")"
+  show_notice "$(green "Shadowtls 通用链接和二维码和通用参数")"
   echo ""
   echo "" 
   green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━tls 通用链接格式━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -157,7 +167,8 @@ show_client_configuration() {
   green "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "" 
 
-  # VLESS 配置
+
+
   vmess_uuid=$(grep -o "VMESS_UUID='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   ws_path=$(grep -o "WS_PATH='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
@@ -181,11 +192,12 @@ show_client_configuration() {
   yellow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
   echo ""
+
 }
 
-# 启用 BBR
+#enable bbr
 enable_bbr() {
-    # 临时解决方案用于安装 BBR
+    # temporary workaround for installing bbr
     bash <(curl -L -s https://raw.githubusercontent.com/teddysun/across/master/bbr.sh)
     echo ""
 }
@@ -198,9 +210,11 @@ bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/sing.sh
 EOF
   chmod +x /root/sbox/sing.sh
   ln -sf /root/sbox/sing.sh /usr/bin/sing
+
 }
 
-# 开启 Hysteria2 端口跳跃
+# 开启hysteria2端口跳跃
+
 interface=$(ip route get 8.8.8.8 | awk '{print $5}')
 
 # 检查是否获取到了网卡名称
@@ -220,6 +234,8 @@ enable_hy2hopping(){
     ip6tables -t nat -A PREROUTING -i "$interface" -p udp --dport $start_port:$end_port -j DNAT --to-destination :$hy_current_port
 
     sed -i "s/HY_HOPPING=FALSE/HY_HOPPING='TRUE'/" /root/sbox/config
+
+
 }
 
 disable_hy2hopping(){
@@ -229,25 +245,27 @@ disable_hy2hopping(){
   iptables -t nat -F PREROUTING >/dev/null 2>&1
   ip6tables -t nat -F PREROUTING >/dev/null 2>&1
   sed -i "s/HY_HOPPING='TRUE'/HY_HOPPING=FALSE/" /root/sbox/config
+
+
 }
 
-# 卸载 sing-box
+
 uninstall_singbox() {
-    # 停止并禁用服务
+    # Stop and disable services
     systemctl stop sing-box
     systemctl disable sing-box > /dev/null 2>&1
 
-    # 删除服务文件
+    # Remove service files
     rm -f /etc/systemd/system/sing-box.service
 
-    # 删除配置文件和可执行文件
+    # Remove configuration and executable files
     rm -f /root/sbox/sbconfig_server.json
     rm -f /root/sbox/sing-box
     rm -f /root/sbox/config
     rm -f /usr/bin/sing
     rm -f /root/sbox/sing.sh
 
-    # 删除目录
+    # Remove directories
     rm -rf /root/sbox/
 
     echo "卸载完成"
@@ -255,7 +273,7 @@ uninstall_singbox() {
 
 install_base
 
-# 检查是否已安装 sing-box
+# Check if reality.json, sing-box, and sing-box.service already exist
 if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -f "/root/sbox/sing-box" ] && [ -f "/etc/systemd/system/sing-box.service" ]; then
 
     echo "sing-box-reality-hysteria2已经安装"
@@ -275,11 +293,11 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
     case $choice in
       1)
           show_notice "开始卸载..."
-          # 卸载之前的安装
+          # Uninstall previous installation
           uninstall_singbox
         ;;
       3)  
-          # 显示客户端配置
+          # show client configuration
           show_client_configuration
           exit 0
       ;;	
@@ -290,7 +308,7 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
       5)
           show_notice "更新 Sing-box..."
           download_singbox
-          # 检查配置并启动服务
+          # Check configuration and start the service
           if /root/sbox/sing-box check -c /root/sbox/sbconfig_server.json; then
               echo "Configuration checked successfully. Starting sing-box service..."
               systemctl restart sing-box
@@ -306,6 +324,7 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
                 # 开启端口跳跃
                 echo "开始设置端口跳跃范围"
                 enable_hy2hopping
+                
             else
                 yellow "端口跳跃已开启"
                 echo ""
@@ -359,21 +378,21 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
           echo "Invalid choice. Exiting."
           exit 1
           ;;
-    esac
-fi
+	esac
+	fi
 
 mkdir -p "/root/sbox/"
 
 download_singbox
 
-# Hysteria2 配置
+# hysteria2
 green "开始配置hysteria2"
 echo ""
-# 生成 Hysteria2 必要值
+# Generate hysteria necessary values
 hy_password=$(/root/sbox/sing-box generate rand --hex 8)
 echo "自动生成了8位随机密码"
 echo ""
-# 询问监听端口
+# Ask for listen port
 while true; do
     read -p "请输入hysteria2监听端口 (default: 8433): " hy_port
     hy_port=${hy_port:-8433}
@@ -387,15 +406,11 @@ while true; do
 done
 echo ""
 echo ""
-
-# ShadowTLS 配置
-green "开始配置ShadowTLS"
-echo ""
-# 生成 ShadowTLS 必要值
+# Generate tls necessary values
 tls_password=$(/root/sbox/sing-box generate rand --base64 16)
 echo "自动生成了16位随机密码"
 echo ""
-# 询问监听端口
+# Ask for listen port
 while true; do
     read -p "请输入tls监听端口 (default: 9433): " tls_port
     tls_port=${tls_port:-9433}
@@ -409,10 +424,11 @@ while true; do
 done
 echo ""
 
-# VMess 配置
+
+# vmess ws
 yellow "开始配置vmess"
 echo ""
-# 生成 VMess 必要值
+# Generate hysteria necessary values
 vmess_uuid=$(/root/sbox/sing-box generate uuid)
 while true; do
     read -p "请输入vmess端口，默认为2053: " vmess_port
@@ -429,30 +445,31 @@ echo ""
 read -p "ws路径 (无需加斜杠,默认随机生成): " ws_path
 ws_path=${ws_path:-$(/root/sbox/sing-box generate rand --hex 6)}
 
-# 获取服务器 IP
+
+#ip地址
 server_ip=$(curl -s4m8 ip.sb -k) || server_ip=$(curl -s6m8 ip.sb -k)
 
-# 生成配置文件
+#config配置文件
 cat > /root/sbox/config <<EOF
 
-# VPS IP
+# VPS ip
 SERVER_IP='$server_ip'
 # Singbox
 # Hy2
 HY_PORT='$hy_port'
 HY_SERVER_NAME='$hy_server_name'
 HY_PASSWORD='$hy_password'
-# VMess
+# Vmess
 VMESS_PORT='$vmess_port'
 VMESS_UUID='$vmess_uuid'
 WS_PATH='$ws_path'
-# TLS
+# Tls
 TLS_PORT='$tls_port'
 TLS_PASSWORD='$tls_password'
 
 EOF
 
-# 生成 sing-box 配置文件
+# sbox配置文件
 cat > /root/sbox/sbconfig_server.json << EOF
 
 {
@@ -461,7 +478,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "level": "info",
     "timestamp": true
   },
-  "dns": {
+"dns": {
     "servers": [
       {
         "tag": "cloudflare",
@@ -546,14 +563,37 @@ cat > /root/sbox/sbconfig_server.json << EOF
                 "certificate_path": "/root/cert.crt",
                 "key_path": "/root/private.key"
             }
-    }
-  ],
-  "outbounds": [
-    {
-      "type": "direct",
-      "tag": "direct"
     },
     {
+      "type": "tuic",
+      "tag": "Tuic",
+      "listen": "::", 
+      "listen_port": 7680, 
+      "sniff": true, 
+      "sniff_override_destination": false,
+      "users": [
+        {
+          "uuid": "$vmess_uuid",
+          "password": "$vmess_uuid" 
+        }
+      ],
+      "congestion_control": "bbr", 
+      "tls": {
+        "enabled": true,
+        "alpn": [
+          "h3"
+        ], 
+        "certificate_path": "/root/cert.crt", 
+        "key_path": "/root/private.key" 
+      }
+    }
+  ],
+"outbounds": [
+	{
+      "type": "direct",
+      "tag": "direct"
+    	},
+     {
       "type": "block",
       "tag": "block"
     },
@@ -561,30 +601,30 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "type": "dns",
       "tag": "dns-out"
     },
-    {
-      "type": "direct",
-      "tag": "warp-IPv4-out",
-      "detour": "wireguard-out",
-      "domain_strategy": "ipv4_only"
-    },
-    {
-      "type": "direct",
-      "tag": "warp-IPv6-out",
-      "detour": "wireguard-out",
-      "domain_strategy": "ipv6_only"
-    },
-    {
-      "type": "direct",
-      "tag": "warp-IPv6-prefer-out",
-      "detour": "wireguard-out",
-      "domain_strategy": "prefer_ipv6"
-    },
-    {
-      "type": "direct",
-      "tag": "warp-IPv4-prefer-out",
-      "detour": "wireguard-out",
-      "domain_strategy": "prefer_ipv4"
-    },
+      {
+        "type": "direct",
+        "tag": "warp-IPv4-out",
+        "detour": "wireguard-out",
+        "domain_strategy": "ipv4_only"
+      },
+      {
+        "type": "direct",
+        "tag": "warp-IPv6-out",
+        "detour": "wireguard-out",
+        "domain_strategy": "ipv6_only"
+      },
+      {
+        "type": "direct",
+        "tag": "warp-IPv6-prefer-out",
+        "detour": "wireguard-out",
+        "domain_strategy": "prefer_ipv6"
+      },
+      {
+        "type": "direct",
+        "tag": "warp-IPv4-prefer-out",
+        "detour": "wireguard-out",
+        "domain_strategy": "prefer_ipv4"
+      },
     {
       "type": "wireguard",
       "tag": "wireguard-out",
@@ -600,12 +640,12 @@ cat > /root/sbox/sbconfig_server.json << EOF
     }
   ],
   "route": {
-    "rules": [
-      {
-        "rule_set": ["geosite-openai","geosite-netflix"],
-        "outbound": "warp-IPv6-out"
-      },
-      {
+      "rules": [
+        {
+          "rule_set": ["geosite-openai","geosite-netflix"],
+          "outbound": "warp-IPv6-out"
+        },
+	      {
         "protocol": "dns",
         "outbound": "dns-out"
       },
@@ -619,51 +659,51 @@ cat > /root/sbox/sbconfig_server.json << EOF
         ],
         "outbound": "block"
       },
-      {
-        "rule_set": "geosite-bing",
-        "outbound": "warp-IPv6-out" 
-      },
-      {
-        "domain_keyword": [
-          "ipaddress"
-        ],
-        "outbound": "warp-IPv6-out" 
-      }
-    ],
-    "rule_set": [
-      { 
-        "tag": "geosite-openai",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/openai.srs",
-        "download_detour": "direct"
-      },
-      {
-        "tag": "geosite-netflix",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/netflix.srs",
-        "download_detour": "direct"
-      },
-      {
-        "tag": "geosite-bing",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/bing.srs",
-        "download_detour": "direct"
-      },
-      {
+        {
+          "rule_set": "geosite-bing",
+          "outbound": "warp-IPv6-out" 
+        },
+        {
+          "domain_keyword": [
+            "ipaddress"
+          ],
+          "outbound": "warp-IPv6-out" 
+        }
+      ],
+      "rule_set": [
+        { 
+          "tag": "geosite-openai",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/openai.srs",
+          "download_detour": "direct"
+        },
+        {
+          "tag": "geosite-netflix",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/netflix.srs",
+          "download_detour": "direct"
+        },
+        {
+          "tag": "geosite-bing",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/bing.srs",
+          "download_detour": "direct"
+        },
+	{
         "tag": "geosite-category-ads-all",
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
         "download_detour": "direct"
       }
-    ],
-    "auto_detect_interface": true,
+      ],
+          "auto_detect_interface": true,
     "final": "direct"
-  },
-  "experimental": {
+    },
+    "experimental": {
     "cache_file": {
       "enabled": true,
       "path": "cache.db",
@@ -675,7 +715,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
 
 EOF
 
-# 创建 sing-box 服务文件
+# Create sing-box.service
 cat > /etc/systemd/system/sing-box.service <<EOF
 [Unit]
 After=network.target nss-lookup.target
@@ -695,7 +735,8 @@ LimitNOFILE=infinity
 WantedBy=multi-user.target
 EOF
 
-# 检查配置并启动服务
+
+# Check configuration and start the service
 if /root/sbox/sing-box check -c /root/sbox/sbconfig_server.json; then
     echo "Configuration checked successfully. Starting sing-box service..."
     systemctl daemon-reload
@@ -705,6 +746,8 @@ if /root/sbox/sing-box check -c /root/sbox/sbconfig_server.json; then
     create_shortcut
     show_client_configuration
     sing
+
+
 else
     echo "Error in configuration. Aborting"
 fi
