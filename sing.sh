@@ -146,7 +146,7 @@ show_client_configuration() {
   tls_password=$(grep -o "TLS_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the hy link
-  tls_link="ss://$(echo -n "2022-blake3-aes-128-gcm:$tls_password@$(cat /root/domain.txt):$tls_port" | base64 -w0)#SS2022$(cat /root/domain.txt)"
+  tls_link="ss://$(echo -n "2022-blake3-aes-128-gcm:$tls_password@$(cat /root/domain.txt):$tls_port" | base64 -w0)?shadow-tls=$(echo -n "{\"version\":\"3\",\"host\":\"www.samsung.com\",\"password\":\"$tls_password\"}" | base64 -w0)#ShadowTLS$(cat /root/domain.txt)"
 
   echo ""
   echo "" 
@@ -385,11 +385,31 @@ mkdir -p "/root/sbox/"
 
 download_singbox
 
+# vmess ws
+yellow "开始配置vmess"
+echo ""
+# Generate hysteria necessary values
+vmess_uuid=$(/root/sbox/sing-box generate uuid)
+while true; do
+    read -p "请输入vmess端口，默认为2053: " vmess_port
+    vmess_port=${vmess_port:-2053}
+
+    # 检测端口是否被占用
+    if ss -tuln | grep -q ":$vmess_port\b"; then
+        echo "端口 $vmess_port 已经被占用，请选择其他端口。"
+    else
+        break
+    fi
+done
+echo ""
+read -p "ws路径 (无需加斜杠,默认随机生成): " ws_path
+ws_path=$vmess_uuid
+
 # hysteria2
 green "开始配置hysteria2"
 echo ""
 # Generate hysteria necessary values
-hy_password=$(/root/sbox/sing-box generate rand --hex 8)
+hy_password=$vmess_uuid
 echo "自动生成了8位随机密码"
 echo ""
 # Ask for listen port
@@ -423,27 +443,6 @@ while true; do
     fi
 done
 echo ""
-
-
-# vmess ws
-yellow "开始配置vmess"
-echo ""
-# Generate hysteria necessary values
-vmess_uuid=$(/root/sbox/sing-box generate uuid)
-while true; do
-    read -p "请输入vmess端口，默认为2053: " vmess_port
-    vmess_port=${vmess_port:-2053}
-
-    # 检测端口是否被占用
-    if ss -tuln | grep -q ":$vmess_port\b"; then
-        echo "端口 $vmess_port 已经被占用，请选择其他端口。"
-    else
-        break
-    fi
-done
-echo ""
-read -p "ws路径 (无需加斜杠,默认随机生成): " ws_path
-ws_path=${ws_path:-$(/root/sbox/sing-box generate rand --hex 6)}
 
 
 #ip地址
@@ -525,10 +524,27 @@ cat > /root/sbox/sbconfig_server.json << EOF
         }
     },
     {
-      "type": "shadowsocks",
-      "tag": "shadowsocks-shadowtls-in", 
+      "type": "shadowtls",
+      "tag": "ShadowTLS",
       "listen": "::",
       "listen_port": $tls_port, 
+      "version": 3,
+      "users": [
+        {
+          "password": "$tls_password" 
+        }
+      ],
+      "handshake": {
+        "server": "www.samsung.com",
+        "server_port": 443
+      },
+      "strict_mode": true, 
+      "detour": "shadowsocks-shadowtls-in"
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "shadowsocks-shadowtls-in", 
+      "listen": "127.0.0.1",
       "sniff": true,
       "sniff_override_destination": false,
       "method": "2022-blake3-aes-128-gcm",
@@ -563,31 +579,31 @@ cat > /root/sbox/sbconfig_server.json << EOF
                 "certificate_path": "/root/cert.crt",
                 "key_path": "/root/private.key"
             }
-    },
-    {
-      "type": "tuic",
-      "tag": "Tuic",
-      "listen": "::", 
-      "listen_port": 7680, 
-      "sniff": true, 
-      "sniff_override_destination": false,
-      "users": [
-        {
-          "uuid": "$vmess_uuid",
-          "password": "$vmess_uuid" 
-        }
-      ],
-      "congestion_control": "bbr", 
-      "tls": {
-        "enabled": true,
-        "alpn": [
-          "h3"
-        ], 
-        "certificate_path": "/root/cert.crt", 
-        "key_path": "/root/private.key" 
-      }
     }
   ],
+ "endpoints":[
+{
+"type":"wireguard",
+"tag":"warp-out",
+"address":[
+"172.16.0.2/32",
+"2606:4700:110:8f9a:dc05:2307:8bbc:5196/128"
+],
+"private_key":"8G4m+UBlxt2/kR0MOTQuKA6N0PTNsxdhnj0K84HDTH0=",
+"peers": [
+{
+"address": "162.159.192.1",
+"port":2408,
+"public_key":"bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+"allowed_ips": [
+"0.0.0.0/0",
+"::/0"
+],
+"reserved":[213,132,110]
+}
+]
+}
+], 
 "outbounds": [
 	{
       "type": "direct",
@@ -600,50 +616,13 @@ cat > /root/sbox/sbconfig_server.json << EOF
     {
       "type": "dns",
       "tag": "dns-out"
-    },
-      {
-        "type": "direct",
-        "tag": "warp-IPv4-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "ipv4_only"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv6-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "ipv6_only"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv6-prefer-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "prefer_ipv6"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv4-prefer-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "prefer_ipv4"
-      },
-    {
-      "type": "wireguard",
-      "tag": "wireguard-out",
-      "server": "engage.cloudflareclient.com",
-      "server_port": 2408,
-      "local_address": [
-        "172.16.0.2/32",
-        "2606:4700:110:812a:4929:7d2a:af62:351c/128"
-      ],
-      "private_key": "gBthRjevHDGyV0KvYwYE52NIPy29sSrVr6rcQtYNcXA=",
-      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-      "reserved":[6,146,6]
     }
   ],
   "route": {
       "rules": [
         {
           "rule_set": ["geosite-openai","geosite-netflix"],
-          "outbound": "warp-IPv6-out"
+          "outbound": "warp-out"
         },
 	      {
         "protocol": "dns",
@@ -660,14 +639,10 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "outbound": "block"
       },
         {
-          "rule_set": "geosite-bing",
-          "outbound": "warp-IPv6-out" 
-        },
-        {
           "domain_keyword": [
             "ipaddress"
           ],
-          "outbound": "warp-IPv6-out" 
+          "outbound": "warp-out" 
         }
       ],
       "rule_set": [
@@ -683,13 +658,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "type": "remote",
           "format": "binary",
           "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/netflix.srs",
-          "download_detour": "direct"
-        },
-        {
-          "tag": "geosite-bing",
-          "type": "remote",
-          "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/bing.srs",
           "download_detour": "direct"
         },
 	{
