@@ -146,7 +146,7 @@ show_client_configuration() {
   tls_password=$(grep -o "TLS_PASSWORD='[^']*'" /root/sbox/config | awk -F"'" '{print $2}')
   
   # Generate the hy link
-  tls_link="ss://$(echo -n "2022-blake3-aes-128-gcm:$tls_password@$(cat /root/domain.txt):$tls_port" | base64 -w0)#SS2022$(cat /root/domain.txt)"
+  tls_link="ss://$(echo -n "2022-blake3-aes-128-gcm:$tls_password@$(cat /root/domain.txt):$tls_port" | base64 -w0)?shadow-tls=$(echo -n "{\"version\":\"3\",\"host\":\"www.samsung.com\",\"password\":\"$tls_password\"}" | base64 -w0)#ShadowTLS$(cat /root/domain.txt)"
 
   echo ""
   echo "" 
@@ -385,46 +385,6 @@ mkdir -p "/root/sbox/"
 
 download_singbox
 
-# hysteria2
-green "开始配置hysteria2"
-echo ""
-# Generate hysteria necessary values
-hy_password=$(/root/sbox/sing-box generate rand --hex 8)
-echo "自动生成了8位随机密码"
-echo ""
-# Ask for listen port
-while true; do
-    read -p "请输入hysteria2监听端口 (default: 8433): " hy_port
-    hy_port=${hy_port:-8433}
-
-    # 检测端口是否被占用
-    if ss -tuln | grep -q ":$hy_port\b"; then
-        echo "端口 $hy_port 已经被占用，请选择其他端口。"
-    else
-        break
-    fi
-done
-echo ""
-echo ""
-# Generate tls necessary values
-tls_password=$(/root/sbox/sing-box generate rand --base64 16)
-echo "自动生成了16位随机密码"
-echo ""
-# Ask for listen port
-while true; do
-    read -p "请输入tls监听端口 (default: 9433): " tls_port
-    tls_port=${tls_port:-9433}
-
-    # 检测端口是否被占用
-    if ss -tuln | grep -q ":$tls_port\b"; then
-        echo "端口 $tls_port 已经被占用，请选择其他端口。"
-    else
-        break
-    fi
-done
-echo ""
-
-
 # vmess ws
 yellow "开始配置vmess"
 echo ""
@@ -443,7 +403,46 @@ while true; do
 done
 echo ""
 read -p "ws路径 (无需加斜杠,默认随机生成): " ws_path
-ws_path=${ws_path:-$(/root/sbox/sing-box generate rand --hex 6)}
+ws_path=$vmess_uuid
+
+# hysteria2
+green "开始配置hysteria2"
+echo ""
+# Generate hysteria necessary values
+hy_password=$vmess_uuid
+echo "自动生成了8位随机密码"
+echo ""
+# Ask for listen port
+while true; do
+    read -p "请输入hysteria2监听端口 (default: 8433): " hy_port
+    hy_port=${hy_port:-8433}
+
+    # 检测端口是否被占用
+    if ss -tuln | grep -q ":$hy_port\b"; then
+        echo "端口 $hy_port 已经被占用，请选择其他端口。"
+    else
+        break
+    fi
+done
+echo ""
+echo ""
+# Generate tls necessary values
+tls_password=$vmess_uuid
+echo "自动生成了16位随机密码"
+echo ""
+# Ask for listen port
+while true; do
+    read -p "请输入tls监听端口 (default: 9433): " tls_port
+    tls_port=${tls_port:-9433}
+
+    # 检测端口是否被占用
+    if ss -tuln | grep -q ":$tls_port\b"; then
+        echo "端口 $tls_port 已经被占用，请选择其他端口。"
+    else
+        break
+    fi
+done
+echo ""
 
 
 #ip地址
@@ -525,10 +524,27 @@ cat > /root/sbox/sbconfig_server.json << EOF
         }
     },
     {
-      "type": "shadowsocks",
-      "tag": "shadowsocks-shadowtls-in", 
+      "type": "shadowtls",
+      "tag": "ShadowTLS",
       "listen": "::",
       "listen_port": $tls_port, 
+      "version": 3,
+      "users": [
+        {
+          "password": "$tls_password" 
+        }
+      ],
+      "handshake": {
+        "server": "www.samsung.com",
+        "server_port": 443
+      },
+      "strict_mode": true, 
+      "detour": "shadowsocks-shadowtls-in"
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "shadowsocks-shadowtls-in", 
+      "listen": "127.0.0.1",
       "sniff": true,
       "sniff_override_destination": false,
       "method": "2022-blake3-aes-128-gcm",
@@ -563,29 +579,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
                 "certificate_path": "/root/cert.crt",
                 "key_path": "/root/private.key"
             }
-    },
-    {
-      "type": "tuic",
-      "tag": "Tuic",
-      "listen": "::", 
-      "listen_port": 7680, 
-      "sniff": true, 
-      "sniff_override_destination": false,
-      "users": [
-        {
-          "uuid": "$vmess_uuid",
-          "password": "$vmess_uuid" 
-        }
-      ],
-      "congestion_control": "bbr", 
-      "tls": {
-        "enabled": true,
-        "alpn": [
-          "h3"
-        ], 
-        "certificate_path": "/root/cert.crt", 
-        "key_path": "/root/private.key" 
-      }
     }
   ],
 "outbounds": [
