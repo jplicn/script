@@ -581,6 +581,29 @@ cat > /root/sbox/sbconfig_server.json << EOF
             }
     }
   ],
+ "endpoints":[
+{
+"type":"wireguard",
+"tag":"warp-out",
+"address":[
+"172.16.0.2/32",
+"2606:4700:110:8f9a:dc05:2307:8bbc:5196/128"
+],
+"private_key":"8G4m+UBlxt2/kR0MOTQuKA6N0PTNsxdhnj0K84HDTH0=",
+"peers": [
+{
+"address": "162.159.192.1",
+"port":2408,
+"public_key":"bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+"allowed_ips": [
+"0.0.0.0/0",
+"::/0"
+],
+"reserved":[213,132,110]
+}
+]
+}
+], 
 "outbounds": [
 	{
       "type": "direct",
@@ -593,50 +616,13 @@ cat > /root/sbox/sbconfig_server.json << EOF
     {
       "type": "dns",
       "tag": "dns-out"
-    },
-      {
-        "type": "direct",
-        "tag": "warp-IPv4-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "ipv4_only"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv6-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "ipv6_only"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv6-prefer-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "prefer_ipv6"
-      },
-      {
-        "type": "direct",
-        "tag": "warp-IPv4-prefer-out",
-        "detour": "wireguard-out",
-        "domain_strategy": "prefer_ipv4"
-      },
-    {
-      "type": "wireguard",
-      "tag": "wireguard-out",
-      "server": "engage.cloudflareclient.com",
-      "server_port": 2408,
-      "local_address": [
-        "172.16.0.2/32",
-        "2606:4700:110:812a:4929:7d2a:af62:351c/128"
-      ],
-      "private_key": "gBthRjevHDGyV0KvYwYE52NIPy29sSrVr6rcQtYNcXA=",
-      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-      "reserved":[6,146,6]
     }
   ],
   "route": {
       "rules": [
         {
           "rule_set": ["geosite-openai","geosite-netflix"],
-          "outbound": "warp-IPv6-out"
+          "outbound": "warp-out"
         },
 	      {
         "protocol": "dns",
@@ -654,13 +640,13 @@ cat > /root/sbox/sbconfig_server.json << EOF
       },
         {
           "rule_set": "geosite-bing",
-          "outbound": "warp-IPv6-out" 
+          "outbound": "warp-out" 
         },
         {
           "domain_keyword": [
             "ipaddress"
           ],
-          "outbound": "warp-IPv6-out" 
+          "outbound": "warp-out" 
         }
       ],
       "rule_set": [
