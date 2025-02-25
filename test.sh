@@ -544,7 +544,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
     {
       "type": "shadowsocks",
       "tag": "shadowsocks-shadowtls-in", 
-      "listen": "127.0.0.1",
+      "listen": "::",
       "sniff": true,
       "sniff_override_destination": false,
       "method": "2022-blake3-aes-128-gcm",
