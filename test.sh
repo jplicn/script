@@ -487,10 +487,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "tag": "cloudflare-resolver", 
         "address": "1.1.1.1",
         "detour": "direct"
-      },
-      {
-        "tag": "block",
-        "address": "rcode://success"
       }
     ],
     "rules": [
@@ -498,7 +494,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "rule_set": [
           "geosite-category-ads-all"
         ],
-        "server": "block"
+        "action": "reject"
       }
     ],
     "final": "cloudflare",
@@ -511,7 +507,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "type": "hysteria2",
         "tag": "hy2-in",
         "listen": "::",
-        "listen_port": $hy_port,
+        "listen_port": "$hy_port",
         "users": [
             {
                 "password": "$hy_password"
@@ -530,7 +526,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "type": "shadowtls",
       "tag": "ShadowTLS",
       "listen": "::",
-      "listen_port": $tls_port, 
+      "listen_port": "$tls_port", 
       "version": 3,
       "users": [
         {
@@ -581,7 +577,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "sniff_override_destination": false,
         "tag": "vmess-sb",
         "listen": "::",
-        "listen_port": $vmess_port,
+        "listen_port": "$vmess_port",
         "users": [
             {
                 "uuid": "$vmess_uuid",
@@ -608,14 +604,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "tag": "direct"
     },
     {
-      "type": "block",
-      "tag": "block"
-    },
-    {
-      "type": "dns",
-      "tag": "dns-out"
-    },
-    {
       "type": "wireguard",
       "tag": "warp-out",
       "local_address": [
@@ -633,7 +621,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "rules": [
       {
         "protocol": "dns",
-        "outbound": "dns-out"
+        "action": "return"
       },
       {
         "ip_is_private": true,
@@ -643,7 +631,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "rule_set": [
           "geosite-category-ads-all"
         ],
-        "outbound": "block"
+        "action": "reject"
       },
       {
         "rule_set": [
@@ -673,18 +661,18 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/netflix.srs",
           "download_detour": "direct"
         },
-	{
+      {
         "tag": "geosite-category-ads-all",
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
         "download_detour": "direct"
       }
-      ],
-          "auto_detect_interface": true,
+    ],
+    "auto_detect_interface": true,
     "final": "direct"
-    },
-    "experimental": {
+  },
+  "experimental": {
     "cache_file": {
       "enabled": true,
       "path": "cache.db",
@@ -693,6 +681,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
     }
   }
 }
+
 
 EOF
 
