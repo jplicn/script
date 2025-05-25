@@ -307,7 +307,7 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
           show_notice "更新 Sing-box..."
           download_singbox
           # Check configuration and start the service
-          if /root/sbox/sing-box check -c /root/sbox/sbconfig_server.json; then
+          if ENABLE_DEPRECATED_SPECIAL_OUTBOUNDS=true /root/sbox/sing-box check -c /root/sbox/sbconfig_server.json; then
               echo "Configuration checked successfully. Starting sing-box service..."
               systemctl restart sing-box
           fi
@@ -481,7 +481,11 @@ cat > /root/sbox/sbconfig_server.json << EOF
       {
         "tag": "cloudflare",
         "address": "https://1.1.1.1/dns-query",
-        "strategy": "ipv4_only",
+        "address_resolver": "cloudflare-resolver"
+      },
+      {
+        "tag": "cloudflare-resolver", 
+        "address": "1.1.1.1",
         "detour": "direct"
       },
       {
@@ -498,7 +502,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       }
     ],
     "final": "cloudflare",
-    "strategy": "",
+    "strategy": "ipv4_only",
     "disable_cache": false,
     "disable_expire": false
   },
@@ -629,19 +633,16 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "rules": [
       {
         "protocol": "dns",
-        "action": "route",
         "outbound": "dns-out"
       },
       {
         "ip_is_private": true,
-        "action": "route",
         "outbound": "direct"
       },
       {
         "rule_set": [
           "geosite-category-ads-all"
         ],
-        "action": "route",
         "outbound": "block"
       },
       {
@@ -649,14 +650,12 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "geosite-openai",
           "geosite-netflix"
         ],
-        "action": "route",
         "outbound": "warp-out"
       },
       {
         "domain_keyword": [
           "ipaddress"
         ],
-        "action": "route",
         "outbound": "warp-out" 
       }
     ],
