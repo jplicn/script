@@ -484,7 +484,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
             }
         ],
         "strategy": "ipv4_only"
-    }
+    },
   "inbounds": [
     {
         "type": "hysteria2",
