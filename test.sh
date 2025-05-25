@@ -607,36 +607,14 @@ cat > /root/sbox/sbconfig_server.json << EOF
 	{
       "type": "direct",
       "tag": "direct"
-    	},
-     {
-      "type": "block",
-      "tag": "block"
-    },
-    {
-      "type": "dns",
-      "tag": "dns-out"
-    }
+    	}
   ],
   "route": {
       "rules": [
         {
-          "rule_set": ["geosite-openai","geosite-netflix"],
+          "rule_set": ["geosite-openai"],
           "outbound": "warp-out"
         },
-	      {
-        "protocol": "dns",
-        "outbound": "dns-out"
-      },
-      {
-        "ip_is_private": true,
-        "outbound": "direct"
-      },
-      {
-        "rule_set": [
-          "geosite-category-ads-all"
-        ],
-        "outbound": "block"
-      },
         {
           "domain_keyword": [
             "ipaddress"
@@ -651,21 +629,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "format": "binary",
           "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/openai.srs",
           "download_detour": "direct"
-        },
-        {
-          "tag": "geosite-netflix",
-          "type": "remote",
-          "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/netflix.srs",
-          "download_detour": "direct"
-        },
-	{
-        "tag": "geosite-category-ads-all",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
-        "download_detour": "direct"
-      }
+        }
       ],
           "auto_detect_interface": true,
     "final": "direct"
