@@ -1,3 +1,5 @@
+
+
 #!/bin/bash
 
 # 延迟打字
@@ -307,7 +309,7 @@ if [ -f "/root/sbox/sbconfig_server.json" ] && [ -f "/root/sbox/config" ] && [ -
           show_notice "更新 Sing-box..."
           download_singbox
           # Check configuration and start the service
-          if ENABLE_DEPRECATED_SPECIAL_OUTBOUNDS=true /root/sbox/sing-box check -c /root/sbox/sbconfig_server.json; then
+          if /root/sbox/sing-box check -c /root/sbox/sbconfig_server.json; then
               echo "Configuration checked successfully. Starting sing-box service..."
               systemctl restart sing-box
           fi
@@ -463,12 +465,10 @@ WS_PATH='$ws_path'
 # Tls
 TLS_PORT='$tls_port'
 TLS_PASSWORD='$tls_password'
-# Hopping
-HY_HOPPING=FALSE
 
 EOF
 
-# sbox配置文件 - 修复了弃用格式
+# sbox配置文件
 cat > /root/sbox/sbconfig_server.json << EOF
 
 {
@@ -477,19 +477,17 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "level": "info",
     "timestamp": true
   },
-  "dns": {
+"dns": {
     "servers": [
       {
         "tag": "cloudflare",
         "address": "https://1.1.1.1/dns-query",
-        "address_resolver": "cloudflare-resolver"
-      },
-      {
-        "tag": "cloudflare-resolver", 
-        "address": "1.1.1.1",
-        "address_strategy": "ipv4_only",
         "strategy": "ipv4_only",
         "detour": "direct"
+      },
+      {
+        "tag": "block",
+        "address": "rcode://success"
       }
     ],
     "rules": [
@@ -497,11 +495,11 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "rule_set": [
           "geosite-category-ads-all"
         ],
-        "action": "reject"
+        "server": "block"
       }
     ],
     "final": "cloudflare",
-    "strategy": "ipv4_only",
+    "strategy": "",
     "disable_cache": false,
     "disable_expire": false
   },
@@ -510,7 +508,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "type": "hysteria2",
         "tag": "hy2-in",
         "listen": "::",
-        "listen_port": 8080,
+        "listen_port": $hy_port,
         "users": [
             {
                 "password": "$hy_password"
@@ -529,7 +527,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "type": "shadowtls",
       "tag": "ShadowTLS",
       "listen": "::",
-      "listen_port": 8443, 
+      "listen_port": $tls_port, 
       "version": 3,
       "users": [
         {
@@ -557,7 +555,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "padding": true
         }
     },
-    {
+        {
       "type": "anytls",
       "tag": "anytls-in",
       "listen": "::",
@@ -580,7 +578,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "sniff_override_destination": false,
         "tag": "vmess-sb",
         "listen": "::",
-        "listen_port": 8081,
+        "listen_port": $vmess_port,
         "users": [
             {
                 "uuid": "$vmess_uuid",
@@ -601,30 +599,52 @@ cat > /root/sbox/sbconfig_server.json << EOF
             }
     }
   ],
-  "outbounds": [
-    {
+ "endpoints":[
+{
+"type":"wireguard",
+"tag":"warp-out",
+"address":[
+"172.16.0.2/32",
+"2606:4700:110:8f9a:dc05:2307:8bbc:5196/128"
+],
+"private_key":"8G4m+UBlxt2/kR0MOTQuKA6N0PTNsxdhnj0K84HDTH0=",
+"peers": [
+{
+"address": "162.159.192.1",
+"port":2408,
+"public_key":"bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+"allowed_ips": [
+"0.0.0.0/0",
+"::/0"
+],
+"reserved":[213,132,110]
+}
+]
+}
+], 
+"outbounds": [
+	{
       "type": "direct",
       "tag": "direct"
+    	},
+     {
+      "type": "block",
+      "tag": "block"
     },
     {
-      "type": "wireguard",
-      "tag": "warp-out",
-      "local_address": [
-        "172.16.0.2/32",
-        "2606:4700:110:8f9a:dc05:2307:8bbc:5196/128"
-      ],
-      "private_key": "8G4m+UBlxt2/kR0MOTQuKA6N0PTNsxdhnj0K84HDTH0=",
-      "server": "162.159.192.1",
-      "server_port": 2408,
-      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-      "reserved": [213,132,110]
+      "type": "dns",
+      "tag": "dns-out"
     }
   ],
   "route": {
-    "rules": [
-      {
+      "rules": [
+        {
+          "rule_set": ["geosite-openai","geosite-netflix"],
+          "outbound": "warp-out"
+        },
+	      {
         "protocol": "dns",
-        "action": "return"
+        "outbound": "dns-out"
       },
       {
         "ip_is_private": true,
@@ -634,48 +654,42 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "rule_set": [
           "geosite-category-ads-all"
         ],
-        "action": "reject"
+        "outbound": "block"
       },
-      {
-        "rule_set": [
-          "geosite-openai",
-          "geosite-netflix"
-        ],
-        "outbound": "warp-out"
-      },
-      {
-        "domain_keyword": [
-          "ipaddress"
-        ],
-        "outbound": "warp-out" 
-      }
-    ],
-    "rule_set": [
-      { 
-        "tag": "geosite-openai",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/openai.srs",
-        "download_detour": "direct"
-      },{
+        {
+          "domain_keyword": [
+            "ipaddress"
+          ],
+          "outbound": "warp-out" 
+        }
+      ],
+      "rule_set": [
+        { 
+          "tag": "geosite-openai",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/openai.srs",
+          "download_detour": "direct"
+        },
+        {
           "tag": "geosite-netflix",
           "type": "remote",
           "format": "binary",
           "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/netflix.srs",
           "download_detour": "direct"
         },
-      {
+	{
         "tag": "geosite-category-ads-all",
         "type": "remote",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
         "download_detour": "direct"
       }
-    ],
-    "auto_detect_interface": true,
+      ],
+          "auto_detect_interface": true,
     "final": "direct"
-  },
-  "experimental": {
+    },
+    "experimental": {
     "cache_file": {
       "enabled": true,
       "path": "cache.db",
@@ -684,7 +698,6 @@ cat > /root/sbox/sbconfig_server.json << EOF
     }
   }
 }
-
 
 EOF
 
