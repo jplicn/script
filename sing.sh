@@ -1,5 +1,6 @@
 
 
+
 #!/bin/bash
 
 # 延迟打字
@@ -76,13 +77,13 @@ download_singbox(){
   esac
   # Fetch the latest (including pre-releases) release version number from GitHub API
   # 正式版
-  #latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" | grep -Po '"tag_name": "\K.*?(?=")' | head -n 1)
+  latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" | grep -Po '"tag_name": "\K.*?(?=")' | head -n 1)
   #beta版本
-  latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" \
-  | awk '/"tag_name":/ {tag=$2} /"prerelease": false/ {print tag}' \
-  | tr -d '",' \
-  | sort -V \
-  | tail -n 1)
+  #latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" \
+  #| awk '/"tag_name":/ {tag=$2} /"prerelease": false/ {print tag}' \
+  #| tr -d '",' \
+  #| sort -V \
+  #| tail -n 1)
   latest_version=${latest_version_tag#v}  # Remove 'v' prefix from version number
   echo "Latest version: $latest_version"
   # Detect server architecture
@@ -480,28 +481,10 @@ cat > /root/sbox/sbconfig_server.json << EOF
 "dns": {
     "servers": [
       {
-        "tag": "cloudflare",
-        "address": "https://1.1.1.1/dns-query",
-        "strategy": "ipv4_only",
-        "detour": "direct"
-      },
-      {
-        "tag": "block",
-        "address": "rcode://success"
+        "type": "local"
       }
     ],
-    "rules": [
-      {
-        "rule_set": [
-          "geosite-category-ads-all"
-        ],
-        "server": "block"
-      }
-    ],
-    "final": "cloudflare",
-    "strategy": "",
-    "disable_cache": false,
-    "disable_expire": false
+    "strategy": "ipv4_only"
   },
   "inbounds": [
     {
@@ -556,6 +539,22 @@ cat > /root/sbox/sbconfig_server.json << EOF
         }
     },
     {
+      "type":"anytls",
+      "tag":"ubuntu anytls",
+      "listen":"::",
+      "listen_port":8883,
+            "users":[
+                {
+                    "password":"$tls_password"
+                }
+            ],
+            "tls":{
+                "enabled":true,
+                "certificate_path":"/root/cert.crt",
+                "key_path":"/root/private.key"
+            }
+        },
+    {
         "type": "vmess",
         "sniff": true,
         "sniff_override_destination": false,
@@ -609,36 +608,14 @@ cat > /root/sbox/sbconfig_server.json << EOF
 	{
       "type": "direct",
       "tag": "direct"
-    	},
-     {
-      "type": "block",
-      "tag": "block"
-    },
-    {
-      "type": "dns",
-      "tag": "dns-out"
-    }
+    	}
   ],
   "route": {
       "rules": [
         {
-          "rule_set": ["geosite-openai","geosite-netflix"],
+          "rule_set": ["geosite-openai"],
           "outbound": "warp-out"
         },
-	      {
-        "protocol": "dns",
-        "outbound": "dns-out"
-      },
-      {
-        "ip_is_private": true,
-        "outbound": "direct"
-      },
-      {
-        "rule_set": [
-          "geosite-category-ads-all"
-        ],
-        "outbound": "block"
-      },
         {
           "domain_keyword": [
             "ipaddress"
@@ -653,21 +630,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
           "format": "binary",
           "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/openai.srs",
           "download_detour": "direct"
-        },
-        {
-          "tag": "geosite-netflix",
-          "type": "remote",
-          "format": "binary",
-          "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/netflix.srs",
-          "download_detour": "direct"
-        },
-	{
-        "tag": "geosite-category-ads-all",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
-        "download_detour": "direct"
-      }
+        }
       ],
           "auto_detect_interface": true,
     "final": "direct"
