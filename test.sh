@@ -206,7 +206,7 @@ enable_bbr() {
 create_shortcut() {
   cat > /root/sbox/sing.sh << EOF
 #!/usr/bin/env bash
-bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/sing.sh) \$1
+bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/test.sh) \$1
 EOF
   chmod +x /root/sbox/sing.sh
   ln -sf /root/sbox/sing.sh /usr/bin/sing
