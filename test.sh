@@ -470,6 +470,7 @@ EOF
 
 # sbox配置文件 - 修复了弃用格式
 cat > /root/sbox/sbconfig_server.json << EOF
+
 {
   "log": {
     "disabled": false,
@@ -486,6 +487,8 @@ cat > /root/sbox/sbconfig_server.json << EOF
       {
         "tag": "cloudflare-resolver", 
         "address": "1.1.1.1",
+        "address_strategy": "ipv4_only",
+        "strategy": "ipv4_only",
         "detour": "direct"
       }
     ],
@@ -507,7 +510,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "type": "hysteria2",
         "tag": "hy2-in",
         "listen": "::",
-        "listen_port": "$hy_port",
+        "listen_port": 8080,
         "users": [
             {
                 "password": "$hy_password"
@@ -526,7 +529,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
       "type": "shadowtls",
       "tag": "ShadowTLS",
       "listen": "::",
-      "listen_port": "$tls_port", 
+      "listen_port": 8443, 
       "version": 3,
       "users": [
         {
@@ -577,7 +580,7 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "sniff_override_destination": false,
         "tag": "vmess-sb",
         "listen": "::",
-        "listen_port": "$vmess_port",
+        "listen_port": 8081,
         "users": [
             {
                 "uuid": "$vmess_uuid",
