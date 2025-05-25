@@ -76,13 +76,13 @@ download_singbox(){
   esac
   # Fetch the latest (including pre-releases) release version number from GitHub API
   # 正式版
-  #latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" | grep -Po '"tag_name": "\K.*?(?=")' | head -n 1)
+  latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" | grep -Po '"tag_name": "\K.*?(?=")' | head -n 1)
   #beta版本
-  latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" \
-  | awk '/"tag_name":/ {tag=$2} /"prerelease": false/ {print tag}' \
-  | tr -d '",' \
-  | sort -V \
-  | tail -n 1)
+  #latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" \
+  #| awk '/"tag_name":/ {tag=$2} /"prerelease": false/ {print tag}' \
+  #| tr -d '",' \
+  #| sort -V \
+  #| tail -n 1)
   latest_version=${latest_version_tag#v}  # Remove 'v' prefix from version number
   echo "Latest version: $latest_version"
   # Detect server architecture
