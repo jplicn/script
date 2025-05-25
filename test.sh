@@ -76,13 +76,13 @@ download_singbox(){
   esac
   # Fetch the latest (including pre-releases) release version number from GitHub API
   # 正式版
-  latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" | grep -Po '"tag_name": "\K.*?(?=")' | head -n 1)
+  #latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" | grep -Po '"tag_name": "\K.*?(?=")' | head -n 1)
   #beta版本
-  #latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" \
-  #| awk '/"tag_name":/ {tag=$2} /"prerelease": false/ {print tag}' \
-  #| tr -d '",' \
-  #| sort -V \
-  #| tail -n 1)
+  latest_version_tag=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases" \
+  | awk '/"tag_name":/ {tag=$2} /"prerelease": false/ {print tag}' \
+  | tr -d '",' \
+  | sort -V \
+  | tail -n 1)
   latest_version=${latest_version_tag#v}  # Remove 'v' prefix from version number
   echo "Latest version: $latest_version"
   # Detect server architecture
@@ -206,7 +206,7 @@ enable_bbr() {
 create_shortcut() {
   cat > /root/sbox/sing.sh << EOF
 #!/usr/bin/env bash
-bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/test.sh) \$1
+bash <(curl -fsSL https://raw.githubusercontent.com/jplicn/script/master/sing.sh) \$1
 EOF
   chmod +x /root/sbox/sing.sh
   ln -sf /root/sbox/sing.sh /usr/bin/sing
@@ -477,14 +477,14 @@ cat > /root/sbox/sbconfig_server.json << EOF
     "level": "info",
     "timestamp": true
   },
-    "dns":{
-        "servers":[
-            {
-                "type":"local"
-            }
-        ],
-        "strategy": "ipv4_only"
-    },
+"dns": {
+    "servers": [
+      {
+        "type": "local"
+      }
+    ],
+    "strategy": "ipv4_only"
+  },
   "inbounds": [
     {
         "type": "hysteria2",
@@ -537,23 +537,22 @@ cat > /root/sbox/sbconfig_server.json << EOF
         "padding": true
         }
     },
-        {
-      "type": "anytls",
-      "tag": "anytls-in",
-      "listen": "::",
-      "listen_port": 7443,
-      "users": [
-        {
-          "password": "$tls_password"
-        }
-      ],
-      "tls": {
-        "enabled": true,
-        "server_name": "$(cat /root/domain.txt)",
-        "certificate_path": "/root/cert.crt",
-        "key_path": "/root/private.key"
-      }
-    },
+    {
+      "type":"anytls",
+      "tag":"ubuntu anytls",
+      "listen":"::",
+      "listen_port":8883,
+            "users":[
+                {
+                    "password":"$tls_password"
+                }
+            ],
+            "tls":{
+                "enabled":true,
+                "certificate_path":"/root/cert.crt",
+                "key_path":"/root/private.key"
+            }
+        },
     {
         "type": "vmess",
         "sniff": true,
