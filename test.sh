@@ -30,7 +30,7 @@ show_notice() {
     echo -e "${green_bg}${white_fg}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${reset}"
 }
 
-# 1. 系统依赖安装 (合并并优化)
+# 1. 系统依赖安装
 install_base(){
   local packages=("qrencode" "jq" "iptables" "curl" "wget" "socat" "tar" "lsof")
   
@@ -47,36 +47,23 @@ install_base(){
     exit 1
   fi
 
-  echo "正在安装依赖..."
+  echo "正在检查并安装系统依赖..."
   for package in "${packages[@]}"; do
     if ! command -v "$package" &> /dev/null; then
         $CMD install -y "$package" > /dev/null 2>&1
         if [ $? -ne 0 ]; then
-            red "安装 $package 失败，请检查网络或源。"
-        else
-            green "$package 安装成功。"
+            red "警告：安装 $package 失败，请手动检查。"
         fi
-    else
-        echo "$package 已安装。"
     fi
   done
 }
 
-# 2. 证书申请模块 (集成自第二个脚本)
+# 2. 证书申请模块 (独立功能)
 apply_certificate() {
-    # 如果证书已存在，询问是否跳过
-    if [ -f "$CERT_FILE" ] && [ -f "$KEY_FILE" ] && [ -f "$DOMAIN_FILE" ]; then
-        yellow "检测到已有证书文件和域名配置。"
-        read -p "是否跳过证书申请，直接使用现有证书? (y/n, 默认y): " skip_cert
-        skip_cert=${skip_cert:-y}
-        if [[ "$skip_cert" == "y" ]]; then
-            green "跳过证书申请。"
-            return
-        fi
-    fi
-
+    install_base # 确保 socat/curl 已安装
+    
     echo ""
-    show_notice "$(green "步骤 1/3: 域名与证书配置")"
+    show_notice "$(green "独立模块: 域名与证书配置")"
     
     # 检查 80 端口
     if lsof -i:80 > /dev/null 2>&1; then
@@ -90,7 +77,7 @@ apply_certificate() {
         if lsof -i:80 > /dev/null 2>&1; then
             red "错误：80 端口依然被占用，无法进行证书验证。"
             red "请手动停止占用 80 端口的程序 (如 Nginx/Caddy) 后重试。"
-            exit 1
+            return
         fi
     fi
 
@@ -101,6 +88,7 @@ apply_certificate() {
     fi
 
     # 输入域名
+    echo ""
     while true; do
         read -p "请输入您的域名 (请确保已解析到本机 IP): " domain
         if [ -z "$domain" ]; then
@@ -116,6 +104,7 @@ apply_certificate() {
     random_email="$(head /dev/urandom | tr -dc a-z0-9 | head -c 8)@gmail.com"
     
     # 选择 CA
+    echo ""
     echo "请选择证书机构:"
     echo "1. Let's Encrypt (推荐)"
     echo "2. Buypass"
@@ -142,15 +131,25 @@ apply_certificate() {
         /root/.acme.sh/acme.sh --installcert -d "$domain" --ecc \
             --key-file "$KEY_FILE" \
             --fullchain-file "$CERT_FILE"
+        
+        echo ""
+        green "========================================="
+        green " 证书已准备就绪！"
+        green " 域名: $domain"
+        green " 证书路径: $CERT_FILE"
+        green " 私钥路径: $KEY_FILE"
+        green "========================================="
+        green "现在请在主菜单选择 [2] 安装 Sing-box。"
+        read -p "按回车键返回主菜单..."
     else
         red "证书申请失败！请检查域名解析是否正确，以及防火墙是否开放 80 端口。"
-        exit 1
+        return
     fi
 }
 
 # 3. 下载 Sing-box
 download_singbox(){
-  show_notice "$(green "步骤 2/3: 安装 Sing-box 核心")"
+  show_notice "$(green "开始安装 Sing-box 核心")"
   
   mkdir -p "$WORKDIR"
   arch=$(uname -m)
@@ -191,14 +190,23 @@ download_singbox(){
 
 # 4. 生成配置
 configure_singbox() {
-    show_notice "$(green "步骤 3/3: 生成配置文件")"
+    # 前置检查：确保域名和证书存在
+    if [ ! -f "$DOMAIN_FILE" ] || [ ! -f "$CERT_FILE" ] || [ ! -f "$KEY_FILE" ]; then
+        red "错误：未检测到域名配置或证书文件！"
+        yellow "请先在主菜单运行 [1] 申请/配置证书，然后再运行此选项。"
+        read -p "按回车键返回主菜单..."
+        return
+    fi
+
+    show_notice "$(green "生成配置文件")"
     
     local domain=$(cat "$DOMAIN_FILE")
+    echo "检测到当前域名: $domain"
     
     # 获取 UUID 和 随机密码
     vmess_uuid=$("$WORKDIR/sing-box" generate uuid)
     tls_password=$("$WORKDIR/sing-box" generate rand --base64 16)
-    hy_password=$vmess_uuid # 复用 UUID 方便记忆，也可单独生成
+    hy_password=$vmess_uuid
     ws_path=$vmess_uuid
     hy_server_name=$domain
 
@@ -224,7 +232,7 @@ configure_singbox() {
     # 获取本机 IP
     server_ip=$(curl -s4m8 ip.sb -k || curl -s6m8 ip.sb -k)
 
-    # 保存简易配置信息用于查看
+    # 保存配置变量
     cat > "$WORKDIR/config" <<EOF
 SERVER_IP='$server_ip'
 HY_PORT='$hy_port'
@@ -238,7 +246,6 @@ TLS_PASSWORD='$tls_password'
 EOF
 
     # 生成 sbconfig_server.json
-    # 注意：WARP 的 key 依然是硬编码的，多人使用有风险，但这保持了原脚本逻辑
     cat > "$WORKDIR/sbconfig_server.json" << EOF
 {
   "log": {
@@ -439,7 +446,7 @@ EOF
 
 # 5. 客户端配置展示
 show_client_configuration() {
-    if [ ! -f "$WORKDIR/config" ]; then red "未找到配置文件"; return; fi
+    if [ ! -f "$WORKDIR/config" ]; then red "未找到配置文件，请先安装 Sing-box"; return; fi
     
     source "$WORKDIR/config"
     local domain=$(cat "$DOMAIN_FILE")
@@ -473,6 +480,7 @@ show_client_configuration() {
     
     echo ""
     yellow "提示：以后可以输入 'sing' 命令再次调出此菜单。"
+    read -p "按回车键返回..."
 }
 
 # 6. 端口跳跃设置
@@ -480,6 +488,8 @@ enable_hy2hopping(){
     interface=$(ip route get 8.8.8.8 | awk '{print $5}')
     if [ -z "$interface" ]; then red "无法获取网卡信息"; return; fi
     
+    # 需要先加载配置获取端口
+    if [ ! -f "$WORKDIR/config" ]; then red "请先安装 Sing-box"; return; fi
     source "$WORKDIR/config"
     
     read -p "输入UDP端口范围起始值 (默认 20000): " start_port
@@ -488,12 +498,10 @@ enable_hy2hopping(){
     end_port=${end_port:-30000}
     
     iptables -t nat -A PREROUTING -i "$interface" -p udp --dport $start_port:$end_port -j DNAT --to-destination :$HY_PORT
-    # 如果有 IPv6
     if command -v ip6tables &>/dev/null; then
          ip6tables -t nat -A PREROUTING -i "$interface" -p udp --dport $start_port:$end_port -j DNAT --to-destination :$HY_PORT
     fi
     
-    # 标记状态 (简单标记)
     touch "$WORKDIR/hopping_enabled"
     green "端口跳跃已开启 ($start_port-$end_port -> $HY_PORT)"
 }
@@ -531,32 +539,34 @@ uninstall_singbox() {
     rm -f /etc/systemd/system/sing-box.service
     rm -rf "$WORKDIR"
     rm -f /usr/bin/sing
-    green "Sing-box 已卸载 (保留了 /root 下的证书文件)。"
+    green "Sing-box 已卸载 (保留了证书文件)。"
+    green "如需删除证书，请手动删除 /root/cert.crt 和 /root/private.key"
 }
 
 # 8. 菜单系统
 show_menu() {
     clear
-    show_notice "Sing-box 一键安装脚本 (整合版)"
-    echo "1. 安装 Sing-box (含证书申请)"
-    echo "2. 查看客户端配置 (链接/二维码)"
-    echo "3. 卸载 Sing-box"
+    show_notice "Sing-box 一键安装脚本 (分离版)"
+    echo "1. 申请/管理 SSL 证书 (必须先执行)"
+    echo "2. 安装 Sing-box 核心 (需先有证书)"
+    echo "---------------------------------"
+    echo "3. 查看客户端配置 (链接/二维码)"
     echo "4. 开启/管理 Hy2 端口跳跃"
     echo "5. 开启 BBR 加速"
-    echo "6. 重启服务"
+    echo "6. 卸载 Sing-box"
+    echo "7. 重启服务"
     echo "0. 退出"
     echo ""
     read -p "请选择: " choice
     
     case $choice in
-        1)
-            install_base
-            apply_certificate
-            download_singbox
-            configure_singbox
-            ;;
-        2) show_client_configuration ;;
-        3) uninstall_singbox ;;
+        1) apply_certificate ;;
+        2) 
+           install_base
+           download_singbox
+           configure_singbox
+           ;;
+        3) show_client_configuration ;;
         4) 
             if [ -f "$WORKDIR/hopping_enabled" ]; then
                 yellow "当前状态：已开启"
@@ -567,20 +577,24 @@ show_menu() {
             fi
             ;;
         5) enable_bbr ;;
-        6) systemctl restart sing-box && green "重启成功" ;;
+        6) uninstall_singbox ;;
+        7) systemctl restart sing-box && green "重启成功" ;;
         0) exit 0 ;;
         *) echo "无效选择" ;;
     esac
+    
+    # 操作完成后，如果不是退出，暂停一下让用户看结果
+    if [[ "$choice" != "0" ]]; then
+        echo ""
+        read -p "按任意键返回菜单..."
+        show_menu
+    fi
 }
 
-# 入口判断
+# 脚本入口
 if [[ "$1" == "show_menu" ]]; then
     show_menu
-elif [ -f "$WORKDIR/sbconfig_server.json" ]; then
-    # 如果已安装，直接显示菜单
-    show_menu
 else
-    # 未安装则直接开始安装流程
-    install_base
+    # 首次运行直接进入菜单
     show_menu
 fi
